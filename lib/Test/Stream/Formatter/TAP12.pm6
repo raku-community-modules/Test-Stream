@@ -4,14 +4,15 @@ use Test::Stream::Listener;
 
 unit class Test::Stream::Formatter::TAP12 does Test::Stream::Listener;
 
+use Test::Stream::Diagnostic;
 use Test::Stream::Types;
 
 my class TodoState {
-    has PositiveInt $.count;
+    has Int $.count is rw;
     has Str $.reason;
-    submethod BUILD (Str:D :$!reason, PositiveInt:D :$!count) { }
+    submethod BUILD (Str:D :$!reason, Int:D :$!count) { }
 
-    method did-todo {
+    method did-todo-test {
         $.count--;
     }
 }
@@ -20,13 +21,13 @@ my class Suite {
     has Instant $.started-at;
     has Str $.name;
     has Int $.planned is rw;
-    has Int:D $.test-num is rw = 0;
+    has Int:D $.tests-run is rw = 0;
     # This is the _real_ count because TODO tests are printed as "not ok" but
     # they don't count as actual failures.
-    has Int:D $.real-failure-count = 0;
+    has Int:D $.real-failure-count is rw = 0;
     has Bool $.said-plan is rw = False;
 
-    has TodoState $.todo-state;
+    has TodoState $.todo-state is rw;
 
     submethod BUILD (
         Instant:D :$!started-at,
@@ -36,10 +37,10 @@ my class Suite {
 
     method next-test-number (--> PositiveInt:D) {
         if $.todo-state {
-            $.todo-state.did-todo;
+            $.todo-state.did-todo-test;
             $.todo-state = (TodoState) unless $.todo-state.count;
         }
-        return ++$.test-num;
+        return ++$.tests-run;
     }
 
     method start-todo (|a) {
@@ -64,7 +65,11 @@ my class Suite {
     }
 }
 
+# This is the current suite stack. We push and pop onto this as we go.
 has Suite @!suites;
+# As we pop suites off @!suites we unshift them onto this so we always have
+# access to them.
+has Suite @!finished-suites;
 has IO::Handle $.output = $*OUT;
 has IO::Handle $.todo-output = $*OUT;
 has IO::Handle $.failure-output = $*ERR;
@@ -103,8 +108,8 @@ multi method accept-event (Test::Stream::Event::Plan:D $event) {
 multi method accept-event (Test::Stream::Event::SkipAll:D $event) {
     self!die-unless-suites($event);
 
-    if self!current-suite.test-num > 0 {
-        die "Received a SkipAll event but the current suite has already run {self!current-suite.test-num} tests";
+    if self!current-suite.tests-run > 0 {
+        die "Received a SkipAll event but the current suite has already run {self!current-suite.tests-run} tests";
     }
 
     self!say-plan( 0, $event.reason );
@@ -130,8 +135,6 @@ multi method accept-event (Test::Stream::Event::Test:D $event) {
     self!current-suite.record-failure
         unless $event.passed || $todo-reason.defined;
 
-
-
     my %status = (
         ok          => ?$event.passed,
         number      => $test-num,
@@ -147,7 +150,7 @@ multi method accept-event (Test::Stream::Event::Test:D $event) {
 multi method accept-event (Test::Stream::Event::Skip:D $event) {
     self!die-unless-suites($event);
 
-    for 1..$event.tests {
+    for 1..$event.count {
         self!say-test-status(
             ok          => True,
             number      => self!current-suite.next-test-number,
@@ -174,33 +177,53 @@ multi method accept-event (Test::Stream::Event::Todo:D $event) {
     );
 }
 
-method finalize (--> Int:D) {
-    die 'finalize-and-exit was called but there are no suites currently in progress'
-        unless @!suites.elems;
+class Status {
+    has Int:D $.exit-code = 0;
+    has Str:D $.error     = q{};
+}
 
-    my $exit-status = 0;
-    if @!suites.elems > 1 {
-        warn 'finalize-and-exit was called but {@!suites.elems} suites are still in process';
-        $exit-status = 1;
-    }
-
-    my $top-suite = @!suites[0];
-
+method finalize (--> Status:D) {
+    my $unfinished-suites = @!suites.elems;
     self!end-current-suite while @!suites;
 
-    if $top-suite.planned {
-        return 255
-            unless $top-suite.planned == $top-suite.test-num;
+    my $top-suite = @!finished-suites[0];
+
+    # The exit-code is going to be used as an actual process exit code so it cannot be greater than 254.q
+    if $top-suite.real-failure-count > 0 {
+        my $failed = 'test' ~ ( $top-suite.real-failure-count > 1 ?? 's' !! q{} );
+        my $error = "failed {$top-suite.real-failure-count} $failed";
+        return Status.new(
+            exit-code => min( 254, $top-suite.real-failure-count ),
+            error     => $error,
+        );
+
     }
-    elsif $top-suite.failure-count > 0 {
-        return min( 254, $top-suite.failure-count );
+    elsif $top-suite.planned
+          && ( $top-suite.planned != $top-suite.tests-run ) {
+        my $planned = 'test' ~ ( $top-suite.planned   > 1 ?? 's' !! q{} );
+        my $ran     = 'test' ~ ( $top-suite.tests-run > 1 ?? 's' !! q{} );
+        return Status.new(
+            exit-code => 255,
+            error     => "planned {$top-suite.planned} $planned but ran {$top-suite.tests-run} $ran",
+        );
+    }
+    elsif $unfinished-suites {
+        my $unfinished = 'suite' ~ ( $unfinished-suites > 1 ?? 's' !! q{} );
+        return Status.new(
+            exit-code => 1,
+            error     => "finalize was called but {@!suites.elems} $unfinished are still in process",
+        );
     }
 
-    return $exit-status;
+    return Status.new(
+        exit-code => 0,
+        error     => q{},
+    );
 }
 
 method !end-current-suite {
     my $suite = @!suites.pop;
+    @!finished-suites.unshift($suite);
 
     unless $suite.said-plan {
         self!say-plan( $suite.test-num );
@@ -209,6 +232,7 @@ method !end-current-suite {
 
     my $now = now;
     self!say-comment(
+        $.output,
         "Started at {$suite.started-at.Rat}"
         ~ " - ended at {$now.Rat}"
         ~ " - elapsed time is {$now - $suite.started-at}s"
@@ -238,24 +262,27 @@ method !say-test-status (
     Str :$name?,
     Str :$todo-reason?,
     Str :$skip-reason?,
-    Test::Stream::Event::Diagnostic :$diagnostic?,
+    Test::Stream::Diagnostic :$diagnostic?,
 ) {
     my $status-line = ( !$ok ?? q{not } !! q{} ) ~ "ok $number";
+
+    if $name.defined {
+        $status-line ~= q{ } ~ escape($name);
+    }
+
     if $todo-reason.defined {
         $status-line ~= q{ # TODO } ~ escape($todo-reason);
     }
     elsif $skip-reason.defined {
         $status-line ~= q{ # skip } ~ escape($skip-reason);
     }
-    elsif $name.defined {
-        $status-line ~= q{ } ~ escape($name);
-    }
 
     self!say-indented( $.output, $status-line );
+    return if $ok && !$todo-reason.defined;
     self!maybe-say-diagnostic( $diagnostic, $todo-reason.defined );
 }
 
-method !maybe-say-diagnostic (Test::Stream::Event::Diagnostic $diagnostic, Bool:D $is-todo)  {
+method !maybe-say-diagnostic (Test::Stream::Diagnostic $diagnostic, Bool:D $is-todo)  {
     return unless $diagnostic.defined;
 
     my $output =
@@ -267,17 +294,25 @@ method !maybe-say-diagnostic (Test::Stream::Event::Diagnostic $diagnostic, Bool:
 
     self!say-comment( $output, $diagnostic.message )
         if $diagnostic.message.defined;
-    if $diagnostic.got.defined && $diagnostic.expected.defined {
-        self!say-comment( $output, q{  expected : } ~ $diagnostic.expected.perl );
-        self!say-comment( $output, q{  operator : } ~ $diagnostic.operator.perl )
-            if $diagnostic.operator.defined;
-        self!say-comment( $output, q{  got      : } ~ $diagnostic.got.perl )
+
+    if $diagnostic.more.defined {
+        if $diagnostic.more<got>.defined && $diagnostic.more<expected>.defined {
+            self!say-comment( $output, q{    expected : } ~ $diagnostic.more<expected>.perl );
+            self!say-comment( $output, q{    operator : } ~ $diagnostic.more<operator>.gist )
+                if $diagnostic.more<operator>.defined;
+            self!say-comment( $output, q{         got : } ~ $diagnostic.more<got>.perl )
+        }
+        else {
+            for $diagnostic.more.keys.sort -> $k {
+                self!say-comment( $output, qq[    $k : {$diagnostic.more{$k}.perl}] );
+            }
+        }
     }
 }
 
-method !say-comment (Str:D $comment) {
+method !say-comment (IO::Handle $output, Str:D $comment) {
     self!say-indented(
-        $.output,
+        $output,
         $comment.lines.map( { escape($_) } ),
         :prefix('# '),
     );

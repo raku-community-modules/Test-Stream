@@ -2,6 +2,7 @@ use v6;
 
 unit module Test::Stream;
 
+use Test::Stream::Diagnostic;
 use Test::Stream::Types;
 
 role Event {
@@ -33,23 +34,8 @@ class Event::Suite::Start does Event does Event::Named { }
 
 class Event::Suite::End does Event does Event::Named does Event::PassFail { }
 
-class Event::Diagnostic {
-    has Str $.message;
-    has DiagnosticSeverity $.severity;
-    has $.got;
-    has Str $.operator;
-    has $.expected;
-    submethod BUILD (
-        Str:D :$!message,
-        DiagnosticSeverity:D :$!severity,
-        Any :$!got?,
-        Str:D :$!operator?,
-        Any :$!expected?,
-    ) { }
-}
-
 class Event::Test does Event does Event::Named does Event::PassFail {
-    has Event::Diagnostic $.diagnostic;
+    has Test::Stream::Diagnostic $.diagnostic;
 }
 
 class Event::Bail does Event {
