@@ -14,3 +14,4 @@ multi method accept-event (Test::Stream::Event::Suite::End:D $event) { ... }
 multi method accept-event (Test::Stream::Event::Test:D $event) { ... }
 multi method accept-event (Test::Stream::Event::Todo:D $event) { ... }
 
+
