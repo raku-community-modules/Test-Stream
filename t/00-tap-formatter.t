@@ -50,7 +50,7 @@ test-formatter(
                 name   => 'test 1',
             },
             expect => ${
-                output         => "ok 1 test 1\n",
+                output         => "ok 1 - test 1\n",
                 todo-output    => q{},
                 failure-output => q{},
             },
@@ -62,7 +62,7 @@ test-formatter(
                 name   => 'something',
             },
             expect => ${
-                output         => "ok 2 something\n",
+                output         => "ok 2 - something\n",
                 todo-output    => q{},
                 failure-output => q{},
             },
@@ -119,7 +119,7 @@ test-formatter(
                 name   => 'passed',
             },
             expect => ${
-                output         => "ok 1 passed\n",
+                output         => "ok 1 - passed\n",
                 todo-output    => q{},
                 failure-output => q{},
             },
@@ -131,7 +131,7 @@ test-formatter(
                 name   => 'failed',
             },
             expect => ${
-                output         => "not ok 2 failed\n",
+                output         => "not ok 2 - failed\n",
                 todo-output    => q{},
                 failure-output => q{},
             },
@@ -155,7 +155,7 @@ test-formatter(
                 name   => 'needs fixing',
             },
             expect => ${
-                output         => "not ok 3 needs fixing # TODO not yet done\n",
+                output         => "not ok 3 - needs fixing # TODO not yet done\n",
                 todo-output    => q{},
                 failure-output => q{},
             },
@@ -233,7 +233,7 @@ test-formatter(
                 ),
             },
             expect => ${
-                output         => "ok 1 no diag should show\n",
+                output         => "ok 1 - no diag should show\n",
                 todo-output    => q{},
                 failure-output => q{},
             },
@@ -254,7 +254,7 @@ test-formatter(
                 ),
             },
             expect => ${
-                output         => "not ok 2 should include diag info\n",
+                output         => "not ok 2 - should include diag info\n",
                 todo-output    => q{},
                 failure-output => q:to/FAILURE/,
                 # did not get the answer
@@ -291,7 +291,7 @@ test-formatter(
                 ),
             },
             expect => ${
-                output         => "not ok 3 needs fixing # TODO not yet done\n",
+                output         => "not ok 3 - needs fixing # TODO not yet done\n",
                 todo-output    => q:to/TODO/,
                 # expected large size
                 #     expected : "large"
@@ -315,7 +315,7 @@ test-formatter(
                 ),
             },
             expect => ${
-                output         => "not ok 4 diag.more has arbitrary keys\n",
+                output         => "not ok 4 - diag.more has arbitrary keys\n",
                 todo-output    => q{},
                 failure-output => q:to/FAILURE/,
                 # did not get the answer
@@ -436,8 +436,8 @@ sub my-lives-ok (Str:D $name, Code $code) {
 sub my-ok (Bool:D $ok, Str:D $name, *@diag) {
     state $test-num = 1;
 
-    my $start = $ok ?? q{} !! 'not ';
-    say $start, 'ok ', $test-num++, " $name";
+    my $start = $ok ?? q{} !! q{not };
+    say $start, q{ok - }, $test-num++, " $name";
     unless $ok {
         diag($_) for @diag.values 
     }

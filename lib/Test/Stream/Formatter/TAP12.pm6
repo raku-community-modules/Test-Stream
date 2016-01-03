@@ -267,7 +267,7 @@ method !say-test-status (
     my $status-line = ( !$ok ?? q{not } !! q{} ) ~ "ok $number";
 
     if $name.defined {
-        $status-line ~= q{ } ~ escape($name);
+        $status-line ~= q{ - } ~ escape($name);
     }
 
     if $todo-reason.defined {
