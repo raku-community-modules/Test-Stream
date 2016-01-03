@@ -18,8 +18,6 @@ use Test::Stream::Types;
 my $test-count = 83;
 say "1..$test-count";
 
-my $test-num = 1;
-
 diag('No subtests, all tests passing');
 test-formatter(
     event-tests => $[
@@ -436,6 +434,8 @@ sub my-lives-ok (Str:D $name, Code $code) {
 }
 
 sub my-ok (Bool:D $ok, Str:D $name, *@diag) {
+    state $test-num = 1;
+
     my $start = $ok ?? q{} !! 'not ';
     say $start, 'ok ', $test-num++, " $name";
     unless $ok {
