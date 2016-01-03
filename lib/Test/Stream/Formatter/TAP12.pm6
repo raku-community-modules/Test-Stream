@@ -190,7 +190,7 @@ method finalize (--> Status:D) {
 
     # The exit-code is going to be used as an actual process exit code so it cannot be greater than 254.q
     if $top-suite.real-failure-count > 0 {
-        my $failed = 'test' ~ ( $top-suite.real-failure-count > 1 ?? 's' !! q{} );
+        my $failed = maybe-plural( $top-suite.real-failure-count, 'test' );
         my $error = "failed {$top-suite.real-failure-count} $failed";
         return Status.new(
             exit-code => min( 254, $top-suite.real-failure-count ),
@@ -200,15 +200,16 @@ method finalize (--> Status:D) {
     }
     elsif $top-suite.planned
           && ( $top-suite.planned != $top-suite.tests-run ) {
-        my $planned = 'test' ~ ( $top-suite.planned   > 1 ?? 's' !! q{} );
-        my $ran     = 'test' ~ ( $top-suite.tests-run > 1 ?? 's' !! q{} );
+
+        my $planned = maybe-plural( $top-suite.planned, 'test' );
+        my $ran     = maybe-plural( $top-suite.tests-run, 'test' );
         return Status.new(
             exit-code => 255,
             error     => "planned {$top-suite.planned} $planned but ran {$top-suite.tests-run} $ran",
         );
     }
     elsif $unfinished-suites {
-        my $unfinished = 'suite' ~ ( $unfinished-suites > 1 ?? 's' !! q{} );
+        my $unfinished = maybe-plural( $unfinished-suites, 'suite' );
         return Status.new(
             exit-code => 1,
             error     => "finalize was called but {@!suites.elems} $unfinished are still in process",
@@ -222,21 +223,35 @@ method finalize (--> Status:D) {
 }
 
 method !end-current-suite {
-    my $suite = @!suites.pop;
-    @!finished-suites.unshift($suite);
-
+    my $suite = @!suites[*-1];
     unless $suite.said-plan {
-        self!say-plan( $suite.test-num );
+        self!say-plan( $suite.tests-run );
         $suite.said-plan = True;
     }
 
-    my $now = now;
-    self!say-comment(
-        $.output,
-        "Started at {$suite.started-at.Rat}"
-        ~ " - ended at {$now.Rat}"
-        ~ " - elapsed time is {$now - $suite.started-at}s"
-    );
+    if $suite.real-failure-count {
+        my $failed = maybe-plural( $suite.real-failure-count, 'test' );
+        self!say-comment(
+            $.failure-output,
+            "Looks like you failed {$suite.real-failure-count} $failed out of {$suite.tests-run}.",
+        );
+    }
+
+    @!finished-suites.unshift(@!suites.pop);
+
+    # With TAP, subtests get summarized as a single pass/fail in the
+    # containing test suite.
+    if @!suites.elems {
+        self.accept-event(
+            Test::Stream::Event::Test.new(
+                passed => $suite.real-failure-count == 0,
+                name   => $suite.name,
+            )
+        );
+    }
+
+    # It might be nice to add some timing output here as well, but for now
+    # we'll stick with emulating Perl 5 as closely as possible.
 }
 
 method !die-unless-suites (Test::Stream::Event:D $event) {
@@ -334,5 +349,11 @@ method !say-indented (IO::Handle:D $handle, Str :$prefix, *@text) {
 }
 
 method !indent-level {
-    return @!suites.elems - 1;
+    return ( @!suites.elems - 1 ) * 4;
+}
+
+# We know that that the nouns we're dealing with are all simple "add an 's'"
+# nouns for pluralization.
+sub maybe-plural (Int:D $count, Str:D $noun) {
+    return $count > 1 ?? $noun ~ 's' !! $noun;
 }

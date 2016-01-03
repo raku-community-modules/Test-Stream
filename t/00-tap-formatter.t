@@ -14,8 +14,8 @@ use Test::Stream::Types;
 # Every event we send generates 4 basic tests ...
 #    - did it throw an exception?
 #    - do each of the 3 output handles contain the expected output?
-# Every formatter test adds a finalize test
-my $test-count = 83;
+# Every formatter test adds three finalize tests
+my $test-count = 136;
 say "1..$test-count";
 
 diag('No subtests, all tests passing');
@@ -73,11 +73,7 @@ test-formatter(
                 name => '00-tap-formatter.t',
             },
             expect => ${
-                output => rx{
-                    '# Started at ' \d+ '.' \d+
-                    ' - ended at ' \d+ '.' \d+
-                    ' - elapsed time is ' \d+ '.' \d+ "s\n"
-                },
+                output         => q{},
                 todo-output    => q{},
                 failure-output => q{},
             },
@@ -178,13 +174,9 @@ test-formatter(
                 name => '00-tap-formatter.t',
             },
             expect => ${
-                output => rx{
-                    '# Started at ' \d+ '.' \d+
-                    ' - ended at ' \d+ '.' \d+
-                    ' - elapsed time is ' \d+ '.' \d+ "s\n"
-                },
+                output         => q{},
                 todo-output    => q{},
-                failure-output => q{},
+                failure-output => "# Looks like you failed 1 test out of 5.\n",
             },
         },
     ],
@@ -330,18 +322,175 @@ test-formatter(
                 name => '00-tap-formatter.t',
             },
             expect => ${
-                output => rx{
-                    '# Started at ' \d+ '.' \d+
-                    ' - ended at ' \d+ '.' \d+
-                    ' - elapsed time is ' \d+ '.' \d+ "s\n"
-                },
+                output         => q{},
                 todo-output    => q{},
-                failure-output => q{},
+                failure-output => "# Looks like you failed 2 tests out of 4.\n",
             },
         },
     ],
     exit-code => 2,
     error     => 'failed 2 tests',
+);
+
+diag('Subtests with diagnostics, skip, todo, etc.');
+test-formatter(
+    event-tests => $[
+        ${
+            event => Test::Stream::Event::Suite::Start,
+            args  => ${
+                name => '00-tap-formatter.t',
+            },
+            expect => ${
+                output         => q{},
+                todo-output    => q{},
+                failure-output => q{},
+            },
+        },
+        ${
+            event => Test::Stream::Event::Plan,
+            args  => ${
+                planned => 4,
+            },
+            expect => ${
+                output         => "1..4\n",
+                todo-output    => q{},
+                failure-output => q{},
+            },
+        },
+        ${
+            event => Test::Stream::Event::Test,
+            args  => ${
+                passed => True,
+                name   => 'pre-subtest',
+            },
+            expect => ${
+                output         => "ok 1 - pre-subtest\n",
+                todo-output    => q{},
+                failure-output => q{},
+            },
+        },
+        ${
+            event => Test::Stream::Event::Suite::Start,
+            args  => ${
+                name => 'this is sub 1',
+            },
+            expect => ${
+                output         => "# Subtest this is sub 1\n",
+                todo-output    => q{},
+                failure-output => q{},
+            },
+        },
+        ${
+            event => Test::Stream::Event::Test,
+            args  => ${
+                passed => False,
+                name   => 'should include diag info',
+                diagnostic => Test::Stream::Diagnostic.new(
+                    severity => DiagnosticSeverity::failure,
+                    message  => 'did not get the answer',
+                    more     => ${
+                        got      => 41,
+                        operator => '==',
+                        expected => 42,
+                    },
+                ),
+            },
+            expect => ${
+                output         => "    not ok 1 - should include diag info\n",
+                todo-output    => q{},
+                failure-output => q:to/FAILURE/,
+                    # did not get the answer
+                    #     expected : 42
+                    #     operator : ==
+                    #          got : 41
+                FAILURE
+            },
+        },
+        ${
+            event => Test::Stream::Event::Todo,
+            args  => ${
+                count  => 1,
+                reason => 'not yet done',
+            },
+            expect => ${
+                output         => q{},
+                todo-output    => q{},
+                failure-output => q{},
+            },
+        },
+        ${
+            event => Test::Stream::Event::Test,
+            args  => ${
+                passed => False,
+                name   => 'needs fixing',
+                diagnostic => Test::Stream::Diagnostic.new(
+                    severity => DiagnosticSeverity::todo,
+                    message  => 'expected large size',
+                    more     => ${
+                        got      => 'medium',
+                        expected => 'large',
+                    },
+                ),
+            },
+            expect => ${
+                output         => "    not ok 2 - needs fixing # TODO not yet done\n",
+                todo-output    => q:to/TODO/,
+                    # expected large size
+                    #     expected : "large"
+                    #          got : "medium"
+                TODO
+                failure-output => q{},
+            },
+        },
+        ${
+            event => Test::Stream::Event::Test,
+            args  => ${
+                passed => False,
+                name   => 'diag.more has arbitrary keys',
+                diagnostic => Test::Stream::Diagnostic.new(
+                    severity => DiagnosticSeverity::failure,
+                    message  => 'did not get the answer',
+                    more     => ${
+                        with => 'arbitrary',
+                        keys => $[ 1, 2, 3 ],
+                    },
+                ),
+            },
+            expect => ${
+                output         => "    not ok 3 - diag.more has arbitrary keys\n",
+                todo-output    => q{},
+                failure-output => q:to/FAILURE/,
+                    # did not get the answer
+                    #     keys : $[1, 2, 3]
+                    #     with : "arbitrary"
+                FAILURE
+            },
+        },
+        ${
+            event => Test::Stream::Event::Suite::End,
+            args  => ${
+                name => 'this is sub 1',
+            },
+            expect => ${
+                output         => "    1..3\n" ~ "not ok 2 - this is sub 1\n",
+                todo-output    => q{},
+                failure-output => "    # Looks like you failed 2 tests out of 3.\n",
+            },
+        },
+        ${
+            event => Test::Stream::Event::Suite::End,
+            args  => ${
+                name => '00-tap-formatter.t',
+            },
+            expect => ${
+                output         => q{},
+                todo-output    => q{},
+                failure-output => "# Looks like you failed 1 test out of 2.\n",
+            },
+        },
+    ],
+    exit-code => 1,
+    error     => 'failed 1 test',
 );
 
 sub test-formatter (:@event-tests, :$exit-code, :$error) {
@@ -401,11 +550,13 @@ sub compare-outputs (Str:D $type, Str:D $key, %outputs, %expect) {
 
     my @diag;
     unless $ok {
-        @diag.append: %outputs{$key}.Str.subst( :g, "\n", '\\n' );
         @diag.append:
-            %expect{$key} ~~ Str
-                ?? %expect{$key}.Str.subst( :g, "\n", '\\n' )
-                !! %expect{$key}.perl;
+            q{expected : }
+            ~ ( %expect{$key} ~~ Str
+                    ?? %expect{$key}.Str.subst( :g, "\n", '\\n' )
+                    !! %expect{$key}.perl );
+        @diag.append:
+            q{     got : } ~ %outputs{$key}.Str.subst( :g, "\n", '\\n' );
     }
         
     my-ok(
