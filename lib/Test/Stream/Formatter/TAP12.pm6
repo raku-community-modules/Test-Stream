@@ -25,7 +25,7 @@ my class Suite {
     # This is the _real_ count because TODO tests are printed as "not ok" but
     # they don't count as actual failures.
     has Int:D $.real-failure-count is rw = 0;
-    has Bool $.said-plan is rw = False;
+    has Bool:D $.said-plan is rw = False;
 
     has TodoState $.todo-state is rw;
 
@@ -73,6 +73,8 @@ has Suite @!finished-suites;
 has IO::Handle $.output = $*OUT;
 has IO::Handle $.todo-output = $*OUT;
 has IO::Handle $.failure-output = $*ERR;
+has Bool:D $.bailed is rw = False;
+has Str $.bailed-reason is rw = (Str);
 
 multi method accept-event (Test::Stream::Event::Suite::Start:D $event) {
     # We want this comment to appear at the _current_ indentation level, not
@@ -100,9 +102,7 @@ multi method accept-event (Test::Stream::Event::Suite::End:D $event) {
 multi method accept-event (Test::Stream::Event::Plan:D $event) {
     self!die-unless-suites($event);
 
-    self!current-suite.planned = $event.planned;
     self!say-plan( $event.planned );
-    self!current-suite.said-plan = True;
 }
 
 multi method accept-event (Test::Stream::Event::SkipAll:D $event) {
@@ -163,9 +163,12 @@ multi method accept-event (Test::Stream::Event::Bail:D $event) {
     self!die-unless-suites($event);
 
     my $bail = 'Bail out!';
-    $bail ~= " {$event.reason}" if $event.reason;
+    $bail ~= qq[  {$event.reason}] if $event.reason;
     # This should never be indented.
     self.output.say($bail);
+
+    $.bailed = True;
+    $.bailed-reason = $event.reason;
 }
 
 multi method accept-event (Test::Stream::Event::Todo:D $event) {
@@ -188,8 +191,16 @@ method finalize (--> Status:D) {
 
     my $top-suite = @!finished-suites[0];
 
-    # The exit-code is going to be used as an actual process exit code so it cannot be greater than 254.q
-    if $top-suite.real-failure-count > 0 {
+    # The exit-code is going to be used as an actual process exit code so it
+    # cannot be greater than 254.
+
+    if $.bailed {
+        return Status.new(
+            exit-code => 255,
+            error     => 'Bailed out' ~ ( $.bailed-reason ?? qq{ - $.bailed-reason} !! q{} ),
+        );
+    }
+    elsif $top-suite.real-failure-count > 0 {
         my $failed = maybe-plural( $top-suite.real-failure-count, 'test' );
         my $error = "failed {$top-suite.real-failure-count} $failed";
         return Status.new(
@@ -226,7 +237,6 @@ method !end-current-suite {
     my $suite = @!suites[*-1];
     unless $suite.said-plan {
         self!say-plan( $suite.tests-run );
-        $suite.said-plan = True;
     }
 
     if $suite.real-failure-count {
@@ -263,8 +273,11 @@ method !current-suite {
     return @!suites[*-1];
 }
 
-method !say-plan (Int:D $count, Str $skip?) {
-    my $plan-line = '1..' ~ $count;
+method !say-plan (Int:D $planned, Str $skip?) {
+    self!current-suite.planned = $planned;
+    self!current-suite.said-plan = True;
+
+    my $plan-line = '1..' ~ $planned;
     if $skip.defined {
         $plan-line ~= " # Skipped: $skip";
     }
