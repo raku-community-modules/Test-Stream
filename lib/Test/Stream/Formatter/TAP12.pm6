@@ -126,6 +126,11 @@ multi method accept-event (Test::Stream::Event::Diag:D $event) {
     self!say-comment( $output, $event.message );
 }
 
+multi method accept-event (Test::Stream::Event::Note:D $event) {
+    self!die-unless-suites($event);
+    self!say-comment( $.output, $event.message );
+}
+
 multi method accept-event (Test::Stream::Event::Test:D $event) {
     self!die-unless-suites($event);
 

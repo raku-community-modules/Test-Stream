@@ -46,6 +46,10 @@ class Event::Diag does Event {
     has Str $.message;
 }
 
+class Event::Note does Event {
+    has Str $.message;
+}
+
 class Event::Plan does Event {
     has PositiveInt $.planned;
 }

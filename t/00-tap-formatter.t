@@ -707,6 +707,150 @@ test-formatter(
     error     => 'failed 2 tests',
 );
 
+my-diag('Note always go to $.output, whether in todo or not');
+test-formatter(
+    event-tests => $[
+        ${
+            event => Test::Stream::Event::Suite::Start,
+            args  => ${
+                name => '00-tap-formatter.t',
+            },
+            expect => ${
+                output         => q{},
+                todo-output    => q{},
+                failure-output => q{},
+            },
+        },
+        ${
+            event => Test::Stream::Event::Note,
+            args  => ${
+                message => 'note 1',
+            },
+            expect => ${
+                output         => "# note 1\n",
+                todo-output    => q{},
+                failure-output => q{},
+            },
+        },
+        ${
+            event => Test::Stream::Event::Todo,
+            args  => ${
+                count  => 1,
+                reason => 'not yet done',
+            },
+            expect => ${
+                output         => q{},
+                todo-output    => q{},
+                failure-output => q{},
+            },
+        },
+        ${
+            event => Test::Stream::Event::Note,
+            args  => ${
+                message => 'note 2',
+            },
+            expect => ${
+                output         => "# note 2\n",
+                todo-output    => q{},
+                failure-output => q{},
+            },
+        },
+        ${
+            event => Test::Stream::Event::Test,
+            args  => ${
+                passed => False,
+                name   => 'needs fixing',
+            },
+            expect => ${
+                output         => "not ok 1 - needs fixing # TODO not yet done\n",
+                todo-output    => q{},
+                failure-output => q{},
+            },
+        },
+        ${
+            event => Test::Stream::Event::Suite::Start,
+            args  => ${
+                name => 'subtest',
+            },
+            expect => ${
+                output         => "# Subtest subtest\n",
+                todo-output    => q{},
+                failure-output => q{},
+            },
+        },
+        ${
+            event => Test::Stream::Event::Note,
+            args  => ${
+                message => 'subnote 1',
+            },
+            expect => ${
+                output         => "    # subnote 1\n",
+                todo-output    => q{},
+                failure-output => q{},
+            },
+        },
+        ${
+            event => Test::Stream::Event::Todo,
+            args  => ${
+                count  => 1,
+                reason => 'not yet done',
+            },
+            expect => ${
+                output         => q{},
+                todo-output    => q{},
+                failure-output => q{},
+            },
+        },
+        ${
+            event => Test::Stream::Event::Note,
+            args  => ${
+                message => 'subnote 2',
+            },
+            expect => ${
+                output         => "    # subnote 2\n",
+                todo-output    => q{},
+                failure-output => q{},
+            },
+        },
+        ${
+            event => Test::Stream::Event::Test,
+            args  => ${
+                passed => False,
+                name   => 'needs fixing',
+            },
+            expect => ${
+                output         => "    not ok 1 - needs fixing # TODO not yet done\n",
+                todo-output    => q{},
+                failure-output => q{},
+            },
+        },
+        ${
+            event => Test::Stream::Event::Suite::End,
+            args  => ${
+                name => 'subtest',
+            },
+            expect => ${
+                output         => qq{    1..1\nok 2 - subtest\n},
+                todo-output    => q{},
+                failure-output => q{},
+            },
+        },
+        ${
+            event => Test::Stream::Event::Suite::End,
+            args  => ${
+                name => '00-tap-formatter.t',
+            },
+            expect => ${
+                output         => "1..2\n",
+                todo-output    => q{},
+                failure-output => q{},
+            },
+        },
+    ],
+    exit-code => 0,
+    error     => q{},
+);
+
 my-diag('Bail out');
 test-formatter(
     event-tests => $[
