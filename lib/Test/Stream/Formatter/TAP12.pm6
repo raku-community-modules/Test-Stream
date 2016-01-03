@@ -112,33 +112,19 @@ multi method accept-event (Test::Stream::Event::Note:D $event) {
 multi method accept-event (Test::Stream::Event::Test:D $event) {
     self!die-unless-suites($event);
 
-    my $todo-reason = self!current-suite.todo-reason;
     my $test-num = self!current-suite.next-test-number;
 
     self!current-suite.record-failure
-        unless $event.passed || $todo-reason.defined;
+        unless $event.passed || self!current-suite.in-todo;
 
-    my %status = (
-        ok          => ?$event.passed,
-        number      => $test-num,
-        name        => $event.name,
-        diagnostic  => $event.diagnostic,
-    );
-    %status<todo-reason> = $todo-reason
-        if $todo-reason.defined;
-
-    self!say-test-status(|%status);
+    self!say-test-status( $event, $test-num );
 }
 
 multi method accept-event (Test::Stream::Event::Skip:D $event) {
     self!die-unless-suites($event);
 
     for 1..$event.count {
-        self!say-test-status(
-            ok          => True,
-            number      => self!current-suite.next-test-number,
-            skip-reason => $event.reason,
-        );
+        self!say-test-status( $event, self!current-suite.next-test-number );
     }
 }
 
@@ -248,12 +234,15 @@ method !end-current-suite {
     # With TAP, subtests get summarized as a single pass/fail in the
     # containing test suite.
     if @!suites.elems {
-        self.accept-event(
+        self!say-test-status(
             Test::Stream::Event::Test.new(
                 passed => $suite.real-failure-count == 0,
                 name   => $suite.name,
-            )
+            ),
+            self!current-suite.next-test-number,
+            False,
         );
+        self!current-suite.record-failure if $suite.real-failure-count
     }
 
     # It might be nice to add some timing output here as well, but for now
@@ -280,37 +269,56 @@ method !say-plan (Int:D $planned, Str $skip?) {
     self!say-indented( $.output, $plan-line );
 }
 
-method !say-test-status (
-    Bool:D :$ok,
-    PositiveInt:D :$number,
-    Str :$name?,
-    Str :$todo-reason?,
-    Str :$skip-reason?,
-    Test::Stream::Diagnostic :$diagnostic?,
-) {
+method !say-test-status (Test::Stream::Event:D $event, PositiveInt:D $number, Bool:D $diag-source = True) {
+    my $ok = do given $event {
+        when Test::Stream::Event::Skip {
+            True;
+        }
+        default {
+            $event.passed;
+        }
+    };
+
     my $status-line = ( !$ok ?? q{not } !! q{} ) ~ "ok $number";
 
-    if $name.defined {
-        $status-line ~= q{ - } ~ escape($name);
+    if $event.can('name') && $event.name.defined {
+        $status-line ~= q{ - } ~ escape( $event.name );
     }
 
-    if $todo-reason.defined {
-        $status-line ~= q{ # TODO } ~ escape($todo-reason);
+    if self!current-suite.todo-reason.defined {
+        $status-line ~= q{ # TODO } ~ escape( self!current-suite.todo-reason );
     }
-    elsif $skip-reason.defined {
-        $status-line ~= q{ # skip } ~ escape($skip-reason);
+    elsif $event ~~ Test::Stream::Event::Skip && $event.reason.defined {
+        $status-line ~= q{ # skip } ~ escape( $event.reason );
     }
 
     self!say-indented( $.output, $status-line );
-    return if $ok && !$todo-reason.defined;
-    self!maybe-say-diagnostic( $diagnostic, $todo-reason.defined );
+
+    return if $ok;
+
+    if $diag-source {
+        my $fail-msg = q{  Failed};
+        $fail-msg ~= q{ (TODO)} if self!current-suite.in-todo;
+        $fail-msg ~= q{ test};
+        $fail-msg ~= qq[ '{$event.name}'] if $event.name.defined;
+        my $at-msg = q{  at } ~ $event.source.file ~ q{ line } ~ $event.source.line;
+
+        my $output =
+            self!current-suite.in-todo
+            ?? $.todo-output
+            !! $.failure-output;
+        self!say-comment( $output, $_ )
+            for ( $fail-msg, $at-msg );
+    }
+
+    self!maybe-say-diagnostic( $event.diagnostic );
 }
 
-method !maybe-say-diagnostic (Test::Stream::Diagnostic $diagnostic, Bool:D $is-todo)  {
+method !maybe-say-diagnostic (Test::Stream::Diagnostic $diagnostic)  {
     return unless $diagnostic.defined;
 
     my $output =
-        $is-todo
+        self!current-suite.in-todo
         ?? $.todo-output
         !! $diagnostic.severity eq 'failure'
         ?? $.failure-output

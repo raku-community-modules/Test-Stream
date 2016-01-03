@@ -124,12 +124,15 @@ test-formatter(
             event => Test::Stream::Event::Test,
             args  => ${
                 passed => False,
-                name   => 'failed',
+                name   => 'will fail',
             },
             expect => ${
-                output         => "not ok 2 - failed\n",
+                output         => "not ok 2 - will fail\n",
                 todo-output    => q{},
-                failure-output => q{},
+                failure-output => q:to/FAILURE/,
+                #   Failed test 'will fail'
+                #   at t/00-tap-formatter.t line 1569
+                FAILURE
             },
         },
         ${
@@ -151,7 +154,10 @@ test-formatter(
             },
             expect => ${
                 output         => "not ok 3 - needs fixing # TODO not yet done\n",
-                todo-output    => q{},
+                todo-output    => q:to/TODO/,
+                #   Failed (TODO) test 'needs fixing'
+                #   at t/00-tap-formatter.t line 1569
+                TODO
                 failure-output => q{},
             },
         },
@@ -173,7 +179,10 @@ test-formatter(
                 reason => 'bad platform',
             },
             expect => ${
-                output         => "ok 4 # skip bad platform\nok 5 # skip bad platform\n",
+                output         => q:to/OUTPUT/,
+                ok 4 # skip bad platform
+                ok 5 # skip bad platform
+                OUTPUT
                 todo-output    => q{},
                 failure-output => q{},
             },
@@ -259,6 +268,8 @@ test-formatter(
                 output         => "not ok 2 - should include diag info\n",
                 todo-output    => q{},
                 failure-output => q:to/FAILURE/,
+                #   Failed test 'should include diag info'
+                #   at t/00-tap-formatter.t line 1569
                 # did not get the answer
                 #     expected : 42
                 #     operator : ==
@@ -292,8 +303,10 @@ test-formatter(
                 ),
             },
             expect => ${
-                output         => "not ok 3 - needs fixing # TODO not yet done\n",
+                output         => qq{not ok 3 - needs fixing # TODO not yet done\n},
                 todo-output    => q:to/TODO/,
+                #   Failed (TODO) test 'needs fixing'
+                #   at t/00-tap-formatter.t line 1569
                 # expected large size
                 #     expected : "large"
                 #          got : "medium"
@@ -330,6 +343,8 @@ test-formatter(
                 output         => "not ok 4 - diag.more has arbitrary keys\n",
                 todo-output    => q{},
                 failure-output => q:to/FAILURE/,
+                #   Failed test 'diag.more has arbitrary keys'
+                #   at t/00-tap-formatter.t line 1569
                 # did not get the answer
                 #     keys : $[1, 2, 3]
                 #     with : "arbitrary"
@@ -416,9 +431,11 @@ test-formatter(
                 ),
             },
             expect => ${
-                output         => "    not ok 1 - should include diag info\n",
+                output         => qq{    not ok 1 - should include diag info\n},
                 todo-output    => q{},
                 failure-output => q:to/FAILURE/,
+                    #   Failed test 'should include diag info'
+                    #   at t/00-tap-formatter.t line 1569
                     # did not get the answer
                     #     expected : 42
                     #     operator : ==
@@ -452,8 +469,10 @@ test-formatter(
                 ),
             },
             expect => ${
-                output         => "    not ok 2 - needs fixing # TODO not yet done\n",
+                output         => qq{    not ok 2 - needs fixing # TODO not yet done\n},
                 todo-output    => q:to/TODO/,
+                    #   Failed (TODO) test 'needs fixing'
+                    #   at t/00-tap-formatter.t line 1569
                     # expected large size
                     #     expected : "large"
                     #          got : "medium"
@@ -487,9 +506,11 @@ test-formatter(
                 ),
             },
             expect => ${
-                output         => "    not ok 3 - diag.more has arbitrary keys\n",
+                output         => qq{    not ok 3 - diag.more has arbitrary keys\n},
                 todo-output    => q{},
                 failure-output => q:to/FAILURE/,
+                    #   Failed test 'diag.more has arbitrary keys'
+                    #   at t/00-tap-formatter.t line 1569
                     # did not get the answer
                     #     keys : $[1, 2, 3]
                     #     with : "arbitrary"
@@ -502,9 +523,12 @@ test-formatter(
                 name => 'this is sub 1',
             },
             expect => ${
-                output         => "    1..3\n" ~ "not ok 2 - this is sub 1\n",
+                output         => q:to/OUTPUT/,
+                    1..3
+                not ok 2 - this is sub 1
+                OUTPUT
                 todo-output    => q{},
-                failure-output => "    # Looks like you failed 2 tests out of 3.\n",
+                failure-output => qq{    # Looks like you failed 2 tests out of 3.\n},
             },
         },
         ${
@@ -564,12 +588,15 @@ test-formatter(
             event => Test::Stream::Event::Test,
             args  => ${
                 passed => False,
-                name   => 'failed',
+                name   => 'will fail',
             },
             expect => ${
-                output         => "not ok 2 - failed\n",
+                output         => qq{not ok 2 - will fail\n},
                 todo-output    => q{},
-                failure-output => q{},
+                failure-output => q:to/FAILURE/,
+                #   Failed test 'will fail'
+                #   at t/00-tap-formatter.t line 1569
+                FAILURE
             },
         },
         ${
@@ -602,7 +629,10 @@ test-formatter(
             },
             expect => ${
                 output         => "not ok 3 - needs fixing # TODO not yet done\n",
-                todo-output    => q{},
+                todo-output    => q:to/TODO/,
+                #   Failed (TODO) test 'needs fixing'
+                #   at t/00-tap-formatter.t line 1569
+                TODO
                 failure-output => q{},
             },
         },
@@ -646,7 +676,7 @@ test-formatter(
                 name   => 'passed',
             },
             expect => ${
-                output         => "    ok 1 - passed\n",
+                output         => qq{    ok 1 - passed\n},
                 todo-output    => q{},
                 failure-output => q{},
             },
@@ -659,19 +689,22 @@ test-formatter(
             expect => ${
                 output         => q{},
                 todo-output    => q{},
-                failure-output => "    # diag 1\n",
+                failure-output => qq{    # diag 1\n},
             },
         },
         ${
             event => Test::Stream::Event::Test,
             args  => ${
                 passed => False,
-                name   => 'failed',
+                name   => 'will fail',
             },
             expect => ${
-                output         => "    not ok 2 - failed\n",
+                output         => qq{    not ok 2 - will fail\n},
                 todo-output    => q{},
-                failure-output => q{},
+                failure-output => q:to/FAILURE/,
+                    #   Failed test 'will fail'
+                    #   at t/00-tap-formatter.t line 1569
+                FAILURE
             },
         },
         ${
@@ -682,7 +715,7 @@ test-formatter(
             expect => ${
                 output         => q{},
                 todo-output    => q{},
-                failure-output => "    # diag 2\n",
+                failure-output => qq{    # diag 2\n},
             },
         },
         ${
@@ -703,8 +736,11 @@ test-formatter(
                 name   => 'needs fixing',
             },
             expect => ${
-                output         => "    not ok 3 - needs fixing # TODO not yet done\n",
-                todo-output    => q{},
+                output         => qq{    not ok 3 - needs fixing # TODO not yet done\n},
+                todo-output    => q:to/TODO/,
+                    #   Failed (TODO) test 'needs fixing'
+                    #   at t/00-tap-formatter.t line 1569
+                TODO
                 failure-output => q{},
             },
         },
@@ -715,7 +751,7 @@ test-formatter(
             },
             expect => ${
                 output         => q{},
-                todo-output    => "    # diag 3\n",
+                todo-output    => qq{    # diag 3\n},
                 failure-output => q{},
             },
         },
@@ -736,9 +772,12 @@ test-formatter(
                 name => 'subtest',
             },
             expect => ${
-                output         => qq{    1..3\nnot ok 4 - subtest\n},
+                output         => q:to/OUTPUT/,
+                    1..3
+                not ok 4 - subtest
+                OUTPUT
                 todo-output    => q{},
-                failure-output => "    # Looks like you failed 1 test out of 3.\n",
+                failure-output => qq{    # Looks like you failed 1 test out of 3.\n},
             },
         },
         ${
@@ -812,7 +851,10 @@ test-formatter(
             },
             expect => ${
                 output         => "not ok 1 - needs fixing # TODO not yet done\n",
-                todo-output    => q{},
+                todo-output    => q:to/TODO/,
+                #   Failed (TODO) test 'needs fixing'
+                #   at t/00-tap-formatter.t line 1569
+                TODO
                 failure-output => q{},
             },
         },
@@ -844,7 +886,7 @@ test-formatter(
                 message => 'subnote 1',
             },
             expect => ${
-                output         => "    # subnote 1\n",
+                output         => qq{    # subnote 1\n},
                 todo-output    => q{},
                 failure-output => q{},
             },
@@ -866,7 +908,7 @@ test-formatter(
                 message => 'subnote 2',
             },
             expect => ${
-                output         => "    # subnote 2\n",
+                output         => qq{    # subnote 2\n},
                 todo-output    => q{},
                 failure-output => q{},
             },
@@ -878,8 +920,11 @@ test-formatter(
                 name   => 'needs fixing',
             },
             expect => ${
-                output         => "    not ok 1 - needs fixing # TODO not yet done\n",
-                todo-output    => q{},
+                output         => qq{    not ok 1 - needs fixing # TODO not yet done\n},
+                todo-output    => q:to/TODO/,
+                    #   Failed (TODO) test 'needs fixing'
+                    #   at t/00-tap-formatter.t line 1569
+                TODO
                 failure-output => q{},
             },
         },
