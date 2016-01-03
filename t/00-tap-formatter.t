@@ -18,7 +18,7 @@ use Test::Stream::Types;
 my $test-count = 136;
 say "1..$test-count";
 
-diag('No subtests, all tests passing');
+my-diag('No subtests, all tests passing');
 test-formatter(
     event-tests => $[
         ${
@@ -83,7 +83,7 @@ test-formatter(
     error     => q{},
 );
 
-diag('Failures, todo, and skip');
+my-diag('Failures, todo, and skip');
 test-formatter(
     event-tests => $[
         ${
@@ -184,7 +184,7 @@ test-formatter(
     error     => 'failed 1 test',
 );
 
-diag('Diagnostics attached to tests (including pass, failure, TODO tests, and arbtitrary %more for the diagnostic object)');
+my-diag('Diagnostics attached to tests (including pass, failure, TODO tests, and arbtitrary %more for the diagnostic object)');
 test-formatter(
     event-tests => $[
         ${
@@ -332,7 +332,7 @@ test-formatter(
     error     => 'failed 2 tests',
 );
 
-diag('Subtests with diagnostics, skip, todo, etc.');
+my-diag('Subtests with diagnostics, skip, todo, etc.');
 test-formatter(
     event-tests => $[
         ${
@@ -590,13 +590,13 @@ sub my-ok (Bool:D $ok, Str:D $name, *@diag) {
     my $start = $ok ?? q{} !! q{not };
     say $start, q{ok - }, $test-num++, " $name";
     unless $ok {
-        diag($_) for @diag.values 
+        my-diag($_) for @diag.values 
     }
     return $ok;
 }
 
 
-sub diag (Str:D $message) {
+sub my-diag (Str:D $message) {
     $*ERR.say( q{# }, escape($message) );
 }
 
