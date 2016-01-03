@@ -69,7 +69,8 @@ multi method accept-event (Test::Stream::Event::Suite::End:D $event) {
     self!die-unless-suites($event);
 
     unless self!current-suite.name eq $event.name {
-        die "Recieved a Suite::End event named {$event.name} but the most recent suite is named {self!current-suite.name}";
+        die qq[Received a Suite::End event named "{$event.name}"]
+          ~ qq[ but the most recent suite is named "{self!current-suite.name}"];
     }
 
     self!end-current-suite;
@@ -85,7 +86,8 @@ multi method accept-event (Test::Stream::Event::SkipAll:D $event) {
     self!die-unless-suites($event);
 
     if self!current-suite.tests-run > 0 {
-        die "Received a SkipAll event but the current suite has already run {self!current-suite.tests-run} tests";
+        my $ran = maybe-plural( self!current-suite.tests-run, 'test' );
+        die "Received a SkipAll event but the current suite has already run {self!current-suite.tests-run} $ran";
     }
 
     self!say-plan( 0, $event.reason );
@@ -161,8 +163,14 @@ multi method accept-event (Test::Stream::Event::Todo::Start:D $event) {
 multi method accept-event (Test::Stream::Event::Todo::End:D $event) {
     self!die-unless-suites($event);
 
+    unless self!current-suite.todo-reason {
+        die qq[Received a Todo::End event with a reason of "{$event.reason}"]
+            ~ ' but there is no corresponding Todo::Start event';
+    }
+
     unless $event.reason eq self!current-suite.todo-reason {
-        die "Recieved a Todo::End event with a reason of {$event.reason} but the most recent todo reason was {self!current-suite.todo-reason}";
+        die qq[Received a Todo::End event with a reason of "{$event.reason}" but the]
+          ~ qq[ most recent Todo::Start reason was "{self!current-suite.todo-reason}"];
     }
 
     self!current-suite.todo-reason = (Str);
