@@ -446,7 +446,7 @@ sub my-ok (Bool:D $ok, Str:D $name, *@diag) {
 
 
 sub diag (Str:D $message) {
-    say q{# }, escape($message);
+    $*ERR.say( q{# }, escape($message) );
 }
 
 sub escape (Str:D $text) {
