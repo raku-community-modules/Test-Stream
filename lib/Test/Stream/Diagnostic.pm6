@@ -9,7 +9,7 @@ has DiagnosticSeverity $.severity;
 has %.more;
 
 submethod BUILD (
-    Str:D :$!message,
+    Str :$!message,
     DiagnosticSeverity:D :$!severity,
     :%!more?
 ) { }
