@@ -12,6 +12,7 @@ multi method accept-event (Test::Stream::Event::SkipAll:D $event) { ... }
 multi method accept-event (Test::Stream::Event::Suite::Start:D $event) { ... }
 multi method accept-event (Test::Stream::Event::Suite::End:D $event) { ... }
 multi method accept-event (Test::Stream::Event::Test:D $event) { ... }
-multi method accept-event (Test::Stream::Event::Todo:D $event) { ... }
+multi method accept-event (Test::Stream::Event::Todo::Start:D $event) { ... }
+multi method accept-event (Test::Stream::Event::Todo::End:D $event) { ... }
 
 

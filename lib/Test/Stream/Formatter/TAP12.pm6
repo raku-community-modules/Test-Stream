@@ -7,16 +7,6 @@ unit class Test::Stream::Formatter::TAP12 does Test::Stream::Listener;
 use Test::Stream::Diagnostic;
 use Test::Stream::Types;
 
-my class TodoState {
-    has Int $.count is rw;
-    has Str $.reason;
-    submethod BUILD (Str:D :$!reason, Int:D :$!count) { }
-
-    method did-todo-test {
-        $.count--;
-    }
-}
-
 my class Suite {
     has Instant $.started-at;
     has Str $.name;
@@ -26,8 +16,7 @@ my class Suite {
     # they don't count as actual failures.
     has Int:D $.real-failure-count is rw = 0;
     has Bool:D $.said-plan is rw = False;
-
-    has TodoState $.todo-state is rw;
+    has Str $.todo-reason is rw;
 
     submethod BUILD (
         Instant:D :$!started-at,
@@ -36,24 +25,11 @@ my class Suite {
     ) { }
 
     method next-test-number (--> PositiveInt:D) {
-        if $.todo-state {
-            $.todo-state.did-todo-test;
-            $.todo-state = (TodoState) unless $.todo-state.count;
-        }
         return ++$.tests-run;
     }
 
-    method start-todo (|a) {
-        $.todo-state = TodoState.new(|a);
-    }
-
     method in-todo (--> Bool:D) {
-        return $.todo-state.defined;
-    }
-
-    method todo-reason (--> Str:D) {
-        return unless $.todo-state.defined;
-        return $.todo-state.reason;
+        return $.todo-reason.defined;
     }
 
     method record-failure {
@@ -176,13 +152,20 @@ multi method accept-event (Test::Stream::Event::Bail:D $event) {
     $.bailed-reason = $event.reason;
 }
 
-multi method accept-event (Test::Stream::Event::Todo:D $event) {
+multi method accept-event (Test::Stream::Event::Todo::Start:D $event) {
     self!die-unless-suites($event);
 
-    self!current-suite.start-todo(
-        count  => $event.count,
-        reason => $event.reason,
-    );
+    self!current-suite.todo-reason = $event.reason;
+}
+
+multi method accept-event (Test::Stream::Event::Todo::End:D $event) {
+    self!die-unless-suites($event);
+
+    unless $event.reason eq self!current-suite.todo-reason {
+        die "Recieved a Todo::End event with a reason of {$event.reason} but the most recent todo reason was {self!current-suite.todo-reason}";
+    }
+
+    self!current-suite.todo-reason = (Str);
 }
 
 class Status {

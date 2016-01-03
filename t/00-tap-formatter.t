@@ -15,7 +15,7 @@ use Test::Stream::Types;
 #    - did it throw an exception?
 #    - do each of the 3 output handles contain the expected output?
 # Every formatter test adds three finalize tests
-my $test-count = 136;
+my $test-count = 362;
 say "1..$test-count";
 
 my-diag('No subtests, all tests passing');
@@ -133,9 +133,8 @@ test-formatter(
             },
         },
         ${
-            event => Test::Stream::Event::Todo,
+            event => Test::Stream::Event::Todo::Start,
             args  => ${
-                count  => 1,
                 reason => 'not yet done',
             },
             expect => ${
@@ -152,6 +151,17 @@ test-formatter(
             },
             expect => ${
                 output         => "not ok 3 - needs fixing # TODO not yet done\n",
+                todo-output    => q{},
+                failure-output => q{},
+            },
+        },
+        ${
+            event => Test::Stream::Event::Todo::End,
+            args  => ${
+                reason => 'not yet done',
+            },
+            expect => ${
+                output         => q{},
                 todo-output    => q{},
                 failure-output => q{},
             },
@@ -257,9 +267,8 @@ test-formatter(
             },
         },
         ${
-            event => Test::Stream::Event::Todo,
+            event => Test::Stream::Event::Todo::Start,
             args  => ${
-                count  => 1,
                 reason => 'not yet done',
             },
             expect => ${
@@ -289,6 +298,17 @@ test-formatter(
                 #     expected : "large"
                 #          got : "medium"
                 TODO
+                failure-output => q{},
+            },
+        },
+        ${
+            event => Test::Stream::Event::Todo::End,
+            args  => ${
+                reason => 'not yet done',
+            },
+            expect => ${
+                output         => q{},
+                todo-output    => q{},
                 failure-output => q{},
             },
         },
@@ -407,9 +427,8 @@ test-formatter(
             },
         },
         ${
-            event => Test::Stream::Event::Todo,
+            event => Test::Stream::Event::Todo::Start,
             args  => ${
-                count  => 1,
                 reason => 'not yet done',
             },
             expect => ${
@@ -439,6 +458,17 @@ test-formatter(
                     #     expected : "large"
                     #          got : "medium"
                 TODO
+                failure-output => q{},
+            },
+        },
+        ${
+            event => Test::Stream::Event::Todo::End,
+            args  => ${
+                reason => 'not yet done',
+            },
+            expect => ${
+                output         => q{},
+                todo-output    => q{},
                 failure-output => q{},
             },
         },
@@ -554,9 +584,8 @@ test-formatter(
             },
         },
         ${
-            event => Test::Stream::Event::Todo,
+            event => Test::Stream::Event::Todo::Start,
             args  => ${
-                count  => 1,
                 reason => 'not yet done',
             },
             expect => ${
@@ -589,12 +618,23 @@ test-formatter(
             },
         },
         ${
+            event => Test::Stream::Event::Todo::End,
+            args  => ${
+                reason => 'not yet done',
+            },
+            expect => ${
+                output         => q{},
+                todo-output    => q{},
+                failure-output => q{},
+            },
+        },
+        ${
             event => Test::Stream::Event::Suite::Start,
             args  => ${
                 name => 'subtest',
             },
             expect => ${
-                output         => q{},
+                output         => "# Subtest subtest\n",
                 todo-output    => q{},
                 failure-output => q{},
             },
@@ -646,9 +686,8 @@ test-formatter(
             },
         },
         ${
-            event => Test::Stream::Event::Todo,
+            event => Test::Stream::Event::Todo::Start,
             args  => ${
-                count  => 1,
                 reason => 'not yet done',
             },
             expect => ${
@@ -677,6 +716,17 @@ test-formatter(
             expect => ${
                 output         => q{},
                 todo-output    => "    # diag 3\n",
+                failure-output => q{},
+            },
+        },
+        ${
+            event => Test::Stream::Event::Todo::End,
+            args  => ${
+                reason => 'not yet done',
+            },
+            expect => ${
+                output         => q{},
+                todo-output    => q{},
                 failure-output => q{},
             },
         },
@@ -733,9 +783,8 @@ test-formatter(
             },
         },
         ${
-            event => Test::Stream::Event::Todo,
+            event => Test::Stream::Event::Todo::Start,
             args  => ${
-                count  => 1,
                 reason => 'not yet done',
             },
             expect => ${
@@ -768,6 +817,17 @@ test-formatter(
             },
         },
         ${
+            event => Test::Stream::Event::Todo::End,
+            args  => ${
+                reason => 'not yet done',
+            },
+            expect => ${
+                output         => q{},
+                todo-output    => q{},
+                failure-output => q{},
+            },
+        },
+        ${
             event => Test::Stream::Event::Suite::Start,
             args  => ${
                 name => 'subtest',
@@ -790,9 +850,8 @@ test-formatter(
             },
         },
         ${
-            event => Test::Stream::Event::Todo,
+            event => Test::Stream::Event::Todo::Start,
             args  => ${
-                count  => 1,
                 reason => 'not yet done',
             },
             expect => ${
@@ -820,6 +879,17 @@ test-formatter(
             },
             expect => ${
                 output         => "    not ok 1 - needs fixing # TODO not yet done\n",
+                todo-output    => q{},
+                failure-output => q{},
+            },
+        },
+        ${
+            event => Test::Stream::Event::Todo::End,
+            args  => ${
+                reason => 'not yet done',
+            },
+            expect => ${
+                output         => q{},
                 todo-output    => q{},
                 failure-output => q{},
             },

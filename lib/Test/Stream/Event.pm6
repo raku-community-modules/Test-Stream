@@ -58,12 +58,15 @@ class Event::SkipAll does Event {
     has Str $.reason;
 }
 
-#| Shared role for events that modify future tests (skip & todo).
-role Event::TestModifier {
+class Event::Skip does Event {
     has PositiveInt $.count;
     has Str $.reason;
 }
 
-class Event::Skip does Event does Event::TestModifier { }
+class Event::Todo::Start does Event {
+    has Str $.reason;
+}
 
-class Event::Todo does Event does Event::TestModifier { }
+class Event::Todo::End does Event {
+    has Str $.reason;
+}
