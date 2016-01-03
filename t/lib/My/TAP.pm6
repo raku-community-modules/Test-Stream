@@ -24,7 +24,7 @@ sub my-ok (Bool:D $ok, Str:D $name, *@diag) is export {
     my $start = $ok ?? q{} !! q{not };
     say $start, q{ok }, $test-num++, " - $name";
     unless $ok {
-        my-diag($_) for @diag.values 
+        my-diag($_) for @diag.values;
     }
     return $ok;
 }
