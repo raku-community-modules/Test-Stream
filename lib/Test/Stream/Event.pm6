@@ -15,7 +15,7 @@ role Event {
     has Instant:D $.time = now;
 
     method type {
-        return self.^name.split(rx{'::'})[*-1];
+        return self.^name.subst( rx{ ^ 'Test::Stream::Event::' }, q{} );
     }
 }
 
