@@ -2,10 +2,10 @@ use v6;
 use lib 'lib', 't/lib';
 
 use IO::String;
+use My::TAP;
 use Test::Stream::Event;
 use Test::Stream::Formatter::TAP12;
 use Test::Stream::Types;
-use My::TAP;
 
 # Note that this test cannot use Test.pm6 (because I hope that module will
 # eventually be built on top of Test::Stream), nor any other test
