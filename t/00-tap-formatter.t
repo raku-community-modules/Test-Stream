@@ -5,6 +5,7 @@ use IO::String;
 use Test::Stream::Event;
 use Test::Stream::Formatter::TAP12;
 use Test::Stream::Types;
+use My::TAP;
 
 # Note that this test cannot use Test.pm6 (because I hope that module will
 # eventually be built on top of Test::Stream), nor any other test
@@ -131,7 +132,7 @@ test-formatter(
                 todo-output    => q{},
                 failure-output => q:to/FAILURE/,
                 #   Failed test 'will fail'
-                #   at t/00-tap-formatter.t line 1569
+                #   at t/00-tap-formatter.t line 1570
                 FAILURE
             },
         },
@@ -156,7 +157,7 @@ test-formatter(
                 output         => "not ok 3 - needs fixing # TODO not yet done\n",
                 todo-output    => q:to/TODO/,
                 #   Failed (TODO) test 'needs fixing'
-                #   at t/00-tap-formatter.t line 1569
+                #   at t/00-tap-formatter.t line 1570
                 TODO
                 failure-output => q{},
             },
@@ -269,7 +270,7 @@ test-formatter(
                 todo-output    => q{},
                 failure-output => q:to/FAILURE/,
                 #   Failed test 'should include diag info'
-                #   at t/00-tap-formatter.t line 1569
+                #   at t/00-tap-formatter.t line 1570
                 # did not get the answer
                 #     expected : 42
                 #     operator : ==
@@ -306,7 +307,7 @@ test-formatter(
                 output         => qq{not ok 3 - needs fixing # TODO not yet done\n},
                 todo-output    => q:to/TODO/,
                 #   Failed (TODO) test 'needs fixing'
-                #   at t/00-tap-formatter.t line 1569
+                #   at t/00-tap-formatter.t line 1570
                 # expected large size
                 #     expected : "large"
                 #          got : "medium"
@@ -344,7 +345,7 @@ test-formatter(
                 todo-output    => q{},
                 failure-output => q:to/FAILURE/,
                 #   Failed test 'diag.more has arbitrary keys'
-                #   at t/00-tap-formatter.t line 1569
+                #   at t/00-tap-formatter.t line 1570
                 # did not get the answer
                 #     keys : $[1, 2, 3]
                 #     with : "arbitrary"
@@ -435,7 +436,7 @@ test-formatter(
                 todo-output    => q{},
                 failure-output => q:to/FAILURE/,
                     #   Failed test 'should include diag info'
-                    #   at t/00-tap-formatter.t line 1569
+                    #   at t/00-tap-formatter.t line 1570
                     # did not get the answer
                     #     expected : 42
                     #     operator : ==
@@ -472,7 +473,7 @@ test-formatter(
                 output         => qq{    not ok 2 - needs fixing # TODO not yet done\n},
                 todo-output    => q:to/TODO/,
                     #   Failed (TODO) test 'needs fixing'
-                    #   at t/00-tap-formatter.t line 1569
+                    #   at t/00-tap-formatter.t line 1570
                     # expected large size
                     #     expected : "large"
                     #          got : "medium"
@@ -510,7 +511,7 @@ test-formatter(
                 todo-output    => q{},
                 failure-output => q:to/FAILURE/,
                     #   Failed test 'diag.more has arbitrary keys'
-                    #   at t/00-tap-formatter.t line 1569
+                    #   at t/00-tap-formatter.t line 1570
                     # did not get the answer
                     #     keys : $[1, 2, 3]
                     #     with : "arbitrary"
@@ -595,7 +596,7 @@ test-formatter(
                 todo-output    => q{},
                 failure-output => q:to/FAILURE/,
                 #   Failed test 'will fail'
-                #   at t/00-tap-formatter.t line 1569
+                #   at t/00-tap-formatter.t line 1570
                 FAILURE
             },
         },
@@ -631,7 +632,7 @@ test-formatter(
                 output         => "not ok 3 - needs fixing # TODO not yet done\n",
                 todo-output    => q:to/TODO/,
                 #   Failed (TODO) test 'needs fixing'
-                #   at t/00-tap-formatter.t line 1569
+                #   at t/00-tap-formatter.t line 1570
                 TODO
                 failure-output => q{},
             },
@@ -703,7 +704,7 @@ test-formatter(
                 todo-output    => q{},
                 failure-output => q:to/FAILURE/,
                     #   Failed test 'will fail'
-                    #   at t/00-tap-formatter.t line 1569
+                    #   at t/00-tap-formatter.t line 1570
                 FAILURE
             },
         },
@@ -739,7 +740,7 @@ test-formatter(
                 output         => qq{    not ok 3 - needs fixing # TODO not yet done\n},
                 todo-output    => q:to/TODO/,
                     #   Failed (TODO) test 'needs fixing'
-                    #   at t/00-tap-formatter.t line 1569
+                    #   at t/00-tap-formatter.t line 1570
                 TODO
                 failure-output => q{},
             },
@@ -853,7 +854,7 @@ test-formatter(
                 output         => "not ok 1 - needs fixing # TODO not yet done\n",
                 todo-output    => q:to/TODO/,
                 #   Failed (TODO) test 'needs fixing'
-                #   at t/00-tap-formatter.t line 1569
+                #   at t/00-tap-formatter.t line 1570
                 TODO
                 failure-output => q{},
             },
@@ -923,7 +924,7 @@ test-formatter(
                 output         => qq{    not ok 1 - needs fixing # TODO not yet done\n},
                 todo-output    => q:to/TODO/,
                     #   Failed (TODO) test 'needs fixing'
-                    #   at t/00-tap-formatter.t line 1569
+                    #   at t/00-tap-formatter.t line 1570
                 TODO
                 failure-output => q{},
             },
@@ -1581,7 +1582,7 @@ sub test-formatter (:@event-tests, :$exit-code, :$error) {
         { $tap.finalize },
         'calling finalize',
     );
-    
+
     my-ok(
         $status.exit-code == $exit-code,
         "finalize returned $exit-code for exit code",
@@ -1638,48 +1639,10 @@ sub compare-outputs (Str:D $type, Str:D $key, %outputs, %expect) {
         @diag.append:
             q{     got : } ~ %outputs{$key}.Str.subst( :g, "\n", '\\n' );
     }
-        
+
     my-ok(
         ?$ok,
         "got expected $key for $type",
         @diag,
     );
-}
-
-sub my-lives-ok (Code $code, Str:D $name) {
-    my $return = $code();
- 
-    my-ok( True, "no exception from $name" );
-    CATCH {
-        default {
-            my-ok(
-                False,
-                "no exception from $name",
-                $_.Str.lines.flat,
-                $_.backtrace.Str.lines.flat,
-            );
-        }
-    }
-
-    return $return;
-}
-
-sub my-ok (Bool:D $ok, Str:D $name, *@diag) {
-    state $test-num = 1;
-
-    my $start = $ok ?? q{} !! q{not };
-    say $start, q{ok - }, $test-num++, " $name";
-    unless $ok {
-        my-diag($_) for @diag.values 
-    }
-    return $ok;
-}
-
-
-sub my-diag (Str:D $message) {
-    $*ERR.say( q{# }, escape($message) );
-}
-
-sub escape (Str:D $text) {
-    return $text.subst( :g, q{#}, Q{\#} ).subst( :g, "\n", "\n#" );
 }
