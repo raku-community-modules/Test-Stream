@@ -18,9 +18,8 @@ sub my-lives-ok (Code $code, Str:D $name) is export {
     return $return;
 }
 
+my $test-num = 1;
 sub my-ok (Bool:D $ok, Str:D $name, *@diag) is export {
-    state $test-num = 1;
-
     my $start = $ok ?? q{} !! q{not };
     say $start, q{ok }, $test-num++, " - $name";
     unless $ok {
