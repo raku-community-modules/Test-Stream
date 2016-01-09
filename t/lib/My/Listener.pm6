@@ -18,3 +18,5 @@ multi method accept-event (Test::Stream::Event::Suite::End:D $event) { @.events.
 multi method accept-event (Test::Stream::Event::Test:D $event) { @.events.append($event) }
 multi method accept-event (Test::Stream::Event::Todo::Start:D $event) { @.events.append($event) }
 multi method accept-event (Test::Stream::Event::Todo::End:D $event) { @.events.append($event) }
+
+method clear { @.events = () }
