@@ -330,8 +330,22 @@ method !maybe-say-diagnostic (Test::Stream::Diagnostic $diagnostic)  {
     if $diagnostic.more.defined {
         if $diagnostic.more<got>.defined && $diagnostic.more<expected>.defined {
             self!say-comment( $output, q{    expected : } ~ $diagnostic.more<expected>.perl );
-            self!say-comment( $output, q{    operator : } ~ $diagnostic.more<operator>.gist )
-                if $diagnostic.more<operator>.defined;
+            if $diagnostic.more<operator>.defined {
+                my $op-str = do given $diagnostic.more<operator> {
+                    when Str  {
+                        $diagnostic.more<operator>;
+                    }
+                    when Callable {
+                        $diagnostic.more<operator>.name ne q{}
+                        ?? $diagnostic.more<operator>.name
+                        !! $diagnostic.more<operator>.gist;
+                    }
+                    default {
+                        $diagnostic.more<operator>.gist;
+                    }
+                };
+                self!say-comment( $output, q{    operator : } ~ $op-str );
+            }
             self!say-comment( $output, q{         got : } ~ $diagnostic.more<got>.perl )
         }
         else {

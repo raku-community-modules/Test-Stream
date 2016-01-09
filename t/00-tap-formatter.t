@@ -260,7 +260,7 @@ test-formatter(
                     message  => 'did not get the answer',
                     more     => ${
                         got      => 41,
-                        operator => '==',
+                        operator => &infix:<==>,
                         expected => 42,
                     },
                 ),
@@ -273,7 +273,7 @@ test-formatter(
                 #   at t/00-tap-formatter.t line 1570
                 # did not get the answer
                 #     expected : 42
-                #     operator : ==
+                #     operator : infix:<==>
                 #          got : 41
                 FAILURE
             },
@@ -426,7 +426,7 @@ test-formatter(
                     message  => 'did not get the answer',
                     more     => ${
                         got      => 41,
-                        operator => '==',
+                        operator => &infix:<==>,
                         expected => 42,
                     },
                 ),
@@ -439,7 +439,7 @@ test-formatter(
                     #   at t/00-tap-formatter.t line 1570
                     # did not get the answer
                     #     expected : 42
-                    #     operator : ==
+                    #     operator : infix:<==>
                     #          got : 41
                 FAILURE
             },
