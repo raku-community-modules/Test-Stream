@@ -1,32 +1,17 @@
 use v6;
 use lib 'lib', 't/lib';
 
+use My::Listener;
 use My::TAP;
 use Test::Stream::Event;
 use Test::Stream::Hub;
-use Test::Stream::Listener;
-
-class L does Test::Stream::Listener {
-    has @.events;
-
-    multi method accept-event (Test::Stream::Event::Bail:D $event) { @.events.append($event) }
-    multi method accept-event (Test::Stream::Event::Diag:D $event) { @.events.append($event) }
-    multi method accept-event (Test::Stream::Event::Plan:D $event) { @.events.append($event) }
-    multi method accept-event (Test::Stream::Event::Skip:D $event) { @.events.append($event) }
-    multi method accept-event (Test::Stream::Event::SkipAll:D $event) { @.events.append($event) }
-    multi method accept-event (Test::Stream::Event::Suite::Start:D $event) { @.events.append($event) }
-    multi method accept-event (Test::Stream::Event::Suite::End:D $event) { @.events.append($event) }
-    multi method accept-event (Test::Stream::Event::Test:D $event) { @.events.append($event) }
-    multi method accept-event (Test::Stream::Event::Todo::Start:D $event) { @.events.append($event) }
-    multi method accept-event (Test::Stream::Event::Todo::End:D $event) { @.events.append($event) }
-}
 
 say "1..9";
 
 my $hub = Test::Stream::Hub.instance;
 
-my $l1 = L.new;
-my $l2 = L.new;
+my $l1 = My::Listener.new;
+my $l2 = My::Listener.new;
 $hub.add-listener($l1);
 $hub.add-listener($l2);
 
