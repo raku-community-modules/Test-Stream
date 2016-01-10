@@ -10,6 +10,7 @@ has @.events;
 
 multi method accept-event (Test::Stream::Event::Bail:D $event) { @.events.append($event) }
 multi method accept-event (Test::Stream::Event::Diag:D $event) { @.events.append($event) }
+multi method accept-event (Test::Stream::Event::Note:D $event) { @.events.append($event) }
 multi method accept-event (Test::Stream::Event::Plan:D $event) { @.events.append($event) }
 multi method accept-event (Test::Stream::Event::Skip:D $event) { @.events.append($event) }
 multi method accept-event (Test::Stream::Event::SkipAll:D $event) { @.events.append($event) }
