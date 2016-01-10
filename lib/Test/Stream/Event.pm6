@@ -13,6 +13,10 @@ role Event {
     method type {
         return self.^name.subst( rx{ ^ 'Test::Stream::Event::' }, q{} );
     }
+
+    method set-source (Test::Stream::EventSource:D $source) {
+        $!source = $source;
+    }
 }
 
 #| Shared role events that have a name (subtest-related and test events).

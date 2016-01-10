@@ -5,6 +5,7 @@ use IO::String;
 use My::TAP;
 use Test::Stream::Event;
 use Test::Stream::Formatter::TAP12;
+use Test::Stream::Hub;
 use Test::Stream::Types;
 
 # Note that this test cannot use Test.pm6 (because I hope that module will
@@ -15,17 +16,15 @@ use Test::Stream::Types;
 # Every event we send generates 4 basic tests ...
 #    - did it throw an exception?
 #    - do each of the 3 output handles contain the expected output?
-# Every formatter test adds three finalize tests
-my $test-count = 454;
-say "1..$test-count";
+say "1..348";
 
 my-diag('No subtests, all tests passing');
 test-formatter(
     event-tests => $[
         ${
-            event => Test::Stream::Event::Suite::Start,
+            event => 'suite-start',
             args  => ${
-                name => '00-tap-formatter.t',
+                name => $*PROGRAM-NAME,
             },
             expect => ${
                 output         => q{},
@@ -69,9 +68,9 @@ test-formatter(
             },
         },
         ${
-            event => Test::Stream::Event::Suite::End,
+            event => 'suite-end',
             args  => ${
-                name => '00-tap-formatter.t',
+                name => $*PROGRAM-NAME,
             },
             expect => ${
                 output         => q{},
@@ -80,17 +79,15 @@ test-formatter(
             },
         },
     ],
-    exit-code => 0,
-    error     => q{},
 );
 
 my-diag('Failures, todo, and skip');
 test-formatter(
     event-tests => $[
         ${
-            event => Test::Stream::Event::Suite::Start,
+            event => 'suite-start',
             args  => ${
-                name => '00-tap-formatter.t',
+                name => $*PROGRAM-NAME,
             },
             expect => ${
                 output         => q{},
@@ -130,9 +127,9 @@ test-formatter(
             expect => ${
                 output         => "not ok 2 - will fail\n",
                 todo-output    => q{},
-                failure-output => q:to/FAILURE/,
+                failure-output => qq:to/FAILURE/,
                 #   Failed test 'will fail'
-                #   at t/00-tap-formatter.t line 1570
+                #   at $*PROGRAM-NAME line 1240
                 FAILURE
             },
         },
@@ -155,9 +152,9 @@ test-formatter(
             },
             expect => ${
                 output         => "not ok 3 - needs fixing # TODO not yet done\n",
-                todo-output    => q:to/TODO/,
+                todo-output    => qq:to/TODO/,
                 #   Failed (TODO) test 'needs fixing'
-                #   at t/00-tap-formatter.t line 1570
+                #   at $*PROGRAM-NAME line 1240
                 TODO
                 failure-output => q{},
             },
@@ -189,9 +186,9 @@ test-formatter(
             },
         },
         ${
-            event => Test::Stream::Event::Suite::End,
+            event => 'suite-end',
             args  => ${
-                name => '00-tap-formatter.t',
+                name => $*PROGRAM-NAME,
             },
             expect => ${
                 output         => q{},
@@ -200,17 +197,66 @@ test-formatter(
             },
         },
     ],
-    exit-code => 1,
-    error     => 'failed 1 test',
+);
+
+my-diag('Plan does not match count of tests run');
+test-formatter(
+    event-tests => $[
+        ${
+            event => 'suite-start',
+            args  => ${
+                name => $*PROGRAM-NAME,
+            },
+            expect => ${
+                output         => q{},
+                todo-output    => q{},
+                failure-output => q{},
+            },
+        },
+        ${
+            event => Test::Stream::Event::Plan,
+            args  => ${
+                planned => 2,
+            },
+            expect => ${
+                output         => "1..2\n",
+                todo-output    => q{},
+                failure-output => q{},
+            },
+        },
+        ${
+            event => Test::Stream::Event::Test,
+            args  => ${
+                passed => True,
+                name   => 'passed',
+            },
+            expect => ${
+                output         => "ok 1 - passed\n",
+                todo-output    => q{},
+                failure-output => q{},
+            },
+        },
+        ${
+            event => 'suite-end',
+            args  => ${
+                name => $*PROGRAM-NAME,
+            },
+            expect => ${
+                output         => q{},
+                todo-output    => q{},
+                failure-output => "# You planned 2 tests but ran 1 test.\n",
+            },
+        },
+    ],
 );
 
 my-diag('Diagnostics attached to tests (including pass, failure, TODO tests, and arbtitrary %more for the diagnostic object)');
 test-formatter(
     event-tests => $[
         ${
-            event => Test::Stream::Event::Suite::Start,
+            event => 'suite-start',
             args  => ${
-                name => '00-tap-formatter.t',
+                name => $*PROGRAM-NAME,
             },
             expect => ${
                 output         => q{},
@@ -268,9 +314,9 @@ test-formatter(
             expect => ${
                 output         => "not ok 2 - should include diag info\n",
                 todo-output    => q{},
-                failure-output => q:to/FAILURE/,
+                failure-output => qq:to/FAILURE/,
                 #   Failed test 'should include diag info'
-                #   at t/00-tap-formatter.t line 1570
+                #   at $*PROGRAM-NAME line 1240
                 # did not get the answer
                 #     expected : 42
                 #     operator : infix:<==>
@@ -305,9 +351,9 @@ test-formatter(
             },
             expect => ${
                 output         => qq{not ok 3 - needs fixing # TODO not yet done\n},
-                todo-output    => q:to/TODO/,
+                todo-output    => qq:to/TODO/,
                 #   Failed (TODO) test 'needs fixing'
-                #   at t/00-tap-formatter.t line 1570
+                #   at $*PROGRAM-NAME line 1240
                 # expected large size
                 #     expected : "large"
                 #          got : "medium"
@@ -343,19 +389,19 @@ test-formatter(
             expect => ${
                 output         => "not ok 4 - diag.more has arbitrary keys\n",
                 todo-output    => q{},
-                failure-output => q:to/FAILURE/,
+                failure-output => qq:to/FAILURE/,
                 #   Failed test 'diag.more has arbitrary keys'
-                #   at t/00-tap-formatter.t line 1570
+                #   at $*PROGRAM-NAME line 1240
                 # did not get the answer
-                #     keys : $[1, 2, 3]
+                #     keys : \$[1, 2, 3]
                 #     with : "arbitrary"
                 FAILURE
             },
         },
         ${
-            event => Test::Stream::Event::Suite::End,
+            event => 'suite-end',
             args  => ${
-                name => '00-tap-formatter.t',
+                name => $*PROGRAM-NAME,
             },
             expect => ${
                 output         => q{},
@@ -364,17 +410,15 @@ test-formatter(
             },
         },
     ],
-    exit-code => 2,
-    error     => 'failed 2 tests',
 );
 
 my-diag('Subtests with diagnostics, skip, todo, etc.');
 test-formatter(
     event-tests => $[
         ${
-            event => Test::Stream::Event::Suite::Start,
+            event => 'suite-start',
             args  => ${
-                name => '00-tap-formatter.t',
+                name => $*PROGRAM-NAME,
             },
             expect => ${
                 output         => q{},
@@ -385,10 +429,10 @@ test-formatter(
         ${
             event => Test::Stream::Event::Plan,
             args  => ${
-                planned => 4,
+                planned => 2,
             },
             expect => ${
-                output         => "1..4\n",
+                output         => "1..2\n",
                 todo-output    => q{},
                 failure-output => q{},
             },
@@ -406,7 +450,7 @@ test-formatter(
             },
         },
         ${
-            event => Test::Stream::Event::Suite::Start,
+            event => 'suite-start',
             args  => ${
                 name => 'this is sub 1',
             },
@@ -434,9 +478,9 @@ test-formatter(
             expect => ${
                 output         => qq{    not ok 1 - should include diag info\n},
                 todo-output    => q{},
-                failure-output => q:to/FAILURE/,
+                failure-output => qq:to/FAILURE/,
                     #   Failed test 'should include diag info'
-                    #   at t/00-tap-formatter.t line 1570
+                    #   at $*PROGRAM-NAME line 1240
                     # did not get the answer
                     #     expected : 42
                     #     operator : infix:<==>
@@ -471,9 +515,9 @@ test-formatter(
             },
             expect => ${
                 output         => qq{    not ok 2 - needs fixing # TODO not yet done\n},
-                todo-output    => q:to/TODO/,
+                todo-output    => qq:to/TODO/,
                     #   Failed (TODO) test 'needs fixing'
-                    #   at t/00-tap-formatter.t line 1570
+                    #   at $*PROGRAM-NAME line 1240
                     # expected large size
                     #     expected : "large"
                     #          got : "medium"
@@ -509,17 +553,17 @@ test-formatter(
             expect => ${
                 output         => qq{    not ok 3 - diag.more has arbitrary keys\n},
                 todo-output    => q{},
-                failure-output => q:to/FAILURE/,
+                failure-output => qq:to/FAILURE/,
                     #   Failed test 'diag.more has arbitrary keys'
-                    #   at t/00-tap-formatter.t line 1570
+                    #   at $*PROGRAM-NAME line 1240
                     # did not get the answer
-                    #     keys : $[1, 2, 3]
+                    #     keys : \$[1, 2, 3]
                     #     with : "arbitrary"
                 FAILURE
             },
         },
         ${
-            event => Test::Stream::Event::Suite::End,
+            event => 'suite-end',
             args  => ${
                 name => 'this is sub 1',
             },
@@ -533,9 +577,9 @@ test-formatter(
             },
         },
         ${
-            event => Test::Stream::Event::Suite::End,
+            event => 'suite-end',
             args  => ${
-                name => '00-tap-formatter.t',
+                name => $*PROGRAM-NAME,
             },
             expect => ${
                 output         => q{},
@@ -544,17 +588,15 @@ test-formatter(
             },
         },
     ],
-    exit-code => 1,
-    error     => 'failed 1 test',
 );
 
 my-diag('Diag from passing, failing, and todo test, in top-level test and subtests');
 test-formatter(
     event-tests => $[
         ${
-            event => Test::Stream::Event::Suite::Start,
+            event => 'suite-start',
             args  => ${
-                name => '00-tap-formatter.t',
+                name => $*PROGRAM-NAME,
             },
             expect => ${
                 output         => q{},
@@ -594,9 +636,9 @@ test-formatter(
             expect => ${
                 output         => qq{not ok 2 - will fail\n},
                 todo-output    => q{},
-                failure-output => q:to/FAILURE/,
+                failure-output => qq:to/FAILURE/,
                 #   Failed test 'will fail'
-                #   at t/00-tap-formatter.t line 1570
+                #   at $*PROGRAM-NAME line 1240
                 FAILURE
             },
         },
@@ -630,9 +672,9 @@ test-formatter(
             },
             expect => ${
                 output         => "not ok 3 - needs fixing # TODO not yet done\n",
-                todo-output    => q:to/TODO/,
+                todo-output    => qq:to/TODO/,
                 #   Failed (TODO) test 'needs fixing'
-                #   at t/00-tap-formatter.t line 1570
+                #   at $*PROGRAM-NAME line 1240
                 TODO
                 failure-output => q{},
             },
@@ -660,7 +702,7 @@ test-formatter(
             },
         },
         ${
-            event => Test::Stream::Event::Suite::Start,
+            event => 'suite-start',
             args  => ${
                 name => 'subtest',
             },
@@ -702,9 +744,9 @@ test-formatter(
             expect => ${
                 output         => qq{    not ok 2 - will fail\n},
                 todo-output    => q{},
-                failure-output => q:to/FAILURE/,
+                failure-output => qq:to/FAILURE/,
                     #   Failed test 'will fail'
-                    #   at t/00-tap-formatter.t line 1570
+                    #   at $*PROGRAM-NAME line 1240
                 FAILURE
             },
         },
@@ -738,9 +780,9 @@ test-formatter(
             },
             expect => ${
                 output         => qq{    not ok 3 - needs fixing # TODO not yet done\n},
-                todo-output    => q:to/TODO/,
+                todo-output    => qq:to/TODO/,
                     #   Failed (TODO) test 'needs fixing'
-                    #   at t/00-tap-formatter.t line 1570
+                    #   at $*PROGRAM-NAME line 1240
                 TODO
                 failure-output => q{},
             },
@@ -768,7 +810,7 @@ test-formatter(
             },
         },
         ${
-            event => Test::Stream::Event::Suite::End,
+            event => 'suite-end',
             args  => ${
                 name => 'subtest',
             },
@@ -782,9 +824,9 @@ test-formatter(
             },
         },
         ${
-            event => Test::Stream::Event::Suite::End,
+            event => 'suite-end',
             args  => ${
-                name => '00-tap-formatter.t',
+                name => $*PROGRAM-NAME,
             },
             expect => ${
                 output         => "1..4\n",
@@ -793,17 +835,15 @@ test-formatter(
             },
         },
     ],
-    exit-code => 2,
-    error     => 'failed 2 tests',
 );
 
 my-diag('Note always go to $.output, whether in todo or not');
 test-formatter(
     event-tests => $[
         ${
-            event => Test::Stream::Event::Suite::Start,
+            event => 'suite-start',
             args  => ${
-                name => '00-tap-formatter.t',
+                name => $*PROGRAM-NAME,
             },
             expect => ${
                 output         => q{},
@@ -852,9 +892,9 @@ test-formatter(
             },
             expect => ${
                 output         => "not ok 1 - needs fixing # TODO not yet done\n",
-                todo-output    => q:to/TODO/,
+                todo-output    => qq:to/TODO/,
                 #   Failed (TODO) test 'needs fixing'
-                #   at t/00-tap-formatter.t line 1570
+                #   at $*PROGRAM-NAME line 1240
                 TODO
                 failure-output => q{},
             },
@@ -871,7 +911,7 @@ test-formatter(
             },
         },
         ${
-            event => Test::Stream::Event::Suite::Start,
+            event => 'suite-start',
             args  => ${
                 name => 'subtest',
             },
@@ -922,9 +962,9 @@ test-formatter(
             },
             expect => ${
                 output         => qq{    not ok 1 - needs fixing # TODO not yet done\n},
-                todo-output    => q:to/TODO/,
+                todo-output    => qq:to/TODO/,
                     #   Failed (TODO) test 'needs fixing'
-                    #   at t/00-tap-formatter.t line 1570
+                    #   at $*PROGRAM-NAME line 1240
                 TODO
                 failure-output => q{},
             },
@@ -941,7 +981,7 @@ test-formatter(
             },
         },
         ${
-            event => Test::Stream::Event::Suite::End,
+            event => 'suite-end',
             args  => ${
                 name => 'subtest',
             },
@@ -952,9 +992,9 @@ test-formatter(
             },
         },
         ${
-            event => Test::Stream::Event::Suite::End,
+            event => 'suite-end',
             args  => ${
-                name => '00-tap-formatter.t',
+                name => $*PROGRAM-NAME,
             },
             expect => ${
                 output         => "1..2\n",
@@ -963,17 +1003,15 @@ test-formatter(
             },
         },
     ],
-    exit-code => 0,
-    error     => q{},
 );
 
 my-diag('Bail out');
 test-formatter(
     event-tests => $[
         ${
-            event => Test::Stream::Event::Suite::Start,
+            event => 'suite-start',
             args  => ${
-                name => '00-tap-formatter.t',
+                name => $*PROGRAM-NAME,
             },
             expect => ${
                 output         => q{},
@@ -993,17 +1031,15 @@ test-formatter(
             },
         },
     ],
-    exit-code => 255,
-    error     => 'Bailed out - explosive decompression',
 );
 
 my-diag('Bail out in a subtest');
 test-formatter(
     event-tests => $[
         ${
-            event => Test::Stream::Event::Suite::Start,
+            event => 'suite-start',
             args  => ${
-                name => '00-tap-formatter.t',
+                name => $*PROGRAM-NAME,
             },
             expect => ${
                 output         => q{},
@@ -1012,7 +1048,7 @@ test-formatter(
             },
         },
         ${
-            event => Test::Stream::Event::Suite::Start,
+            event => 'suite-start',
             args  => ${
                 name => 'testing a thing',
             },
@@ -1034,17 +1070,15 @@ test-formatter(
             },
         },
     ],
-    exit-code => 255,
-    error     => 'Bailed out - cannot handle subtests',
 );
 
 my-diag('Skip all');
 test-formatter(
     event-tests => $[
         ${
-            event => Test::Stream::Event::Suite::Start,
+            event => 'suite-start',
             args  => ${
-                name => '00-tap-formatter.t',
+                name => $*PROGRAM-NAME,
             },
             expect => ${
                 output         => q{},
@@ -1064,9 +1098,9 @@ test-formatter(
             },
         },
         ${
-            event => Test::Stream::Event::Suite::End,
+            event => 'suite-end',
             args  => ${
-                name => '00-tap-formatter.t',
+                name => $*PROGRAM-NAME,
             },
             expect => ${
                 output         => q{},
@@ -1075,17 +1109,15 @@ test-formatter(
             },
         },
     ],
-    exit-code => 0,
-    error     => q{},
 );
 
 my-diag('Skip all in a subtest');
 test-formatter(
     event-tests => $[
         ${
-            event => Test::Stream::Event::Suite::Start,
+            event => 'suite-start',
             args  => ${
-                name => '00-tap-formatter.t',
+                name => $*PROGRAM-NAME,
             },
             expect => ${
                 output         => q{},
@@ -1106,7 +1138,7 @@ test-formatter(
             },
         },
         ${
-            event => Test::Stream::Event::Suite::Start,
+            event => 'suite-start',
             args  => ${
                 name => 'will skip',
             },
@@ -1128,7 +1160,7 @@ test-formatter(
             },
         },
         ${
-            event => Test::Stream::Event::Suite::End,
+            event => 'suite-end',
             args  => ${
                 name => 'will skip',
             },
@@ -1151,9 +1183,9 @@ test-formatter(
             },
         },
         ${
-            event => Test::Stream::Event::Suite::End,
+            event => 'suite-end',
             args  => ${
-                name => '00-tap-formatter.t',
+                name => $*PROGRAM-NAME,
             },
             expect => ${
                 output         => "1..3\n",
@@ -1162,402 +1194,9 @@ test-formatter(
             },
         },
     ],
-    exit-code => 0,
-    error     => q{},
 );
 
-my-diag('Suite::End before Suite::Start');
-test-formatter(
-    event-tests => $[
-        ${
-            event => Test::Stream::Event::Suite::End,
-            args  => ${
-                name => '00-tap-formatter.t',
-            },
-            expect => ${
-                exception => rx{
-                    'Received a Suite::End event but there are no suites currently in progress'
-                },
-                output         => q{},
-                todo-output    => q{},
-                failure-output => q{},
-            },
-        },
-    ],
-);
-
-my-diag('Unbalanced Suite::Start/End events');
-test-formatter(
-    event-tests => $[
-        ${
-            event => Test::Stream::Event::Suite::Start,
-            args  => ${
-                name => '00-tap-formatter.t',
-            },
-            expect => ${
-                output         => q{},
-                todo-output    => q{},
-                failure-output => q{},
-            },
-        },
-        ${
-            event => Test::Stream::Event::Suite::End,
-            args  => ${
-                name => '00-tap-formatter.t',
-            },
-            expect => ${
-                output         => "1..0\n",
-                todo-output    => q{},
-                failure-output => q{},
-            },
-        },
-        ${
-            event => Test::Stream::Event::Suite::End,
-            args  => ${
-                name => '00-tap-formatter.t',
-            },
-            expect => ${
-                exception => rx{
-                    'Received a Suite::End event but there are no suites currently in progress'
-                },
-                output         => q{},
-                todo-output    => q{},
-                failure-output => q{},
-            },
-        },
-    ],
-);
-
-my-diag('Suite::Start/End event names do not mach');
-test-formatter(
-    event-tests => $[
-        ${
-            event => Test::Stream::Event::Suite::Start,
-            args  => ${
-                name => '00-tap-formatter.t',
-            },
-            expect => ${
-                output         => q{},
-                todo-output    => q{},
-                failure-output => q{},
-            },
-        },
-        ${
-            event => Test::Stream::Event::Suite::End,
-            args  => ${
-                name => 'Something else',
-            },
-            expect => ${
-                exception => rx {
-                    'Received a Suite::End event named "Something else" but the most recent suite is named "00-tap-formatter.t"'
-                },
-                output         => q{},
-                todo-output    => q{},
-                failure-output => q{},
-            },
-        },
-    ],
-);
-
-my-diag('Plan before Suite::Start');
-test-formatter(
-    event-tests => $[
-        ${
-            event => Test::Stream::Event::Plan,
-            args  => ${
-                planned => 4,
-            },
-            expect => ${
-                exception => rx{
-                    'Received a Plan event but there are no suites currently in progress'
-                },
-                output         => q{},
-                todo-output    => q{},
-                failure-output => q{},
-            },
-        },
-    ],
-);
-
-my-diag('SkipAll before Suite::Start');
-test-formatter(
-    event-tests => $[
-        ${
-            event => Test::Stream::Event::SkipAll,
-            args  => ${
-                reason => 'lazy',
-            },
-            expect => ${
-                exception => rx{
-                    'Received a SkipAll event but there are no suites currently in progress'
-                },
-                output         => q{},
-                todo-output    => q{},
-                failure-output => q{},
-            },
-        },
-    ],
-);
-
-my-diag('SkipAll after tests have run');
-test-formatter(
-    event-tests => $[
-        ${
-            event => Test::Stream::Event::Suite::Start,
-            args  => ${
-                name => '00-tap-formatter.t',
-            },
-            expect => ${
-                output         => q{},
-                todo-output    => q{},
-                failure-output => q{},
-            },
-        },
-        ${
-            event => Test::Stream::Event::Test,
-            args  => ${
-                passed => True,
-                name   => 'test 1',
-            },
-            expect => ${
-                output         => "ok 1 - test 1\n",
-                todo-output    => q{},
-                failure-output => q{},
-            },
-        },
-        ${
-            event => Test::Stream::Event::SkipAll,
-            args  => ${
-                reason => 'lazy',
-            },
-            expect => ${
-                exception => rx{
-                    'Received a SkipAll event but the current suite has already run 1 test'
-                },
-                output         => q{},
-                todo-output    => q{},
-                failure-output => q{},
-            },
-        },
-    ],
-);
-
-my-diag('Diag before Suite::Start');
-test-formatter(
-    event-tests => $[
-        ${
-            event => Test::Stream::Event::Diag,
-            args  => ${
-                message => 'whatever',
-            },
-            expect => ${
-                exception => rx{
-                    'Received a Diag event but there are no suites currently in progress'
-                },
-                output         => q{},
-                todo-output    => q{},
-                failure-output => q{},
-            },
-        },
-    ],
-);
-
-my-diag('Note before Suite::Start');
-test-formatter(
-    event-tests => $[
-        ${
-            event => Test::Stream::Event::Note,
-            args  => ${
-                message => 'whatever',
-            },
-            expect => ${
-                exception => rx{
-                    'Received a Note event but there are no suites currently in progress'
-                },
-                output         => q{},
-                todo-output    => q{},
-                failure-output => q{},
-            },
-        },
-    ],
-);
-
-my-diag('Test before Suite::Start');
-test-formatter(
-    event-tests => $[
-        ${
-            event => Test::Stream::Event::Test,
-            args  => ${
-                passed => True,
-                name   => 'test 1',
-            },
-            expect => ${
-                exception => rx{
-                    'Received a Test event but there are no suites currently in progress'
-                },
-                output         => q{},
-                todo-output    => q{},
-                failure-output => q{},
-            },
-        },
-    ],
-);
-
-my-diag('Skip before Suite::Start');
-test-formatter(
-    event-tests => $[
-        ${
-            event => Test::Stream::Event::Skip,
-            args  => ${
-                count  => 2,
-                reason => 'laziness',
-            },
-            expect => ${
-                exception => rx{
-                    'Received a Skip event but there are no suites currently in progress'
-                },
-                output         => q{},
-                todo-output    => q{},
-                failure-output => q{},
-            },
-        },
-    ],
-);
-
-my-diag('Bail before Suite::Start');
-test-formatter(
-    event-tests => $[
-        ${
-            event => Test::Stream::Event::Bail,
-            args  => ${
-                reason => 'broken',
-            },
-            expect => ${
-                exception => rx{
-                    'Received a Bail event but there are no suites currently in progress'
-                },
-                output         => q{},
-                todo-output    => q{},
-                failure-output => q{},
-            },
-        },
-    ],
-);
-
-my-diag('Todo::Start before Suite::Start');
-test-formatter(
-    event-tests => $[
-        ${
-            event => Test::Stream::Event::Todo::Start,
-            args  => ${
-                reason => 'broken',
-            },
-            expect => ${
-                exception => rx{
-                    'Received a Todo::Start event but there are no suites currently in progress'
-                },
-                output         => q{},
-                todo-output    => q{},
-                failure-output => q{},
-            },
-        },
-    ],
-);
-
-my-diag('Todo::End before Suite::Start');
-test-formatter(
-    event-tests => $[
-        ${
-            event => Test::Stream::Event::Todo::End,
-            args  => ${
-                reason => 'broken',
-            },
-            expect => ${
-                exception => rx{
-                    'Received a Todo::End event but there are no suites currently in progress'
-                },
-                output         => q{},
-                todo-output    => q{},
-                failure-output => q{},
-            },
-        },
-    ],
-);
-
-my-diag('Todo::End before Todo::Start');
-test-formatter(
-    event-tests => $[
-        ${
-            event => Test::Stream::Event::Suite::Start,
-            args  => ${
-                name => '00-tap-formatter.t',
-            },
-            expect => ${
-                output         => q{},
-                todo-output    => q{},
-                failure-output => q{},
-            },
-        },
-        ${
-            event => Test::Stream::Event::Todo::End,
-            args  => ${
-                reason => 'broken',
-            },
-            expect => ${
-                exception => rx{
-                    'Received a Todo::End event with a reason of "broken" but there is no corresponding Todo::Start event'
-                },
-                output         => q{},
-                todo-output    => q{},
-                failure-output => q{},
-            },
-        },
-    ],
-);
-
-my-diag('Todo::Start/End event names do not mach');
-test-formatter(
-    event-tests => $[
-        ${
-            event => Test::Stream::Event::Suite::Start,
-            args  => ${
-                name => '00-tap-formatter.t',
-            },
-            expect => ${
-                output         => q{},
-                todo-output    => q{},
-                failure-output => q{},
-            },
-        },
-        ${
-            event => Test::Stream::Event::Todo::Start,
-            args  => ${
-                reason => 'bored',
-            },
-            expect => ${
-                output         => q{},
-                todo-output    => q{},
-                failure-output => q{},
-            },
-        },
-        ${
-            event => Test::Stream::Event::Todo::End,
-            args  => ${
-                reason => 'broken',
-            },
-            expect => ${
-                exception => rx{
-                    'Received a Todo::End event with a reason of "broken" but the most recent Todo::Start reason was "bored"'
-                },
-                output         => q{},
-                todo-output    => q{},
-                failure-output => q{},
-            },
-        },
-    ],
-);
-
-sub test-formatter (:@event-tests, :$exit-code, :$error) {
+sub test-formatter (:@event-tests) {
     my %outputs = (
         output         => IO::String.new,
         todo-output    => IO::String.new,
@@ -1565,68 +1204,51 @@ sub test-formatter (:@event-tests, :$exit-code, :$error) {
     );
 
     my $tap = Test::Stream::Formatter::TAP12.new(|%outputs);
+    my $hub = Test::Stream::Hub.new;
+    $hub.add-listener($tap);
 
     for @event-tests -> $test {
         test-event-output(
-            $tap,
-            $test<event>.new( |$test<args> ),
+            $hub,
+            $test,
             %outputs,
-            $test<expect>,
         );
         $_.clear for %outputs.values;
     }
-
-    return unless $exit-code.defined && $error.defined;
-
-    my $status = my-lives-ok(
-        { $tap.finalize },
-        'calling finalize',
-    );
-
-    my-ok(
-        $status.exit-code == $exit-code,
-        "finalize returned $exit-code for exit code",
-        "got {$status.exit-code} instead",
-    );
-    my-ok(
-        $status.error eq $error,
-        'finalize returned expected error message (if any)',
-        $status.error,
-    );
 }
 
 sub test-event-output (
-    Test::Stream::Formatter::TAP12:D $tap,
-    Test::Stream::Event:D $event,
+    Test::Stream::Hub:D $hub,
+    $test,
     %outputs,
-    %expect,
 ) {
-    if %expect<exception>.defined {
-        %outputs<exception> = q{};
-        {
-            $tap.accept-event($event);
-            CATCH {
-                default { %outputs<exception> = $_ }
-            }
+    given $test<event> {
+        when 'suite-start' {
+            my-lives-ok(
+                { $hub.start-suite( |$test<args> ) },
+                'sending start-suite to formatter',
+            );
         }
-        compare-outputs( $event.type, 'exception', %outputs, %expect );
-        # We need to delete it or the test-formatter sub will try to call
-        # .clear on it.
-        %outputs<exception>:delete;
-    }
-    else {
-        my-lives-ok(
-            { $tap.accept-event($event) },
-            "sending {$event.type} to formatter",
-        );
-    }
+        when 'suite-end' {
+            my-lives-ok(
+                { $hub.end-suite( |$test<args> ) },
+                'sending end-suite to formatter',
+            );
+        }
+        default {
+            my-lives-ok(
+                { $hub.send-event( $test<event>.new( |$test<args> ) ) },
+                "sending {$test<event>.^name} to formatter",
+            );
+        }
+    };
 
     for < output todo-output failure-output > -> $h {
-        compare-outputs( $event.type, $h, %outputs, %expect );
+        compare-outputs( $h, %outputs, $test<expect> );
     }
 }
 
-sub compare-outputs (Str:D $type, Str:D $key, %outputs, %expect) {
+sub compare-outputs (Str:D $key, %outputs, %expect) {
     my $ok = %outputs{$key} ~~ %expect{$key};
 
     my @diag;
@@ -1642,7 +1264,7 @@ sub compare-outputs (Str:D $type, Str:D $key, %outputs, %expect) {
 
     my-ok(
         ?$ok,
-        "got expected $key for $type",
+        "got expected $key",
         @diag,
     );
 }

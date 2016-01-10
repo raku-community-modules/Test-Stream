@@ -69,9 +69,65 @@ method send-event (Test::Stream::Event:D $event) {
     unless self!in-a-suite || $event.isa(Test::Stream::Event::Suite::Start) {
         die "Attempted to send a {$event.^name} event before any suites were started";
     }
+
+    $event.set-source( Test::Stream::EventSource.new );
+
     .accept-event($event) for @.listeners;
 }
 
 method !in-a-suite (--> Bool:D) {
     return ?@!suites.elems;
+}
+
+class Status {
+    has Int:D $.exit-code = 0;
+    has Str:D $.error     = q{};
+}
+
+method finalize (--> Status:D) {
+    # my $unfinished-suites = @!suites.elems;
+    # self!end-current-suite while @!suites;
+
+    # my $top-suite = @!finished-suites[0];
+
+    # # The exit-code is going to be used as an actual process exit code so it
+    # # cannot be greater than 254.
+
+    # if $.bailed {
+    #     return Status.new(
+    #         exit-code => 255,
+    #         error     => 'Bailed out' ~ ( $.bailed-reason ?? qq{ - $.bailed-reason} !! q{} ),
+    #     );
+    # }
+    # elsif $top-suite.real-failure-count > 0 {
+    #     my $failed = maybe-plural( $top-suite.real-failure-count, 'test' );
+    #     my $error = "failed {$top-suite.real-failure-count} $failed";
+    #     return Status.new(
+    #         exit-code => min( 254, $top-suite.real-failure-count ),
+    #         error     => $error,
+    #     );
+
+    # }
+    # elsif $top-suite.planned
+    #       && ( $top-suite.planned != $top-suite.tests-run ) {
+
+    #     my $planned = maybe-plural( $top-suite.planned, 'test' );
+    #     my $ran     = maybe-plural( $top-suite.tests-run, 'test' );
+    #     return Status.new(
+    #         exit-code => 255,
+    #         error     => "planned {$top-suite.planned} $planned but ran {$top-suite.tests-run} $ran",
+    #     );
+    # }
+    # elsif $unfinished-suites {
+    #     my $unfinished = maybe-plural( $unfinished-suites, 'suite' );
+    #     return Status.new(
+    #         exit-code => 1,
+    #         error     => "finalize was called but {@!suites.elems} $unfinished are still in process",
+    #     );
+    # }
+
+    return Status.new(
+        exit-code => 0,
+        error     => q{},
+    );
 }
