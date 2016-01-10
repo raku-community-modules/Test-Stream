@@ -14,8 +14,9 @@ has Str:D  $!top-suite-name    = IO::Path.new($*PROGRAM-NAME).basename;
 
 method plan (PositiveInt:D $planned) {
     self!send-event(
-        Test::Stream::Event::Plan,
-        planned => $planned,
+        Test::Stream::Event::Plan.new(
+            planned => $planned,
+        )
     )        
 }
 
@@ -93,23 +94,26 @@ method subtest (Str:D $name, Callable:D $block --> Bool:D) {
 
 method skip (Str :$reason, PositiveInt:D :$count ) {
     self!send-event(
-        Test::Stream::Event::Skip,
-        count  => $count,
-        reason => $reason,
+        Test::Stream::Event::Skip.new(
+            count  => $count,
+            reason => $reason,
+        )
     );
 }
 
 method skip-all (Str $reason) {
     self!send-event(
-        Test::Stream::Event::SkipAll,
-        reason => $reason,
+        Test::Stream::Event::SkipAll.new(
+            reason => $reason,
+        )
     );
 }
 
 method diag (Str:D(Mu:D) $message) {
     self!send-event(
-        Test::Stream::Event::Diag,
-        message => $message,
+        Test::Stream::Event::Diag.new(
+            message => $message,
+        )
     )
 }
 
@@ -128,18 +132,17 @@ method !send-test (Bool:D $passed, $name, :$diagnostic-message?, :%more?) {
     }
 
     self!send-event(
-        Test::Stream::Event::Test,
-        |%e,
+        Test::Stream::Event::Test.new(|%e)
     );
 }
 
-method !send-event (|c) {
+method !send-event (Test::Stream::Event:D $event) {
     if $!manage-top-suite && !$!started-top-suite {
         $!hub.start-suite( name => $!top-suite-name );
         $!started-top-suite = True;
     }
 
-    $!hub.send-event(|c);
+    $!hub.send-event($event);
 }
 
 submethod DESTROY {

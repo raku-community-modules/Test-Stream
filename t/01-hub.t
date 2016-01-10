@@ -30,8 +30,9 @@ say "1..9";
     );
 
     $hub.send-event(
-        Test::Stream::Event::Diag,
-        message => 'blah',
+        Test::Stream::Event::Diag.new(
+            message => 'blah',
+        )
     );
 
     $hub.end-suite( name => 'suite' );
@@ -81,8 +82,9 @@ say "1..9";
     my $e = my-throws-ok(
         {
             $hub.send-event(
-                Test::Stream::Event::Plan,
-                planned => 42,
+                Test::Stream::Event::Plan.new(
+                    planned => 42,
+                )
             )
         },
         'got exception trying to send a plan before starting a suite'
@@ -137,8 +139,9 @@ say "1..9";
     );
 
     $hub.send-event(
-        Test::Stream::Event::Test,
-        passed => True,
+        Test::Stream::Event::Test.new(
+            passed => True,
+        )
     );
     test-event-stream(
         $l,

@@ -29,8 +29,9 @@ method remove-listener (Test::Stream::Listener:D $listener) {
 
 method start-suite (Str:D :$name) {
     self.send-event(
-        Test::Stream::Event::Suite::Start,
-        name => $name,
+        Test::Stream::Event::Suite::Start.new(
+            name => $name,
+        )
     );
 
     my $suite = Test::Stream::Suite.new( name => $name );
@@ -49,12 +50,13 @@ method end-suite (Str:D :$name) {
     self.remove-listener($current);
 
     self.send-event(
-        Test::Stream::Event::Suite::End,
-        name          => $name,
-        tests-planned => $current.tests-planned,
-        tests-run     => $current.tests-run,
-        tests-failed  => $current.tests-failed,
-        passed        => $current.passed,
+        Test::Stream::Event::Suite::End.new(
+            name          => $name,
+            tests-planned => $current.tests-planned,
+            tests-run     => $current.tests-run,
+            tests-failed  => $current.tests-failed,
+            passed        => $current.passed,
+        )
     );
 
     @!suites.pop;
@@ -63,13 +65,10 @@ method end-suite (Str:D :$name) {
     return $current;
 }
 
-method send-event (Test::Stream::Event:U $class, *%args) {
-    unless self!in-a-suite || $class === Test::Stream::Event::Suite::Start {
-        die "Attempted to send a {$class.^name} event before any suites were started";
+method send-event (Test::Stream::Event:D $event) {
+    unless self!in-a-suite || $event.isa(Test::Stream::Event::Suite::Start) {
+        die "Attempted to send a {$event.^name} event before any suites were started";
     }
-
-    %args<source> //= Test::Stream::EventSource.new;
-    my $event = $class.new(|%args);
     .accept-event($event) for @.listeners;
 }
 
