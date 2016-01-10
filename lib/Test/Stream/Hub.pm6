@@ -59,6 +59,8 @@ method end-suite (Str:D :$name) {
 
     @!suites.pop;
     @!finished-suites.append($current);
+
+    return $current;
 }
 
 method send-event (Test::Stream::Event:U $class, *%args) {

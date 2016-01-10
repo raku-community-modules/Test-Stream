@@ -10,20 +10,31 @@ class Predicator {
     use Test::Stream::Hub;
     use Test::Stream::Types;
 
-    has Bool:D $!send-suite-events = True;
-    has Bool:D $!sent-suite-start  = False;
-    has Str:D  $!main-suite-name   = IO::Path.new($*PROGRAM-NAME).basename;
+    has Test::Stream::Hub:D $!hub is required;
+    has Bool:D $!manage-top-suite  = True;
+    has Bool:D $!started-top-suite = False;
+    has Str:D  $!top-suite-name    = IO::Path.new($*PROGRAM-NAME).basename;
 
-    method instance ($class: |c) {
-        state $instance //= $class.new(|c);
+    submethod BUILD (:$!hub) { }
+
+    method instance ($class: *%args) {
+        %args<hub> //= Test::Stream::Hub.instance;
+        state $instance //= $class.new(|%args);
     }
 
-    method ok (Bool(Any) $passed, $name?) {
-        self.send-test( $passed, $name );
+    method plan (PositiveInt:D $planned) {
+        self!send-event(
+            Test::Stream::Event::Plan,
+            planned => $planned,
+        )        
+    }
+
+    method ok (Bool:D(Any) $passed, $name? --> Bool:D) {
+        self!send-test( $passed, $name );
         return $passed;
     }
 
-    method is (Mu $got, Mu $expected, $name?) {
+    method is (Mu $got, Mu $expected, $name? --> Bool:D) {
         my $op =
             !$got.defined || !$expected.defined
             ?? &infix:<===>
@@ -32,7 +43,7 @@ class Predicator {
         return self!real-cmp-ok( $got, $op, $expected, $name, False );
     }
 
-    method isnt (Mu $got, Mu $expected, $name?) {
+    method isnt (Mu $got, Mu $expected, $name? --> Bool:D) {
         my $op =
             !$got.defined || !$expected.defined
             # There is no &infix:<!===>, but this somehow gets turned into a
@@ -43,24 +54,22 @@ class Predicator {
         return self!real-cmp-ok( $got, $op, $expected, $name, True );
     }
 
-    method cmp-ok (Mu $got, $op, Mu $expected, $name?) {
-        unless $op ~~ Callable {
-            $op = EVAL "&infix:<$op>";
-            CATCH {
-                default {
-                    self.send-test(
-                        False,
-                        $name,
-                        diagnostic-message => qq{Could not use '$op' as a comparator},
-                    );
-                    return;
-                }
-            }
+    method cmp-ok (Mu $got, $op, Mu $expected, $name? --> Bool:D) {
+        # Note that we have to use «» in order to make sure that < and > work.
+        if $op ~~ Callable ?? $op !! try EVAL qq{&infix:«$op»} -> $matcher {
+            return self!real-cmp-ok( $got, $matcher, $expected, $name, True );
         }
-        self!real-cmp-ok( $got, $op, $expected, $name, True );
+
+        self!send-test(
+            False,
+            $name,
+            diagnostic-message => qq{Could not use '$op' as a comparator},
+        );
+
+        return False;
     }
 
-    method !real-cmp-ok (Mu $got, Callable:D $op, Mu $expected, $name, Bool:D $diag-operator) {
+    method !real-cmp-ok (Mu $got, Callable:D $op, Mu $expected, $name, Bool:D $diag-operator --> Bool:D) {
         my %more;
 
         my $passed = $op( $got, $expected );
@@ -73,7 +82,7 @@ class Predicator {
                 if $diag-operator;
         }
 
-        self.send-test(
+        self!send-test(
             $passed,
             $name,
             more => %more,
@@ -83,55 +92,36 @@ class Predicator {
     }
 
     # XXX - set up context around block?
-    method subtest ($name, &block) {
-        Test::Stream::Hub.instance.send-event(
-            Test::Stream::Event::Suite::Start.new(
-                ( $name.defined ?? ( name => $name ) !! () ),
-            )
-        );
+    method subtest (Str:D $name, Callable:D $block --> Bool:D) {
+        $!hub.start-suite(:$name);
+        $block();
+        my $suite = $!hub.end-suite(:$name);
+        return $suite.passed;
+    }
 
-        block();
-
-        Test::Stream::Hub.instance.send-event(
-            Test::Stream::Event::Suite::End.new(
-                ( $name.defined ?? ( name => $name ) !! () ),
-            )
+    method skip (Str :$reason, PositiveInt:D :$count ) {
+        self!send-event(
+            Test::Stream::Event::Skip,
+            count  => $count,
+            reason => $reason,
         );
     }
 
-    method skip ($reason, $count = 1) {
-        Test::Stream::Hub.instance.send-event(
-            Test::Stream::Event::Skip.new(
-                count  => $count,
-                reason => $reason,
-            )
+    method skip-all (Str $reason) {
+        self!send-event(
+            Test::Stream::Event::SkipAll,
+            reason => $reason,
         );
     }
 
     method diag (Str:D(Mu:D) $message) {
-        Test::Stream::Hub.instance.send-event(
-            Test::Stream::Event::Diag.new(
-                message => $message,
-            )
+        self!send-event(
+            Test::Stream::Event::Diag,
+            message => $message,
         )
     }
 
-    method disable-suite-events {
-        if $!sent-suite-start {
-            die 'Too late to disable the suite events as the Suite::Start event has already been sent';
-        }
-
-        $!send-suite-events = False;
-    }
-
-    method send-test (Bool:D $passed, $name, :$diagnostic-message?, :%more?) {
-        if $!send-suite-events && !$!sent-suite-start {
-            Test::Stream::Hub.instance.send-event(
-                Test::Stream::Event::Suite::Start.new( name => $!main-suite-name )
-            );
-            $!sent-suite-start = True;
-        }
-
+    method !send-test (Bool:D $passed, $name, :$diagnostic-message?, :%more?) {
         my %e = ( passed => $passed );
         %e<name> = $name if $name.defined;
 
@@ -144,51 +134,67 @@ class Predicator {
                 %e<diagnostic> = Test::Stream::Diagnostic.new(|%d);
             }
         }
-        Test::Stream::Hub.instance.send-event(
-            Test::Stream::Event::Test.new(|%e)
+
+        self!send-event(
+            Test::Stream::Event::Test,
+            |%e,
         );
+    }
+
+    method !send-event (|c) {
+        if $!manage-top-suite && !$!started-top-suite {
+            $!hub.start-suite( name => $!top-suite-name );
+            $!started-top-suite = True;
+        }
+
+        $!hub.send-event(|c);
     }
 
     submethod DESTROY {
-        return unless $!sent-suite-start;
-        Test::Stream::Hub.instance.send-event(
-            Test::Stream::Event::Suite::End.new( name => $!main-suite-name )
-        );
+        return unless $!started-top-suite;
+        $!hub.end-suite( name => $!top-suite-name );
     }
 }
 
-sub ok (|c) is export {
-    Predicator.instance.ok(|c);
+sub plan (|c) is export {
+    Predicator.instance.plan(|c);
 }
 
-sub is (|c) is export {
-    Predicator.instance.is(|c);
+sub ok (|c --> Bool:D) is export {
+    return Predicator.instance.ok(|c);
 }
 
-sub isnt (|c) is export {
-    Predicator.instance.isnt(|c);
+sub is (|c --> Bool:D)  is export {
+    return Predicator.instance.is(|c);
 }
 
-sub cmp-ok (|c) is export {
-    Predicator.instance.cmp-ok(|c);
+sub isnt (|c --> Bool:D)  is export {
+    return Predicator.instance.isnt(|c);
 }
 
-multi sub subtest (&block, $name?) is export {
-    Predicator.instance.subtest( $name, &block );
+sub cmp-ok (|c --> Bool:D)  is export {
+    return Predicator.instance.cmp-ok(|c);
 }
 
-multi sub subtest (Str:D $name, &block) is export {
-    Predicator.instance.subtest( $name, &block );
+sub subtest (Str:D $name, &block --> Bool:D) is export {
+    return Predicator.instance.subtest( $name, &block );
 }
 
 multi sub skip () is export {
-    Predicator.instance.skip( q{}, 1 );
+    Predicator.instance.skip( :count(1) );
 }
 
 multi sub skip ($reason, $count = 1) is export {
-    Predicator.instance.skip( $reason, $count );
+    Predicator.instance.skip(
+        reason => $reason // (Str),
+        :$count,
+    );
 }
 
-sub diag (|c) {
+sub skip-all ($reason?) is export {
+    Predicator.instance.skip-all( $reason // (Str) );
+}
+
+sub diag (|c) is export {
     Predicator.instance.diag(|c);
 }
