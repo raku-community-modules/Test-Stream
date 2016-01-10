@@ -43,6 +43,11 @@ multi method accept-event (Test::Stream::Event::Todo::End:D $event) {
     $!in-todo = False;
 }
 
+multi method accept-event (Test::Stream::Event::Skip:D $event) {
+    return if $!subtest-depth;
+    $!tests-run += $event.count;
+}
+
 multi method accept-event (Test::Stream::Event::Suite::Start:D $event) {
     $!subtest-depth++;
 }

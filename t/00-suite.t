@@ -5,7 +5,7 @@ use My::TAP;
 use Test::Stream::Event;
 use Test::Stream::Suite;
 
-say "1..22";
+say "1..28";
 
 {
     my $suite = Test::Stream::Suite.new( name => 'suite' );
@@ -121,6 +121,41 @@ say "1..22";
     my-ok(
         $suite.passed == False,
         'suite.passed is false when tests planned > tests run, even if all tests passed'
+    );
+}
+
+{
+    my $suite = Test::Stream::Suite.new( name => 'suite' );
+    $suite.accept-event( Test::Stream::Event::Test.new( passed => True ) );
+    $suite.accept-event( Test::Stream::Event::Skip.new( count => 4 ) );
+    my-ok(
+        $suite.tests-run == 5,
+        'tests-run is incremented by Skip event'
+    );
+    my-ok(
+        $suite.tests-failed == 0,
+        'tests-failed is not affected by Skip event'
+    );
+    my-ok(
+        $suite.passed == True,
+        'suite.passed is true with skipped tests',
+    );
+}
+
+{
+    my $suite = Test::Stream::Suite.new( name => 'suite' );
+    $suite.accept-event( Test::Stream::Event::Skip.new( count => 4 ) );
+    my-ok(
+        $suite.tests-run == 4,
+        'tests-run is incremented by Skip event'
+    );
+    my-ok(
+        $suite.tests-failed == 0,
+        'tests-failed is not affected by Skip event'
+    );
+    my-ok(
+        $suite.passed == True,
+        'suite.passed is true with _only_ skipped tests',
     );
 }
 
