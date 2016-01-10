@@ -29,7 +29,8 @@ multi method accept-event (Test::Stream::Event::Plan:D $event) {
 }
 
 multi method accept-event (Test::Stream::Event::Test:D $event) {
-    $!tests-run++ unless $!subtest-depth;
+    return if $!subtest-depth;
+    $!tests-run++;
     return if $!in-todo;
     $!tests-failed++ unless $event.passed;
 }
@@ -52,8 +53,10 @@ multi method accept-event (Test::Stream::Event::Suite::Start:D $event) {
     $!subtest-depth++;
 }
 multi method accept-event (Test::Stream::Event::Suite::End:D $event) {
-    $!tests-run++;
-    $!tests-failed++ unless $event.passed;
+    if $!subtest-depth == 1 {
+        $!tests-run++;
+        $!tests-failed++ unless $event.passed;
+    }
     $!subtest-depth--;
 }
 

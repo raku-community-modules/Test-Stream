@@ -189,3 +189,52 @@ say "1..28";
         'suite.passed is true when all tests pass and there is no plan'
     );
 }
+
+{
+    my $suite = Test::Stream::Suite.new( name => 'suite' );
+
+    $suite.accept-event( Test::Stream::Event::Test.new( name => '1', passed => True ) );
+    $suite.accept-event( Test::Stream::Event::Test.new( name => '2', passed => False ) );
+
+    $suite.accept-event( Test::Stream::Event::Suite::Start.new( name => 'depth 1' ) );
+    $suite.accept-event( Test::Stream::Event::Test.new( name => '1.1', passed => True ) );
+    $suite.accept-event( Test::Stream::Event::Test.new( name => '1.2', passed => False ) );
+
+    $suite.accept-event( Test::Stream::Event::Suite::Start.new( name => 'depth 2' ) );
+    $suite.accept-event( Test::Stream::Event::Test.new( name => '1.1.1', passed => True ) );
+    $suite.accept-event( Test::Stream::Event::Test.new( name => '1.1.2', passed => False ) );
+    $suite.accept-event(
+        Test::Stream::Event::Suite::End.new(
+            name          => 'depth 2',
+            tests-planned => (Int),
+            tests-run     => 2,
+            tests-failed  => 1,
+            passed        => False,
+        )
+    );
+
+    $suite.accept-event( Test::Stream::Event::Test.new( name => '1.3', passed => True ) );
+    $suite.accept-event( Test::Stream::Event::Test.new( name => '1.4', passed => False ) );
+
+    $suite.accept-event(
+        Test::Stream::Event::Suite::End.new(
+            name          => 'depth 1',
+            tests-planned => (Int),
+            tests-run     => 2,
+            tests-failed  => 1,
+            passed        => False,
+        )
+    );
+
+    $suite.accept-event( Test::Stream::Event::Test.new( name => '3', passed => True ) );
+    $suite.accept-event( Test::Stream::Event::Test.new( name => '4', passed => False ) );
+
+    my-ok(
+        $suite.tests-run == 5,
+        'suite.tests-run counts all test run in the suite itself plus one for a child subtest',
+    ) or my-diag($suite.tests-run.Str);
+    my-ok(
+        $suite.tests-failed == 3,
+        'suite.tests-failed counts all test run in the suite itself plus one for a child subtest',
+    ) or my-diag($suite.tests-failed.Str);
+}
