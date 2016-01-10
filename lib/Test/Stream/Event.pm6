@@ -30,14 +30,12 @@ role Event::PassFail {
 class Event::Suite::Start does Event does Event::Named {
     submethod BUILD (Str:D :$!name) {
         $!source = Test::Stream::EventSource.new;
-        nextsame;
     }
 }
 
 class Event::Suite::End does Event does Event::Named {
     submethod BUILD (Str:D :$!name) {
         $!source = Test::Stream::EventSource.new;
-        nextsame;
     }
 }
 
@@ -45,7 +43,6 @@ class Event::Test does Event does Event::Named does Event::PassFail {
     has Test::Stream::Diagnostic $.diagnostic;
     submethod BUILD (Str :$!name, Test::Stream::Diagnostic :$!diagnostic, Bool:D :$!passed) {
         $!source = Test::Stream::EventSource.new;
-        nextsame;
     }
 }
 
@@ -53,7 +50,6 @@ class Event::Bail does Event {
     has Str $.reason;
     submethod BUILD (Str :$!reason) {
         $!source = Test::Stream::EventSource.new;
-        nextsame;
     }
 }
 
@@ -61,7 +57,6 @@ class Event::Diag does Event {
     has Str $.message;
     submethod BUILD (Str :$!message) {
         $!source = Test::Stream::EventSource.new;
-        nextsame;
     }
 }
 
@@ -69,7 +64,6 @@ class Event::Note does Event {
     has Str $.message;
     submethod BUILD (Str :$!message) {
         $!source = Test::Stream::EventSource.new;
-        nextsame;
     }
 }
 
@@ -77,7 +71,6 @@ class Event::Plan does Event {
     has PositiveInt $.planned;
     submethod BUILD (PositiveInt:D :$!planned) {
         $!source = Test::Stream::EventSource.new;
-        nextsame;
     }
 }
 
@@ -85,7 +78,6 @@ class Event::SkipAll does Event {
     has Str $.reason;
     submethod BUILD (Str :$!reason) {
         $!source = Test::Stream::EventSource.new;
-        nextsame;
     }
 }
 
@@ -94,7 +86,6 @@ class Event::Skip does Event {
     has Str $.reason;
     submethod BUILD (PositiveInt:D :$!count, Str :$!reason) {
         $!source = Test::Stream::EventSource.new;
-        nextsame;
     }
 }
 
@@ -102,7 +93,6 @@ class Event::Todo::Start does Event {
     has Str $.reason;
     submethod BUILD (Str :$!reason) {
         $!source = Test::Stream::EventSource.new;
-        nextsame;
     }
 }
 
@@ -110,6 +100,5 @@ class Event::Todo::End does Event {
     has Str $.reason;
     submethod BUILD (Str :$!reason) {
         $!source = Test::Stream::EventSource.new;
-        nextsame;
     }
 }
