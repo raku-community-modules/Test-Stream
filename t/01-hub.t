@@ -58,3 +58,14 @@ my-ok(
     $hub eq Test::Stream::Hub.instance,
     'instance always returns the same object'
 );
+
+$hub.remove-listener($l2);
+
+my-ok(
+    $hub.listeners.elems == 1,
+    'hub has one listener after calling remove-listener'
+);
+my-ok(
+    $hub.listeners[0] === $l1,
+    'the remaining listener is the one that was not removed'
+);

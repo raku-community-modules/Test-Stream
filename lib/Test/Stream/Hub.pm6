@@ -17,6 +17,10 @@ method add-listener (Test::Stream::Listener:D $listener) {
     @.listeners.append($listener);
 }
 
+method remove-listener (Test::Stream::Listener:D $listener) {
+    @.listeners = @.listeners.grep( { $_ !=== $listener } );
+}
+
 method send-event (Test::Stream::Event:D $event) {
     .accept-event($event) for @.listeners;
 }
