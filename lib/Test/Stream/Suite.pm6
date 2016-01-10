@@ -49,6 +49,11 @@ multi method accept-event (Test::Stream::Event::Skip:D $event) {
     $!tests-run += $event.count;
 }
 
+multi method accept-event (Test::Stream::Event::SkipAll:D $event) {
+    return if $!subtest-depth;
+    $!tests-planned = 0;
+}
+
 multi method accept-event (Test::Stream::Event::Suite::Start:D $event) {
     $!subtest-depth++;
 }
@@ -60,16 +65,17 @@ multi method accept-event (Test::Stream::Event::Suite::End:D $event) {
     $!subtest-depth--;
 }
 
-# Passed: plan was correct or plan was not called, 1+ tests were run, and all
-# tests passed or were todo tests
+# Passed: plan was correct or plan was not called, 1+ tests were run or
+# SkipAll was sent, and all tests passed or were todo tests
 #
 # ... or ...
 #
 # Failed: plan did not match actual number of tests, no tests were run, or at
 # least 1 test failed.
 method passed (--> Bool:D) {
-    return
-        ?( $!tests-failed == 0
-           && $!tests-run
-           && ( !$!tests-planned.defined || $!tests-run == $!tests-planned ) );
+    return False if $!tests-failed;
+    return True if $!tests-run && !$!tests-planned.defined;
+    # We want to allow a plan of 0 for SkipAll events
+    return True if $!tests-planned.defined && $!tests-run == $!tests-planned;
+    return False;
 }

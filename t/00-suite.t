@@ -144,6 +144,23 @@ say "1..28";
 
 {
     my $suite = Test::Stream::Suite.new( name => 'suite' );
+    $suite.accept-event( Test::Stream::Event::SkipAll.new( reason => 'because' ) );
+    my-ok(
+        $suite.tests-planned == 0,
+        'tests-planned is 0 when SkipAll event is sent',
+    );
+    my-ok(
+        $suite.tests-failed == 0,
+        'tests-failed is 0 when SkipAll event is sent',
+    );
+    my-ok(
+        $suite.passed == True,
+        'suite.passed is true when SkipAll event is sent and no tests are run',
+    );
+}
+
+{
+    my $suite = Test::Stream::Suite.new( name => 'suite' );
     $suite.accept-event( Test::Stream::Event::Skip.new( count => 4 ) );
     my-ok(
         $suite.tests-run == 4,
