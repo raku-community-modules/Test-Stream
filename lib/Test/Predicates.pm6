@@ -48,8 +48,16 @@ sub diag (|c) is export {
     instance().diag(|c);
 }
 
-sub instance  {
-    state $instance //= Test::Predicator.new(
+my Test::Predicator $instance;
+sub instance {
+    return $instance //= Test::Predicator.new(
         hub => Test::Stream::Hub.instance,
     );
+}
+
+# In case it's not obvious this method is only for testing of Test::Stream. If
+# you call it anywhere else you will probably break something. You have been
+# warned.
+our sub clear-instance-violently-for-test-stream-tests {
+    $instance = (Test::Predicator);
 }

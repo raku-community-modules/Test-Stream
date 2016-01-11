@@ -15,8 +15,18 @@ has Test::Stream::Suite @!finished-suites;
 # My current thinking is that there should really just be one Hub per process
 # in most scenarios. Different event producers and listeners can all attach to
 # the one hub.
-method instance ($class: |c) {
-    return state $instance //= $class.new(|c);
+{
+    my Test::Stream::Hub $instance;
+    method instance ($class: |c) {
+        return $instance //= $class.new(|c);
+    }
+
+    # In case it's not obvious this method is only for testing of
+    # Test::Stream. If you call it anywhere else you will probably break
+    # something. You have been warned.
+    method clear-instance-violently-for-test-stream-tests {
+        $instance = (Test::Stream::Hub);
+    }
 }
 
 method add-listener (Test::Stream::Listener:D $listener) {
