@@ -6,6 +6,7 @@ unit class Test::Stream::Formatter::TAP12 does Test::Stream::Listener;
 
 use Test::Stream::Diagnostic;
 use Test::Stream::Types;
+use Test::Stream::Util;
 
 has IO::Handle $.output = $*OUT;
 has IO::Handle $.todo-output = $*OUT;
@@ -75,11 +76,6 @@ multi method accept-event (Test::Stream::Event::Plan:D $event) {
 }
 
 multi method accept-event (Test::Stream::Event::SkipAll:D $event) {
-    # if self!current-suite.tests-run > 0 {
-    #     my $ran = maybe-plural( self!current-suite.tests-run, 'test' );
-    #     die "Received a SkipAll event but the current suite has already run {self!current-suite.tests-run} $ran";
-    # }
-
     self!say-plan( 0, $event.reason );
 }
 
@@ -123,16 +119,6 @@ multi method accept-event (Test::Stream::Event::Todo::Start:D $event) {
 method !in-todo { $!todo-reason.defined }
 
 multi method accept-event (Test::Stream::Event::Todo::End:D $event) {
-    unless $!todo-reason {
-        die qq[Received a Todo::End event with a reason of "{$event.reason}"]
-            ~ ' but there is no corresponding Todo::Start event';
-    }
-
-    unless $event.reason eq $!todo-reason {
-        die qq[Received a Todo::End event with a reason of "{$event.reason}" but the]
-          ~ qq[ most recent Todo::Start reason was "{$!todo-reason}"];
-    }
-
     $!todo-reason = (Str);
 }
 
@@ -260,10 +246,4 @@ method !say-indented (IO::Handle:D $handle, Str :$prefix, *@text) {
 
 method !indent-level {
     return ( $!suite-level - 1 ) * 4;
-}
-
-# We know that that the nouns we're dealing with are all simple "add an 's'"
-# nouns for pluralization.
-sub maybe-plural (Int:D $count, Str:D $noun) {
-    return $count > 1 ?? $noun ~ 's' !! $noun;
 }

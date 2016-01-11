@@ -5,7 +5,7 @@ use My::TAP;
 use Test::Stream::Event;
 use Test::Stream::Suite;
 
-say "1..28";
+say "1..40";
 
 {
     my $suite = Test::Stream::Suite.new( name => 'suite' );
@@ -156,6 +156,60 @@ say "1..28";
     my-ok(
         $suite.passed == True,
         'suite.passed is true when SkipAll event is sent and no tests are run',
+    );
+}
+
+{
+    my $suite = Test::Stream::Suite.new( name => 'suite' );
+    $suite.accept-event( Test::Stream::Event::Test.new( passed => True ) );
+    my $e = my-throws-ok(
+        { $suite.accept-event( Test::Stream::Event::SkipAll.new( reason => 'because' ) ) },
+        'SkipAll after Test',
+    );
+    my-ok(
+        $e.message ~~ rx{ 'Received a SkipAll event but the current suite has already run 1 test' },
+        'got the expected exception when a SkipAll comes after running tests'
+    );
+}
+
+{
+    my $suite = Test::Stream::Suite.new( name => 'suite' );
+    $suite.accept-event( Test::Stream::Event::Test.new( passed => True ) );
+    $suite.accept-event( Test::Stream::Event::Suite::Start.new( name => 'sub' ) );
+    my-lives-ok(
+        { $suite.accept-event( Test::Stream::Event::SkipAll.new( reason => 'because' ) ) },
+        'SkipAll in a child suite does not cause an error',
+    );
+}
+
+{
+    my $suite = Test::Stream::Suite.new( name => 'suite' );
+    $suite.accept-event( Test::Stream::Event::Todo::Start.new( reason => 'todo1' ) );
+    my $e = my-throws-ok(
+        { $suite.accept-event( Test::Stream::Event::Todo::End.new( reason => 'todo2' ) ) },
+        'Todo::End does not match Todo::Start',
+    );
+    my-ok(
+        $e.message ~~ rx{
+            'Received a Todo::End event with a reason of "todo2" but the'
+            ' most recent Todo::Start reason was "todo1"'
+        },
+        'got the expected exception when a Todo::End does not match Todo::Start',
+    );
+}
+
+{
+    my $suite = Test::Stream::Suite.new( name => 'suite' );
+    my $e = my-throws-ok(
+        { $suite.accept-event( Test::Stream::Event::Todo::End.new( reason => 'todo' ) ) },
+        'Todo::End without Todo::Start',
+    );
+    my-ok(
+        $e.message ~~ rx{
+            'Received a Todo::End event with a reason of "todo" but'
+            ' there is no corresponding Todo::Start event'
+        },
+        'got the expected exception with Todo::End before Todo::Start',
     );
 }
 

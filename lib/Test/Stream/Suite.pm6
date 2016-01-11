@@ -13,12 +13,13 @@ use Test::Stream::Listener;
 unit class Test::Stream::Suite does Test::Stream::Listener::MostlyIgnores;
 
 use Test::Stream::Event;
+use Test::Stream::Util;
 
 has Str    $.name;
 has Int    $.tests-planned;
 has Int:D  $.tests-run     = 0;
 has Int:D  $.tests-failed  = 0;
-has Bool:D $!in-todo       = False;
+has Str    @!todo-reasons;
 has Int:D  $!subtest-depth = 0;
 
 submethod BUILD (Str:D :$!name) { }
@@ -31,17 +32,28 @@ multi method accept-event (Test::Stream::Event::Plan:D $event) {
 multi method accept-event (Test::Stream::Event::Test:D $event) {
     return if $!subtest-depth;
     $!tests-run++;
-    return if $!in-todo;
+    return if @!todo-reasons.elems;
     $!tests-failed++ unless $event.passed;
 }
 
 multi method accept-event (Test::Stream::Event::Todo::Start:D $event) {
     return if $!subtest-depth;
-    $!in-todo = True;
+    @!todo-reasons.append( $event.reason );
 }
 multi method accept-event (Test::Stream::Event::Todo::End:D $event) {
     return if $!subtest-depth;
-    $!in-todo = False;
+
+    unless @!todo-reasons.elems {
+        die qq[Received a Todo::End event with a reason of "{$event.reason}"]
+            ~ ' but there is no corresponding Todo::Start event';
+    }
+
+    unless $event.reason eq @!todo-reasons[*-1] {
+        die qq[Received a Todo::End event with a reason of "{$event.reason}"]
+          ~ qq[ but the most recent Todo::Start reason was "{@!todo-reasons[*-1]}"];
+    }
+
+    @!todo-reasons.pop;
 }
 
 multi method accept-event (Test::Stream::Event::Skip:D $event) {
@@ -51,6 +63,12 @@ multi method accept-event (Test::Stream::Event::Skip:D $event) {
 
 multi method accept-event (Test::Stream::Event::SkipAll:D $event) {
     return if $!subtest-depth;
+
+    if $!tests-run {
+        my $ran = maybe-plural( $!tests-run, 'test' );
+        die "Received a SkipAll event but the current suite has already run {$!tests-run} $ran";
+    }
+
     $!tests-planned = 0;
 }
 
