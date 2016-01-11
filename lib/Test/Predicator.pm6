@@ -34,13 +34,17 @@ method is (Mu $got, Mu $expected, $name? --> Bool:D) {
     return self!real-cmp-ok( $got, $op, $expected, $name, False );
 }
 
+# If I juse use "!===" inline in code it works fine, but there is no
+# &infix:<!===> unless I make it here.
+our sub infix:<!===> ($a, $b) {
+    return !( $a === $b );
+}
+
 method isnt (Mu $got, Mu $expected, $name? --> Bool:D) {
     use MONKEY-SEE-NO-EVAL;
     my $op =
         !$got.defined || !$expected.defined
-        # There is no &infix:<!===>, but this somehow gets turned into a
-        # Callable via some sort of magic I do not understand.
-        ?? EVAL('&infix:<!===>')
+        ?? &infix:<!===>
         !! &infix:<ne>;
 
     return self!real-cmp-ok( $got, $op, $expected, $name, True );

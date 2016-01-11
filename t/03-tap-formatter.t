@@ -5,21 +5,11 @@ use v6;
 use lib 'lib', 't/lib';
 
 use My::IO::String;
-use My::TAP;
+use My::Test;
 use Test::Stream::Event;
 use Test::Stream::Formatter::TAP12;
 use Test::Stream::Hub;
 use Test::Stream::Types;
-
-# Note that this test cannot use Test.pm6 (because I hope that module will
-# eventually be built on top of Test::Stream), nor any other test
-# module. Instead, we'll print raw TAP. Once this test passes other tests can
-# safely rely on Test::Stream::TAP12::Formatter.
-
-# Every event we send generates 4 basic tests ...
-#    - did it throw an exception?
-#    - do each of the 3 output handles contain the expected output?
-say "1..396";
 
 my-diag('No subtests, all tests passing');
 test-formatter(
@@ -132,7 +122,7 @@ test-formatter(
                 todo-output    => q{},
                 failure-output => qq:to/FAILURE/,
                 #   Failed test 'will fail'
-                #   at $*PROGRAM-NAME line 1389
+                #   at $*PROGRAM-NAME line 1381
                 FAILURE
             },
         },
@@ -157,7 +147,7 @@ test-formatter(
                 output         => "not ok 3 - needs fixing # TODO not yet done\n",
                 todo-output    => qq:to/TODO/,
                 #   Failed (TODO) test 'needs fixing'
-                #   at $*PROGRAM-NAME line 1389
+                #   at $*PROGRAM-NAME line 1381
                 TODO
                 failure-output => q{},
             },
@@ -465,7 +455,7 @@ test-formatter(
                 todo-output    => q{},
                 failure-output => qq:to/FAILURE/,
                 #   Failed test 'should include diag info'
-                #   at $*PROGRAM-NAME line 1389
+                #   at $*PROGRAM-NAME line 1381
                 # did not get the answer
                 #     expected : 42
                 #     operator : infix:<==>
@@ -502,7 +492,7 @@ test-formatter(
                 output         => qq{not ok 3 - needs fixing # TODO not yet done\n},
                 todo-output    => qq:to/TODO/,
                 #   Failed (TODO) test 'needs fixing'
-                #   at $*PROGRAM-NAME line 1389
+                #   at $*PROGRAM-NAME line 1381
                 # expected large size
                 #     expected : "large"
                 #          got : "medium"
@@ -540,7 +530,7 @@ test-formatter(
                 todo-output    => q{},
                 failure-output => qq:to/FAILURE/,
                 #   Failed test 'diag.more has arbitrary keys'
-                #   at $*PROGRAM-NAME line 1389
+                #   at $*PROGRAM-NAME line 1381
                 # did not get the answer
                 #     keys : \$[1, 2, 3]
                 #     with : "arbitrary"
@@ -629,7 +619,7 @@ test-formatter(
                 todo-output    => q{},
                 failure-output => qq:to/FAILURE/,
                     #   Failed test 'should include diag info'
-                    #   at $*PROGRAM-NAME line 1389
+                    #   at $*PROGRAM-NAME line 1381
                     # did not get the answer
                     #     expected : 42
                     #     operator : infix:<==>
@@ -666,7 +656,7 @@ test-formatter(
                 output         => qq{    not ok 2 - needs fixing # TODO not yet done\n},
                 todo-output    => qq:to/TODO/,
                     #   Failed (TODO) test 'needs fixing'
-                    #   at $*PROGRAM-NAME line 1389
+                    #   at $*PROGRAM-NAME line 1381
                     # expected large size
                     #     expected : "large"
                     #          got : "medium"
@@ -704,7 +694,7 @@ test-formatter(
                 todo-output    => q{},
                 failure-output => qq:to/FAILURE/,
                     #   Failed test 'diag.more has arbitrary keys'
-                    #   at $*PROGRAM-NAME line 1389
+                    #   at $*PROGRAM-NAME line 1381
                     # did not get the answer
                     #     keys : \$[1, 2, 3]
                     #     with : "arbitrary"
@@ -787,7 +777,7 @@ test-formatter(
                 todo-output    => q{},
                 failure-output => qq:to/FAILURE/,
                 #   Failed test 'will fail'
-                #   at $*PROGRAM-NAME line 1389
+                #   at $*PROGRAM-NAME line 1381
                 FAILURE
             },
         },
@@ -823,7 +813,7 @@ test-formatter(
                 output         => "not ok 3 - needs fixing # TODO not yet done\n",
                 todo-output    => qq:to/TODO/,
                 #   Failed (TODO) test 'needs fixing'
-                #   at $*PROGRAM-NAME line 1389
+                #   at $*PROGRAM-NAME line 1381
                 TODO
                 failure-output => q{},
             },
@@ -895,7 +885,7 @@ test-formatter(
                 todo-output    => q{},
                 failure-output => qq:to/FAILURE/,
                     #   Failed test 'will fail'
-                    #   at $*PROGRAM-NAME line 1389
+                    #   at $*PROGRAM-NAME line 1381
                 FAILURE
             },
         },
@@ -931,7 +921,7 @@ test-formatter(
                 output         => qq{    not ok 3 - needs fixing # TODO not yet done\n},
                 todo-output    => qq:to/TODO/,
                     #   Failed (TODO) test 'needs fixing'
-                    #   at $*PROGRAM-NAME line 1389
+                    #   at $*PROGRAM-NAME line 1381
                 TODO
                 failure-output => q{},
             },
@@ -1043,7 +1033,7 @@ test-formatter(
                 output         => "not ok 1 - needs fixing # TODO not yet done\n",
                 todo-output    => qq:to/TODO/,
                 #   Failed (TODO) test 'needs fixing'
-                #   at $*PROGRAM-NAME line 1389
+                #   at $*PROGRAM-NAME line 1381
                 TODO
                 failure-output => q{},
             },
@@ -1113,7 +1103,7 @@ test-formatter(
                 output         => qq{    not ok 1 - needs fixing # TODO not yet done\n},
                 todo-output    => qq:to/TODO/,
                     #   Failed (TODO) test 'needs fixing'
-                    #   at $*PROGRAM-NAME line 1389
+                    #   at $*PROGRAM-NAME line 1381
                 TODO
                 failure-output => q{},
             },
@@ -1345,6 +1335,8 @@ test-formatter(
     ],
 );
 
+my-done-testing;
+
 sub test-formatter (:@event-tests) {
     my %outputs = (
         output         => My::IO::String.new,
@@ -1398,22 +1390,16 @@ sub test-event-output (
 }
 
 sub compare-outputs (Str:D $key, %outputs, %expect) {
-    my $ok = %outputs{$key} ~~ %expect{$key};
-
-    my @diag;
-    unless $ok {
-        @diag.append:
-            q{expected : }
-            ~ ( %expect{$key} ~~ Str
-                    ?? %expect{$key}.Str.subst( :g, "\n", '\\n' )
-                    !! %expect{$key}.perl );
-        @diag.append:
-            q{     got : } ~ %outputs{$key}.Str.subst( :g, "\n", '\\n' );
+    if %expect{$key} ~~ Regex {
+        my-like(
+            %outputs{$key}, %expect{$key},
+            "got expected $key"
+        );
     }
-
-    my-ok(
-        ?$ok,
-        "got expected $key",
-        @diag,
-    );
+    else {
+        my-is(
+            %outputs{$key}, %expect{$key},
+            "got expected $key"
+        );
+    }
 }

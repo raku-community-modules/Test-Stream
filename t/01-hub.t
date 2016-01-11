@@ -2,11 +2,9 @@ use v6;
 use lib 'lib', 't/lib';
 
 use My::Listener;
-use My::TAP;
+use My::Test;
 use Test::Stream::Event;
 use Test::Stream::Hub;
-
-say "1..59";
 
 {
     my $hub = Test::Stream::Hub.new;
@@ -18,15 +16,13 @@ say "1..59";
 
     $hub.start-suite( name => 'suite' );
 
-    my-ok(
-        $l1.events.elems == 1,
+    my-is(
+        $l1.events.elems, 1,
         'first listener got 1 event',
-        $l1.events.elems
     );
-    my-ok(
-        $l2.events.elems == 1,
+    my-is(
+        $l2.events.elems, 1,
         'second listener got 1 event',
-        $l2.events.elems
     );
 
     $hub.send-event(
@@ -37,38 +33,34 @@ say "1..59";
 
     $hub.end-suite( name => 'suite' );
 
-    my-ok(
-        $l1.events.elems == 3,
+    my-is(
+        $l1.events.elems, 3,
         'first listener got 3 events',
-        $l1.events.elems
     );
-    my-ok(
-        $l2.events.elems == 3,
+    my-is(
+        $l2.events.elems, 3,
         'second listener got 3 events',
-        $l2.events.elems
     );
 
     for < Suite::Start Diag Suite::End >.kv -> $i, $type {
-        my-ok(
-            $l1.events[$i].type eq $type,
+        my-is(
+            $l1.events[$i].type, $type,
             "first listener event #$i is a $type",
-            $l1.events[$i].type,
         );
-        my-ok(
-            $l2.events[$i].type eq $type,
+        my-is(
+            $l2.events[$i].type, $type,
             "second listener event #$i is a $type",
-            $l2.events[$i].type,
         );
     }
 
     $hub.remove-listener($l2);
 
-    my-ok(
-        $hub.listeners.elems == 1,
+    my-is(
+        $hub.listeners.elems, 1,
         'hub has one listener after calling remove-listener'
     );
-    my-ok(
-        $hub.listeners[0] === $l1,
+    my-is(
+        $hub.listeners[0], $l1,
         'the remaining listener is the one that was not removed'
     );
 }
@@ -79,7 +71,7 @@ say "1..59";
 
     $hub.add-listener($l);
 
-    my $e = my-throws-ok(
+    my-throws-like(
         {
             $hub.send-event(
                 Test::Stream::Event::Plan.new(
@@ -87,22 +79,16 @@ say "1..59";
                 )
             )
         },
+        rx{ 'Attempted to send a Test::Stream::Event::Plan event before any suites were started' },
         'got exception trying to send a plan before starting a suite'
     );
-    my-ok(
-        $e.message ~~ rx{ 'Attempted to send a Test::Stream::Event::Plan event before any suites were started' },
-        'got expected error'
-    );
 
-    $e = my-throws-ok(
+    my-throws-like(
         {
             $hub.end-suite( name => 'random-suite' );
         },
+        rx{ 'Attempted to end a suite (random-suite) before any suites were started' },
         'got exception trying to end a suite before any suites were started'
-    );
-    my-ok(
-        $e.message ~~ rx{ 'Attempted to end a suite (random-suite) before any suites were started' },
-        'got expected error'
     );
 
     $hub.start-suite( name => 'top' );
@@ -127,15 +113,12 @@ say "1..59";
         },
     );
 
-    $e = my-throws-ok(
+    my-throws-like(
         {
             $hub.end-suite( name => 'random-suite' );
         },
+        rx{ 'Attempted to end a suite (random-suite) that is not the currently running suite (depth 1)' },
         'got exception trying to end a suite that does not match the last suite started (depth of 2)'
-    );
-    my-ok(
-        $e.message ~~ rx{ 'Attempted to end a suite (random-suite) that is not the currently running suite (depth 1)' },
-        'got expected error'
     );
 
     $hub.send-event(
@@ -168,15 +151,12 @@ say "1..59";
         },
     );
 
-    $e = my-throws-ok(
+    my-throws-like(
         {
             $hub.end-suite( name => 'random-suite' );
         },
+        rx{ 'Attempted to end a suite (random-suite) that is not the currently running suite (top)' },
         'got exception trying to end a suite that does not match the last suite started (depth of 1)'
-    );
-    my-ok(
-        $e.message ~~ rx{ 'Attempted to end a suite (random-suite) that is not the currently running suite (top)' },
-        'got expected error'
     );
 
     $hub.end-suite( name => 'top' );
@@ -197,23 +177,22 @@ say "1..59";
 
 {
     my $hub = Test::Stream::Hub.new;
-    my $e = my-throws-ok(
+    my-throws-like(
         {
             $hub.start-suite( name => 'whatever' );
         },
+        rx{ 'Attempted to send a Test::Stream::Event::Suite::Start event before any listeners were added' },
         'got exception trying to start a suite without any listeners added'
-    );
-    my-ok(
-        $e.message ~~ rx{ 'Attempted to send a Test::Stream::Event::Suite::Start event before any listeners were added' },
-        'got expected error'
     );
 }
 
 {
     my $hub = Test::Stream::Hub.instance;
 
-    my-ok(
-        $hub eq Test::Stream::Hub.instance,
+    my-is(
+        $hub, Test::Stream::Hub.instance,
         'instance always returns the same object'
     );
 }
+
+my-done-testing;

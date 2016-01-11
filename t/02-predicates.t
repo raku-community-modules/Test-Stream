@@ -2,19 +2,16 @@ use v6;
 use lib 'lib', 't/lib';
 
 use My::Listener;
-use My::TAP;
+use My::Test;
 use Test::Predicates;
 use Test::Stream::Diagnostic;
 use Test::Stream::Types;
-
-say "1..386";
 
 {
     my $hub = Test::Stream::Hub.instance;
     my $listener = My::Listener.new;
     $hub.add-listener($listener);
 
-    my-diag('plan(42)');
     plan(42);
     test-event-stream(
         $listener,
@@ -31,7 +28,7 @@ say "1..386";
     );
 
     my-diag('ok(True) without name');
-    my-ok( ok(True) === True, 'ok returns bool' );
+    my-is( ok(True), True, 'ok returns bool' );
     test-event-stream(
         $listener,
         ${
@@ -45,7 +42,7 @@ say "1..386";
     );
 
     my-diag('ok(False) without name');
-    my-ok( ok(False) === False, 'ok returns bool' );
+    my-is( ok(False), False, 'ok returns bool' );
     test-event-stream(
         $listener,
         ${
@@ -59,7 +56,7 @@ say "1..386";
     );
 
     my-diag('ok(True) with name');
-    my-ok( ok( True, 'is true' ) === True, 'ok returns bool' );
+    my-is( ok( True, 'is true' ), True, 'ok returns bool' );
     test-event-stream(
         $listener,
         ${
@@ -73,7 +70,7 @@ say "1..386";
     );
 
     my-diag('ok(False) with name');
-    my-ok( ok( False, 'is false' ) === False, 'ok returns bool' );
+    my-is( ok( False, 'is false' ), False, 'ok returns bool' );
     test-event-stream(
         $listener,
         ${
@@ -86,8 +83,8 @@ say "1..386";
         }
     );
 
-    my-diag('is( undef === undef ) without name');
-    my-ok( is( (Str), (Str) ) === True, 'is returns bool' );
+    my-diag('is( undef, undef ) without name');
+    my-is( is( (Str), (Str) ), True, 'is returns bool' );
     test-event-stream(
         $listener,
         ${
@@ -101,7 +98,7 @@ say "1..386";
     );
 
     my-diag('is( undef !=== undef ) without name');
-    my-ok( is( (Str), (Int) ) === False, 'is returns bool' );
+    my-is( is( (Str), (Int) ), False, 'is returns bool' );
     test-event-stream(
         $listener,
         ${
@@ -122,7 +119,7 @@ say "1..386";
     );
 
     my-diag('is( undef !=== defined ) without name');
-    my-ok( is( (Str), 42 ) === False, 'is returns bool' );
+    my-is( is( (Str), 42 ), False, 'is returns bool' );
     test-event-stream(
         $listener,
         ${
@@ -143,7 +140,7 @@ say "1..386";
     );
 
     my-diag('is( defined !=== undef ) without name');
-    my-ok( is( 42, (Str) ) === False, 'is returns bool' );
+    my-is( is( 42, (Str) ), False, 'is returns bool' );
     test-event-stream(
         $listener,
         ${
@@ -164,7 +161,7 @@ say "1..386";
     );
 
     my-diag('is( defined(Int) != defined(Int) ) without name');
-    my-ok( is( 1, 2 ) === False, 'is returns bool' );
+    my-is( is( 1, 2 ), False, 'is returns bool' );
     test-event-stream(
         $listener,
         ${
@@ -185,7 +182,7 @@ say "1..386";
     );
 
     my-diag('is( defined(Str) != defined(Int) ) without name');
-    my-ok( is( 'foo', 2 ) === False, 'is returns bool' );
+    my-is( is( 'foo', 2 ), False, 'is returns bool' );
     test-event-stream(
         $listener,
         ${
@@ -206,7 +203,7 @@ say "1..386";
     );
 
     my-diag('is( defined(Int) == defined(Int) ) without name');
-    my-ok( is( 2, 2 ) === True, 'is returns bool' );
+    my-is( is( 2, 2 ), True, 'is returns bool' );
     test-event-stream(
         $listener,
         ${
@@ -220,7 +217,7 @@ say "1..386";
     );
 
     my-diag('is( defined(Str) == defined(Str) ) without name');
-    my-ok( is( 'foo', 'foo' ) === True, 'is returns bool' );
+    my-is( is( 'foo', 'foo' ), True, 'is returns bool' );
     test-event-stream(
         $listener,
         ${
@@ -234,7 +231,7 @@ say "1..386";
     );
 
     my-diag('is( defined(Str) == defined(Str) ) with name');
-    my-ok( is( 'foo', 'foo', 'two foos' ) === True, 'is returns bool' );
+    my-is( is( 'foo', 'foo', 'two foos' ), True, 'is returns bool' );
     test-event-stream(
         $listener,
         ${
@@ -247,8 +244,13 @@ say "1..386";
         }
     );
 
-    my-diag('isnt( undef === undef ) without name');
-    my-ok( isnt( (Str), (Str) ) === False, 'isnt returns bool' );
+    my-diag('isnt( undef, undef ) without name');
+    my-is( isnt( (Str), (Str) ), False, 'isnt returns bool' );
+    dd ${
+                        got      => (Str),
+                        expected => (Str),
+                        operator => &Test::Predicator::infix:<!===>,
+                    };
     test-event-stream(
         $listener,
         ${
@@ -261,10 +263,7 @@ say "1..386";
                     more     => ${
                         got      => (Str),
                         expected => (Str),
-                        operator => do {
-                            use MONKEY-SEE-NO-EVAL;
-                            EVAL('&infix:<!===>');
-                        },
+                        operator => &Test::Predicator::infix:<!===>,
                     },
                 ),
             },
@@ -272,7 +271,7 @@ say "1..386";
     );
 
     my-diag('isnt( undef !=== undef ) without name');
-    my-ok( isnt( (Str), (Int) ) === True, 'isnt returns bool' );
+    my-is( isnt( (Str), (Int) ), True, 'isnt returns bool' );
     test-event-stream(
         $listener,
         ${
@@ -286,7 +285,7 @@ say "1..386";
     );
 
     my-diag('isnt( undef !=== defined ) without name');
-    my-ok( isnt( (Str), 42 ) === True, 'isnt returns bool' );
+    my-is( isnt( (Str), 42 ), True, 'isnt returns bool' );
     test-event-stream(
         $listener,
         ${
@@ -300,7 +299,7 @@ say "1..386";
     );
 
     my-diag('isnt( defined !=== undef ) without name');
-    my-ok( isnt( 42, (Str) ) === True, 'isnt returns bool' );
+    my-is( isnt( 42, (Str) ), True, 'isnt returns bool' );
     test-event-stream(
         $listener,
         ${
@@ -314,7 +313,7 @@ say "1..386";
     );
 
     my-diag('isnt( defined(Int) != defined(Int) ) without name');
-    my-ok( isnt( 1, 2 ) === True, 'isnt returns bool' );
+    my-is( isnt( 1, 2 ), True, 'isnt returns bool' );
     test-event-stream(
         $listener,
         ${
@@ -328,7 +327,7 @@ say "1..386";
     );
 
     my-diag('isnt( defined(Str) != defined(Int) ) without name');
-    my-ok( isnt( 'foo', 2 ) === True, 'isnt returns bool' );
+    my-is( isnt( 'foo', 2 ), True, 'isnt returns bool' );
     test-event-stream(
         $listener,
         ${
@@ -342,7 +341,7 @@ say "1..386";
     );
 
     my-diag('isnt( defined(Int) == defined(Int) ) without name');
-    my-ok( isnt( 2, 2 ) === False, 'isnt returns bool' );
+    my-is( isnt( 2, 2 ), False, 'isnt returns bool' );
     test-event-stream(
         $listener,
         ${
@@ -363,7 +362,7 @@ say "1..386";
     );
 
     my-diag('isnt( defined(Str) == defined(Str) ) without name');
-    my-ok( isnt( 'foo', 'foo' ) === False, 'isnt returns bool' );
+    my-is( isnt( 'foo', 'foo' ), False, 'isnt returns bool' );
     test-event-stream(
         $listener,
         ${
@@ -384,7 +383,7 @@ say "1..386";
     );
 
     my-diag('isnt( defined(Str) == defined(Str) ) with name');
-    my-ok( isnt( 'foo', 'foo', 'two foos' ) === False, 'isnt returns bool' );
+    my-is( isnt( 'foo', 'foo', 'two foos' ), False, 'isnt returns bool' );
     test-event-stream(
         $listener,
         ${
@@ -405,7 +404,7 @@ say "1..386";
     );
 
     my-diag('cmp-ok( 2 < 3 )');
-    my-ok( cmp-ok( 2, «<», 3 ) === True, 'cmp-ok returns bool' );
+    my-is( cmp-ok( 2, «<», 3 ), True, 'cmp-ok returns bool' );
     test-event-stream(
         $listener,
         ${
@@ -419,7 +418,7 @@ say "1..386";
     );
 
     my-diag('cmp-ok( 2 > 3 )');
-    my-ok( cmp-ok( 2, «>», 3 ) === False, 'cmp-ok returns bool' );
+    my-is( cmp-ok( 2, «>», 3 ), False, 'cmp-ok returns bool' );
     test-event-stream(
         $listener,
         ${
@@ -440,7 +439,7 @@ say "1..386";
     );
 
     my-diag('cmp-ok( 2 not-an-op 3 )');
-    my-ok( cmp-ok( 2, 'not-an-op', 3 ) === False, 'cmp-ok returns bool' );
+    my-is( cmp-ok( 2, 'not-an-op', 3 ), False, 'cmp-ok returns bool' );
     test-event-stream(
         $listener,
         ${
@@ -509,13 +508,14 @@ say "1..386";
     );
 
     my-diag('subtest( subname, &block ) with passing subtest');
-    my-ok(
+    my-is(
         subtest(
             'subname',
             sub {
                 ok(True),
             }
-        ) == True,
+        ),
+        True,
         'subtest returns bool'
     );
     test-event-stream(
@@ -543,13 +543,14 @@ say "1..386";
     );
 
     my-diag('subtest( subname, &block ) with failing subtest');
-    my-ok(
+    my-is(
         subtest(
             'subname',
             sub {
                 ok(False),
             }
-        ) == False,
+        ),
+        False,
         'subtest returns bool'
     );
     test-event-stream(
@@ -577,14 +578,15 @@ say "1..386";
     );
 
     my-diag('nested subtests');
-    my-ok(
+    my-is(
         subtest(
             'subname',
             sub {
                 subtest( 'nested', sub { ok(False) } );
                 ok(True),
             }
-        ) == False,
+        ),
+        False,
         'subtest returns bool'
     );
     test-event-stream(
@@ -632,8 +634,8 @@ say "1..386";
     );
 
     my-diag('subtest that runs no tests returns false');
-    my-ok(
-        subtest( 'no tests', sub { } ) == False,
+    my-is(
+        subtest( 'no tests', sub { } ), False,
         'subtest returns bool'
     );
     test-event-stream(
@@ -653,14 +655,15 @@ say "1..386";
     );
 
     my-diag('subtest with wrong plan returns false');
-    my-ok(
+    my-is(
         subtest(
             'plan is wrong',
             sub {
                 plan(2);
                 ok(True);
             }
-        ) == False,
+        ),
+        False,
         'subtest returns bool'
     );
     test-event-stream(
@@ -694,7 +697,7 @@ say "1..386";
     );
 
     my-diag('nested subtest with wrong plan returns false');
-    my-ok(
+    my-is(
         subtest(
             'plan is correct',
             sub {
@@ -708,7 +711,8 @@ say "1..386";
                 );
                 ok(True);
             }
-        ) == False,
+        ),
+        False,
         'subtest returns bool'
     );
     test-event-stream(
@@ -815,3 +819,5 @@ say "1..386";
         }
     );
 }
+
+my-done-testing;

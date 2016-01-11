@@ -1,59 +1,57 @@
 use v6;
 use lib 'lib', 't/lib';
 
-use My::TAP;
+use My::Test;
 use Test::Stream::Event;
 use Test::Stream::Suite;
-
-say "1..40";
 
 {
     my $suite = Test::Stream::Suite.new( name => 'suite' );
 
     $suite.accept-event( Test::Stream::Event::Plan.new( planned => 5 ) );
-    my-ok(
-        $suite.tests-planned == 5,
+    my-is(
+        $suite.tests-planned, 5,
         'tests-planned is set from Plan event'
     );
 
     $suite.accept-event( Test::Stream::Event::Test.new( passed => True ) );
-    my-ok(
-        $suite.tests-run == 1,
+    my-is(
+        $suite.tests-run, 1,
         'tests-run is incremented from Test event'
     );
-    my-ok(
-        $suite.tests-failed == 0,
+    my-is(
+        $suite.tests-failed, 0,
         'tests-failed is still 0 after passing Test event'
     );
 
     $suite.accept-event( Test::Stream::Event::Test.new( passed => False ) );
-    my-ok(
-        $suite.tests-run == 2,
+    my-is(
+        $suite.tests-run, 2,
         'tests-run is incremented from Test event'
     );
-    my-ok(
-        $suite.tests-failed == 1,
+    my-is(
+        $suite.tests-failed, 1,
         'tests-failed is 1 after failing Test event'
     );
 
     $suite.accept-event( Test::Stream::Event::Todo::Start.new( reason => 'todo' ) );
     $suite.accept-event( Test::Stream::Event::Test.new( passed => True ) );
-    my-ok(
-        $suite.tests-run == 3,
+    my-is(
+        $suite.tests-run, 3,
         'tests-run is incremented from Test event in Todo'
     );
-    my-ok(
-        $suite.tests-failed == 1,
+    my-is(
+        $suite.tests-failed, 1,
         'tests-failed is still 1 after passing Test event in Todo'
     );
 
     $suite.accept-event( Test::Stream::Event::Test.new( passed => False ) );
-    my-ok(
-        $suite.tests-run == 4,
+    my-is(
+        $suite.tests-run, 4,
         'tests-run is incremented from Test event in Todo'
     );
-    my-ok(
-        $suite.tests-failed == 1,
+    my-is(
+        $suite.tests-failed, 1,
         'tests-failed is still 1 after failing Test event in Todo'
     );
 
@@ -61,16 +59,16 @@ say "1..40";
     $suite.accept-event( Test::Stream::Event::Plan.new( planned => 2 ) );
     $suite.accept-event( Test::Stream::Event::Test.new( passed => True ) );
     $suite.accept-event( Test::Stream::Event::Test.new( passed => False ) );
-    my-ok(
-        $suite.tests-planned == 5,
+    my-is(
+        $suite.tests-planned, 5,
         'tests-planned is unaffected by Plan in sub-Suite'
     );
-    my-ok(
-        $suite.tests-run == 4,
+    my-is(
+        $suite.tests-run, 4,
         'tests-run is unaffected by Plan in sub-Suite'
     );
-    my-ok(
-        $suite.tests-failed == 1,
+    my-is(
+        $suite.tests-failed, 1,
         'tests-failed is unaffected by Plan in sub-Suite'
     );
 
@@ -83,43 +81,43 @@ say "1..40";
             passed        => False,
         )
     );
-    my-ok(
-        $suite.tests-run == 5,
+    my-is(
+        $suite.tests-run, 5,
         'tests-run is incremented by Suite::End'
     );
-    my-ok(
-        $suite.tests-failed == 2,
+    my-is(
+        $suite.tests-failed, 2,
         'tests-failed is incremented by failed Suite::End'
     );
 
-    my-ok(
-        $suite.passed == False,
+    my-is(
+        $suite.passed, False,
         'suite did not pass because of tests-failed'
     );
 }
 
 {
     my $suite = Test::Stream::Suite.new( name => 'suite' );
-    my-ok(
-        $suite.passed == False,
+    my-is(
+        $suite.passed, False,
         'suite.passed is false when no tests have been run or planned'
     );
 
     $suite.accept-event( Test::Stream::Event::Plan.new( planned => 1 ) );
-    my-ok(
-        $suite.passed == False,
+    my-is(
+        $suite.passed, False,
         'suite.passed is false when tests planned < tests run'
     );
 
     $suite.accept-event( Test::Stream::Event::Test.new( passed => True ) );
-    my-ok(
-        $suite.passed == True,
+    my-is(
+        $suite.passed, True,
         'suite.passed is true when tests planned matches tests run and all tests passed'
     );
 
     $suite.accept-event( Test::Stream::Event::Test.new( passed => True ) );
-    my-ok(
-        $suite.passed == False,
+    my-is(
+        $suite.passed, False,
         'suite.passed is false when tests planned > tests run, even if all tests passed'
     );
 }
@@ -128,16 +126,16 @@ say "1..40";
     my $suite = Test::Stream::Suite.new( name => 'suite' );
     $suite.accept-event( Test::Stream::Event::Test.new( passed => True ) );
     $suite.accept-event( Test::Stream::Event::Skip.new( count => 4 ) );
-    my-ok(
-        $suite.tests-run == 5,
+    my-is(
+        $suite.tests-run, 5,
         'tests-run is incremented by Skip event'
     );
-    my-ok(
-        $suite.tests-failed == 0,
+    my-is(
+        $suite.tests-failed, 0,
         'tests-failed is not affected by Skip event'
     );
-    my-ok(
-        $suite.passed == True,
+    my-is(
+        $suite.passed, True,
         'suite.passed is true with skipped tests',
     );
 }
@@ -145,16 +143,16 @@ say "1..40";
 {
     my $suite = Test::Stream::Suite.new( name => 'suite' );
     $suite.accept-event( Test::Stream::Event::SkipAll.new( reason => 'because' ) );
-    my-ok(
-        $suite.tests-planned == 0,
+    my-is(
+        $suite.tests-planned, 0,
         'tests-planned is 0 when SkipAll event is sent',
     );
-    my-ok(
-        $suite.tests-failed == 0,
+    my-is(
+        $suite.tests-failed, 0,
         'tests-failed is 0 when SkipAll event is sent',
     );
-    my-ok(
-        $suite.passed == True,
+    my-is(
+        $suite.passed, True,
         'suite.passed is true when SkipAll event is sent and no tests are run',
     );
 }
@@ -162,12 +160,9 @@ say "1..40";
 {
     my $suite = Test::Stream::Suite.new( name => 'suite' );
     $suite.accept-event( Test::Stream::Event::Test.new( passed => True ) );
-    my $e = my-throws-ok(
+    my-throws-like(
         { $suite.accept-event( Test::Stream::Event::SkipAll.new( reason => 'because' ) ) },
-        'SkipAll after Test',
-    );
-    my-ok(
-        $e.message ~~ rx{ 'Received a SkipAll event but the current suite has already run 1 test' },
+        rx{ 'Received a SkipAll event but the current suite has already run 1 test' },
         'got the expected exception when a SkipAll comes after running tests'
     );
 }
@@ -185,12 +180,9 @@ say "1..40";
 {
     my $suite = Test::Stream::Suite.new( name => 'suite' );
     $suite.accept-event( Test::Stream::Event::Todo::Start.new( reason => 'todo1' ) );
-    my $e = my-throws-ok(
+    my-throws-like(
         { $suite.accept-event( Test::Stream::Event::Todo::End.new( reason => 'todo2' ) ) },
-        'Todo::End does not match Todo::Start',
-    );
-    my-ok(
-        $e.message ~~ rx{
+        rx{
             'Received a Todo::End event with a reason of "todo2" but the'
             ' most recent Todo::Start reason was "todo1"'
         },
@@ -200,12 +192,9 @@ say "1..40";
 
 {
     my $suite = Test::Stream::Suite.new( name => 'suite' );
-    my $e = my-throws-ok(
+    my-throws-like(
         { $suite.accept-event( Test::Stream::Event::Todo::End.new( reason => 'todo' ) ) },
-        'Todo::End without Todo::Start',
-    );
-    my-ok(
-        $e.message ~~ rx{
+        rx{
             'Received a Todo::End event with a reason of "todo" but'
             ' there is no corresponding Todo::Start event'
         },
@@ -216,16 +205,16 @@ say "1..40";
 {
     my $suite = Test::Stream::Suite.new( name => 'suite' );
     $suite.accept-event( Test::Stream::Event::Skip.new( count => 4 ) );
-    my-ok(
-        $suite.tests-run == 4,
+    my-is(
+        $suite.tests-run, 4,
         'tests-run is incremented by Skip event'
     );
-    my-ok(
-        $suite.tests-failed == 0,
+    my-is(
+        $suite.tests-failed, 0,
         'tests-failed is not affected by Skip event'
     );
-    my-ok(
-        $suite.passed == True,
+    my-is(
+        $suite.passed, True,
         'suite.passed is true with _only_ skipped tests',
     );
 }
@@ -235,8 +224,8 @@ say "1..40";
     $suite.accept-event( Test::Stream::Event::Plan.new( planned => 2 ) );
     $suite.accept-event( Test::Stream::Event::Test.new( passed => True ) );
     $suite.accept-event( Test::Stream::Event::Test.new( passed => False ) );
-    my-ok(
-        $suite.passed == False,
+    my-is(
+        $suite.passed, False,
         'suite.passed is false when any tests failed (with plan)'
     );
 }
@@ -245,8 +234,8 @@ say "1..40";
     my $suite = Test::Stream::Suite.new( name => 'suite' );
     $suite.accept-event( Test::Stream::Event::Test.new( passed => False ) );
     $suite.accept-event( Test::Stream::Event::Test.new( passed => True ) );
-    my-ok(
-        $suite.passed == False,
+    my-is(
+        $suite.passed, False,
         'suite.passed is false when there any tests failed (no plan)'
     );
 }
@@ -255,8 +244,8 @@ say "1..40";
     my $suite = Test::Stream::Suite.new( name => 'suite' );
     $suite.accept-event( Test::Stream::Event::Test.new( passed => True ) );
     $suite.accept-event( Test::Stream::Event::Test.new( passed => True ) );
-    my-ok(
-        $suite.passed == True,
+    my-is(
+        $suite.passed, True,
         'suite.passed is true when all tests pass and there is no plan'
     );
 }
@@ -300,12 +289,14 @@ say "1..40";
     $suite.accept-event( Test::Stream::Event::Test.new( name => '3', passed => True ) );
     $suite.accept-event( Test::Stream::Event::Test.new( name => '4', passed => False ) );
 
-    my-ok(
-        $suite.tests-run == 5,
+    my-is(
+        $suite.tests-run, 5,
         'suite.tests-run counts all test run in the suite itself plus one for a child subtest',
     ) or my-diag($suite.tests-run.Str);
-    my-ok(
-        $suite.tests-failed == 3,
+    my-is(
+        $suite.tests-failed, 3,
         'suite.tests-failed counts all test run in the suite itself plus one for a child subtest',
     ) or my-diag($suite.tests-failed.Str);
 }
+
+my-done-testing;
