@@ -1,3 +1,6 @@
+# Warning - the emacs uncomment-region command will seriously screw up many
+# parts of this test!
+
 use v6;
 use lib 'lib', 't/lib';
 
@@ -16,7 +19,7 @@ use Test::Stream::Types;
 # Every event we send generates 4 basic tests ...
 #    - did it throw an exception?
 #    - do each of the 3 output handles contain the expected output?
-say "1..348";
+say "1..396";
 
 my-diag('No subtests, all tests passing');
 test-formatter(
@@ -129,7 +132,7 @@ test-formatter(
                 todo-output    => q{},
                 failure-output => qq:to/FAILURE/,
                 #   Failed test 'will fail'
-                #   at $*PROGRAM-NAME line 1240
+                #   at $*PROGRAM-NAME line 1389
                 FAILURE
             },
         },
@@ -154,7 +157,7 @@ test-formatter(
                 output         => "not ok 3 - needs fixing # TODO not yet done\n",
                 todo-output    => qq:to/TODO/,
                 #   Failed (TODO) test 'needs fixing'
-                #   at $*PROGRAM-NAME line 1240
+                #   at $*PROGRAM-NAME line 1389
                 TODO
                 failure-output => q{},
             },
@@ -194,6 +197,152 @@ test-formatter(
                 output         => q{},
                 todo-output    => q{},
                 failure-output => "# Looks like you failed 1 test out of 5.\n",
+            },
+        },
+    ],
+);
+
+my-diag(Q{Escaping of # and \ in test names, diag messages, todo & skip reasons});
+test-formatter(
+    event-tests => $[
+        ${
+            event => 'suite-start',
+            args  => ${
+                name => $*PROGRAM-NAME,
+            },
+            expect => ${
+                output         => q{},
+                todo-output    => q{},
+                failure-output => q{},
+            },
+        },
+        ${
+            event => Test::Stream::Event::Plan,
+            args  => ${
+                planned => 3,
+            },
+            expect => ${
+                output         => "1..3\n",
+                todo-output    => q{},
+                failure-output => q{},
+            },
+        },
+        ${
+            event => Test::Stream::Event::Test,
+            args  => ${
+                passed => True,
+                name   => 'has hash mark (#) and backslash (\\)',
+            },
+            expect => ${
+                output         => Q{ok 1 - has hash mark (\#) and backslash (\\)} ~ "\n",
+                todo-output    => q{},
+                failure-output => q{},
+            },
+        },
+        ${
+            event => Test::Stream::Event::Diag,
+            args  => ${
+                message => 'has hash mark (#) and backslash (\\)',
+            },
+            expect => ${
+                output         => q{},
+                todo-output    => q{},
+                failure-output => Q{# has hash mark (\#) and backslash (\\)} ~ "\n",
+            },
+        },
+        ${
+            event => Test::Stream::Event::Todo::Start,
+            args  => ${
+                reason => 'has hash mark (#) and backslash (\\)',
+            },
+            expect => ${
+                output         => q{},
+                todo-output    => q{},
+                failure-output => q{},
+            },
+        },
+        ${
+            event => Test::Stream::Event::Test,
+            args  => ${
+                passed => True,
+            },
+            expect => ${
+                output         => Q{ok 2 # TODO has hash mark (\#) and backslash (\\)} ~ "\n",
+                todo-output    => q{},
+                failure-output => q{},
+            },
+        },
+        ${
+            event => Test::Stream::Event::Todo::End,
+            args  => ${
+                reason => 'has hash mark (#) and backslash (\\)',
+            },
+            expect => ${
+                output         => q{},
+                todo-output    => q{},
+                failure-output => q{},
+            },
+        },
+        ${
+            event => Test::Stream::Event::Skip,
+            args  => ${
+                count  => 1,
+                reason => 'has hash mark (#) and backslash (\\)',
+            },
+            expect => ${
+                output         => Q{ok 3 # skip has hash mark (\#) and backslash (\\)} ~ "\n",
+                todo-output    => q{},
+                failure-output => q{},
+            },
+        },
+        ${
+            event => 'suite-end',
+            args  => ${
+                name => $*PROGRAM-NAME,
+            },
+            expect => ${
+                output         => q{},
+                todo-output    => q{},
+                failure-output => q{},
+            },
+        },
+    ],
+);
+
+my-diag(Q{Escaping # of and \ in SkipAll reason});
+test-formatter(
+    event-tests => $[
+        ${
+            event => 'suite-start',
+            args  => ${
+                name => $*PROGRAM-NAME,
+            },
+            expect => ${
+                output         => q{},
+                todo-output    => q{},
+                failure-output => q{},
+            },
+        },
+        ${
+            event => Test::Stream::Event::SkipAll,
+            args  => ${
+                reason => 'has hash mark (#) and backslash (\\)',
+            },
+            expect => ${
+                output         => Q{1..0 # Skipped: has hash mark (\#) and backslash (\\)} ~ "\n",
+                todo-output    => q{},
+                failure-output => q{},
+            },
+        },
+        ${
+            event => 'suite-end',
+            args  => ${
+                name => $*PROGRAM-NAME,
+            },
+            expect => ${
+                output         => q{},
+                todo-output    => q{},
+                failure-output => q{},
             },
         },
     ],
@@ -316,7 +465,7 @@ test-formatter(
                 todo-output    => q{},
                 failure-output => qq:to/FAILURE/,
                 #   Failed test 'should include diag info'
-                #   at $*PROGRAM-NAME line 1240
+                #   at $*PROGRAM-NAME line 1389
                 # did not get the answer
                 #     expected : 42
                 #     operator : infix:<==>
@@ -353,7 +502,7 @@ test-formatter(
                 output         => qq{not ok 3 - needs fixing # TODO not yet done\n},
                 todo-output    => qq:to/TODO/,
                 #   Failed (TODO) test 'needs fixing'
-                #   at $*PROGRAM-NAME line 1240
+                #   at $*PROGRAM-NAME line 1389
                 # expected large size
                 #     expected : "large"
                 #          got : "medium"
@@ -391,7 +540,7 @@ test-formatter(
                 todo-output    => q{},
                 failure-output => qq:to/FAILURE/,
                 #   Failed test 'diag.more has arbitrary keys'
-                #   at $*PROGRAM-NAME line 1240
+                #   at $*PROGRAM-NAME line 1389
                 # did not get the answer
                 #     keys : \$[1, 2, 3]
                 #     with : "arbitrary"
@@ -480,7 +629,7 @@ test-formatter(
                 todo-output    => q{},
                 failure-output => qq:to/FAILURE/,
                     #   Failed test 'should include diag info'
-                    #   at $*PROGRAM-NAME line 1240
+                    #   at $*PROGRAM-NAME line 1389
                     # did not get the answer
                     #     expected : 42
                     #     operator : infix:<==>
@@ -517,7 +666,7 @@ test-formatter(
                 output         => qq{    not ok 2 - needs fixing # TODO not yet done\n},
                 todo-output    => qq:to/TODO/,
                     #   Failed (TODO) test 'needs fixing'
-                    #   at $*PROGRAM-NAME line 1240
+                    #   at $*PROGRAM-NAME line 1389
                     # expected large size
                     #     expected : "large"
                     #          got : "medium"
@@ -555,7 +704,7 @@ test-formatter(
                 todo-output    => q{},
                 failure-output => qq:to/FAILURE/,
                     #   Failed test 'diag.more has arbitrary keys'
-                    #   at $*PROGRAM-NAME line 1240
+                    #   at $*PROGRAM-NAME line 1389
                     # did not get the answer
                     #     keys : \$[1, 2, 3]
                     #     with : "arbitrary"
@@ -638,7 +787,7 @@ test-formatter(
                 todo-output    => q{},
                 failure-output => qq:to/FAILURE/,
                 #   Failed test 'will fail'
-                #   at $*PROGRAM-NAME line 1240
+                #   at $*PROGRAM-NAME line 1389
                 FAILURE
             },
         },
@@ -674,7 +823,7 @@ test-formatter(
                 output         => "not ok 3 - needs fixing # TODO not yet done\n",
                 todo-output    => qq:to/TODO/,
                 #   Failed (TODO) test 'needs fixing'
-                #   at $*PROGRAM-NAME line 1240
+                #   at $*PROGRAM-NAME line 1389
                 TODO
                 failure-output => q{},
             },
@@ -746,7 +895,7 @@ test-formatter(
                 todo-output    => q{},
                 failure-output => qq:to/FAILURE/,
                     #   Failed test 'will fail'
-                    #   at $*PROGRAM-NAME line 1240
+                    #   at $*PROGRAM-NAME line 1389
                 FAILURE
             },
         },
@@ -782,7 +931,7 @@ test-formatter(
                 output         => qq{    not ok 3 - needs fixing # TODO not yet done\n},
                 todo-output    => qq:to/TODO/,
                     #   Failed (TODO) test 'needs fixing'
-                    #   at $*PROGRAM-NAME line 1240
+                    #   at $*PROGRAM-NAME line 1389
                 TODO
                 failure-output => q{},
             },
@@ -894,7 +1043,7 @@ test-formatter(
                 output         => "not ok 1 - needs fixing # TODO not yet done\n",
                 todo-output    => qq:to/TODO/,
                 #   Failed (TODO) test 'needs fixing'
-                #   at $*PROGRAM-NAME line 1240
+                #   at $*PROGRAM-NAME line 1389
                 TODO
                 failure-output => q{},
             },
@@ -964,7 +1113,7 @@ test-formatter(
                 output         => qq{    not ok 1 - needs fixing # TODO not yet done\n},
                 todo-output    => qq:to/TODO/,
                     #   Failed (TODO) test 'needs fixing'
-                    #   at $*PROGRAM-NAME line 1240
+                    #   at $*PROGRAM-NAME line 1389
                 TODO
                 failure-output => q{},
             },

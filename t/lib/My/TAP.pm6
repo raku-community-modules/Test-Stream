@@ -52,7 +52,9 @@ sub my-diag (Str:D $message) is export {
 }
 
 sub escape (Str:D $text) {
-    return $text.subst( :g, q{#}, Q{\#} ).subst( :g, "\n", "\n#" );
+    return $text
+        .subst( :g, rx{ (<[ # \\ ]>) }, { Q{\} ~ $/[0] } )
+        .subst( :g, "\n", "\n#" );
 }
 
 sub test-event-stream (My::Listener $listener, *@expect) is export {

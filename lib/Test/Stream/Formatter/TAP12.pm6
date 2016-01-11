@@ -122,10 +122,10 @@ multi method accept-event (Test::Stream::Event::Todo::End:D $event) {
     $!todo-reason = (Str);
 }
 
-method !say-plan (Int:D $planned, Str $skip?) {
+method !say-plan (Int:D $planned, Str $skip-reason?) {
     my $plan-line = '1..' ~ $planned;
-    if $skip.defined {
-        $plan-line ~= " # Skipped: $skip";
+    if $skip-reason.defined {
+        $plan-line ~= " # Skipped: " ~ escape($skip-reason);
     }
     self!say-indented( $.output, $plan-line );
 }
@@ -230,9 +230,12 @@ method !say-comment (IO::Handle $output, Str:D $comment) {
 }
 
 sub escape (Str:D $text) {
-    return $text.subst( :g, q{#}, Q{\#} ),
+    return $text.subst( :g, rx{ (<[ # \\ ]>) }, { Q{\} ~ $/[0] } ),
 }
 
+# Output needs to be escaped _before_ calling this method, since some hash
+# marks need to be left as-is (for comments, TODO, etc.) and others (like in a
+# test name) need escaping.
 method !say-indented (IO::Handle:D $handle, Str :$prefix, *@text) {
     for @text.lines -> $line {
         $handle.print(
