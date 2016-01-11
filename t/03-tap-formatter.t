@@ -4,7 +4,7 @@
 use v6;
 use lib 'lib', 't/lib';
 
-use IO::String;
+use My::IO::String;
 use My::TAP;
 use Test::Stream::Event;
 use Test::Stream::Formatter::TAP12;
@@ -1347,9 +1347,9 @@ test-formatter(
 
 sub test-formatter (:@event-tests) {
     my %outputs = (
-        output         => IO::String.new,
-        todo-output    => IO::String.new,
-        failure-output => IO::String.new,
+        output         => My::IO::String.new,
+        todo-output    => My::IO::String.new,
+        failure-output => My::IO::String.new,
     );
 
     my $tap = Test::Stream::Formatter::TAP12.new(|%outputs);
