@@ -66,17 +66,16 @@ method end-suite (Str:D :$name) {
 }
 
 method send-event (Test::Stream::Event:D $event) {
-    unless self!in-a-suite || $event.isa(Test::Stream::Event::Suite::Start) {
+    unless @.listeners.elems {
+        die "Attempted to send a {$event.^name} event before any listeners were added";
+    }
+
+    unless @!suites.elems || $event.isa(Test::Stream::Event::Suite::Start) {
         die "Attempted to send a {$event.^name} event before any suites were started";
     }
 
     $event.set-source( Test::Stream::EventSource.new );
-
     .accept-event($event) for @.listeners;
-}
-
-method !in-a-suite (--> Bool:D) {
-    return ?@!suites.elems;
 }
 
 class Status {

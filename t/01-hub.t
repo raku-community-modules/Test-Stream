@@ -6,7 +6,7 @@ use My::TAP;
 use Test::Stream::Event;
 use Test::Stream::Hub;
 
-say "1..9";
+say "1..59";
 
 {
     my $hub = Test::Stream::Hub.new;
@@ -192,6 +192,20 @@ say "1..9";
                 passed        => True,
             },
         },
+    );
+}
+
+{
+    my $hub = Test::Stream::Hub.new;
+    my $e = my-throws-ok(
+        {
+            $hub.start-suite( name => 'whatever' );
+        },
+        'got exception trying to start a suite without any listeners added'
+    );
+    my-ok(
+        $e.message ~~ rx{ 'Attempted to send a Test::Stream::Event::Suite::Start event before any listeners were added' },
+        'got expected error'
     );
 }
 
