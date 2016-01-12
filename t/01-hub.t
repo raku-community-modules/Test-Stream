@@ -6,7 +6,7 @@ use My::Test;
 use Test::Stream::Event;
 use Test::Stream::Hub;
 
-{
+my-subtest 'multiple listeners and events', {
     my $hub = Test::Stream::Hub.new;
 
     my $l1 = My::Listener.new;
@@ -63,9 +63,9 @@ use Test::Stream::Hub;
         $hub.listeners[0], $l1,
         'the remaining listener is the one that was not removed'
     );
-}
+};
 
-{
+my-subtest 'errors from bad event sequences', {
     my $hub = Test::Stream::Hub.new;
     my $l = My::Listener.new;
 
@@ -84,9 +84,7 @@ use Test::Stream::Hub;
     );
 
     my-throws-like(
-        {
-            $hub.end-suite( name => 'random-suite' );
-        },
+        { $hub.end-suite( name => 'random-suite' ) },
         rx{ 'Attempted to end a suite (random-suite) before any suites were started' },
         'got exception trying to end a suite before any suites were started'
     );
@@ -114,9 +112,7 @@ use Test::Stream::Hub;
     );
 
     my-throws-like(
-        {
-            $hub.end-suite( name => 'random-suite' );
-        },
+        { $hub.end-suite( name => 'random-suite' ) },
         rx{ 'Attempted to end a suite (random-suite) that is not the currently running suite (depth 1)' },
         'got exception trying to end a suite that does not match the last suite started (depth of 2)'
     );
@@ -152,9 +148,7 @@ use Test::Stream::Hub;
     );
 
     my-throws-like(
-        {
-            $hub.end-suite( name => 'random-suite' );
-        },
+        { $hub.end-suite( name => 'random-suite' ) },
         rx{ 'Attempted to end a suite (random-suite) that is not the currently running suite (top)' },
         'got exception trying to end a suite that does not match the last suite started (depth of 1)'
     );
@@ -173,26 +167,200 @@ use Test::Stream::Hub;
             },
         },
     );
-}
+};
 
-{
+my-subtest 'events after Bail', {
     my $hub = Test::Stream::Hub.new;
+    $hub.add-listener(My::Listener.new);
+
+    $hub.start-suite( name => 'suite' );
+    $hub.send-event(
+        Test::Stream::Event::Test.new(
+            passed => True,
+        )
+    );
+    $hub.send-event( Test::Stream::Event::Bail.new );
+
     my-throws-like(
         {
-            $hub.start-suite( name => 'whatever' );
+            $hub.send-event(
+                Test::Stream::Event::Test.new(
+                    passed => True,
+                )
+            );
         },
+        rx{ 'Attempted to send a Test::Stream::Event::Test event after sending a Bail' },
+        'error from sending Test event after Bail'
+    );
+
+    my-lives-ok(
+        { $hub.end-suite( name => 'suite' ) },
+        'ending suite after Bail is ok'
+    );
+};
+
+my-subtest 'finalize when Bail is seen', {
+    my $hub = Test::Stream::Hub.new;
+    $hub.add-listener(My::Listener.new);
+
+    $hub.start-suite( name => 'suite' );
+    $hub.send-event(
+        Test::Stream::Event::Test.new(
+            passed => True,
+        )
+    ) for 1..10;
+    $hub.send-event(
+        Test::Stream::Event::Test.new(
+            passed => False,
+        )
+    ) for 1..3;
+    $hub.send-event(
+        Test::Stream::Event::Bail.new(
+            reason => 'computer is on fire',
+        )
+    );
+    $hub.end-suite( name => 'suite' );
+
+    my $status = $hub.finalize;
+    my-is(
+        $status.exit-code,
+        255,
+        'status exit-code is 255'
+    );
+    my-is(
+        $status.error,
+        'Bailed out - computer is on fire',
+        'status has expected error'
+    );
+};
+
+my-subtest 'finalize when 3 tests fail', {
+    my $hub = Test::Stream::Hub.new;
+    $hub.add-listener(My::Listener.new);
+
+    $hub.start-suite( name => 'suite' );
+    $hub.send-event(
+        Test::Stream::Event::Test.new(
+            passed => True,
+        )
+    ) for 1..10;
+    $hub.send-event(
+        Test::Stream::Event::Test.new(
+            passed => False,
+        )
+    ) for 1..3;
+    $hub.end-suite( name => 'suite' );
+
+    my $status = $hub.finalize;
+    my-is(
+        $status.exit-code,
+        3,
+        'status exit-code is 3'
+    );
+    my-is(
+        $status.error,
+        'failed 3 tests',
+        'status has expected error'
+    );
+};
+
+my-subtest 'finalize when plan does not match tests run', {
+    my $hub = Test::Stream::Hub.new;
+    $hub.add-listener(My::Listener.new);
+
+    $hub.start-suite( name => 'suite' );
+    $hub.send-event(
+        Test::Stream::Event::Plan.new(
+            planned => 2,
+        )
+    );
+    $hub.send-event(
+        Test::Stream::Event::Test.new(
+            passed => True,
+        )
+    );
+    $hub.end-suite( name => 'suite' );
+
+    my $status = $hub.finalize;
+    my-is(
+        $status.exit-code,
+        255,
+        'status exit-code is 255'
+    );
+    my-is(
+        $status.error,
+        'planned 2 tests but ran 1 test',
+        'status has expected error'
+    );
+};
+
+my-subtest 'finalize when 2 child suites are unfinished', {
+    my $hub = Test::Stream::Hub.new;
+    $hub.add-listener(My::Listener.new);
+
+    $hub.start-suite( name => 'suite' );
+    $hub.start-suite( name => 'inner1' );
+    $hub.start-suite( name => 'inner2' );
+    $hub.send-event(
+        Test::Stream::Event::Test.new(
+            passed => True,
+        )
+    );
+
+    my $status = $hub.finalize;
+    my-is(
+        $status.exit-code,
+        1,
+        'status exit-code is 1'
+    );
+    my-is(
+        $status.error,
+        'finalize was called but 3 suites are still in process',
+        'status has expected error'
+    );
+};
+
+my-subtest 'finalize when all tests pass', {
+    my $hub = Test::Stream::Hub.new;
+    $hub.add-listener(My::Listener.new);
+
+    $hub.start-suite( name => 'suite' );
+    $hub.send-event(
+        Test::Stream::Event::Test.new(
+            passed => True,
+        )
+    );
+    $hub.end-suite( name => 'suite' );
+
+    my $status = $hub.finalize;
+    my-is(
+        $status.exit-code,
+        0,
+        'status exit-code is 0'
+    );
+    my-is(
+        $status.error,
+        q{},
+        'status has no error'
+    );
+};
+
+my-subtest 'starting a suite without any listeners', {
+    my $hub = Test::Stream::Hub.new;
+    my-throws-like(
+        { $hub.start-suite( name => 'whatever' ) },
         rx{ 'Attempted to send a Test::Stream::Event::Suite::Start event before any listeners were added' },
         'got exception trying to start a suite without any listeners added'
     );
-}
+};
 
-{
+my-subtest 'instance returns the same object', {
     my $hub = Test::Stream::Hub.instance;
 
     my-is(
         $hub, Test::Stream::Hub.instance,
         'instance always returns the same object'
     );
-}
+};
 
 my-done-testing;

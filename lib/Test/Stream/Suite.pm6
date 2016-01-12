@@ -19,6 +19,8 @@ has Str    $.name;
 has Int    $.tests-planned;
 has Int:D  $.tests-run     = 0;
 has Int:D  $.tests-failed  = 0;
+has Bool:D $.bailed        = False;
+has Str    $.bail-reason;
 has Str    @!todo-reasons;
 has Int:D  $!subtest-depth = 0;
 
@@ -70,6 +72,11 @@ multi method accept-event (Test::Stream::Event::SkipAll:D $event) {
     }
 
     $!tests-planned = 0;
+}
+
+multi method accept-event (Test::Stream::Event::Bail:D $event) {
+    $!bailed = True;
+    $!bail-reason = $event.reason if $event.reason.defined;
 }
 
 multi method accept-event (Test::Stream::Event::Suite::Start:D $event) {

@@ -4,13 +4,14 @@ unit class Test::Stream::Hub;
 
 use Test::Stream::Listener;
 use Test::Stream::Suite;
+use Test::Stream::Util;
 
-has Test::Stream::Listener @.listeners;
+has Test::Stream::Listener:D @.listeners;
 # This is the current suite stack. We push and pop onto this as we go.
-has Test::Stream::Suite @!suites;
+has Test::Stream::Suite:D @!suites;
 # As we pop suites off @!suites we unshift them onto this so we always have
 # access to them.
-has Test::Stream::Suite @!finished-suites;
+has Test::Stream::Suite:D @!finished-suites;
 
 # My current thinking is that there should really just be one Hub per process
 # in most scenarios. Different event producers and listeners can all attach to
@@ -84,6 +85,10 @@ method send-event (Test::Stream::Event:D $event) {
         die "Attempted to send a {$event.^name} event before any suites were started";
     }
 
+    if @!suites.elems && @!suites[0].bailed && !$event.isa(Test::Stream::Event::Suite::End) {
+        die "Attempted to send a {$event.^name} event after sending a Bail";
+    }
+
     $event.set-source( Test::Stream::EventSource.new );
     .accept-event($event) for @.listeners;
 }
@@ -94,46 +99,46 @@ class Status {
 }
 
 method finalize (--> Status:D) {
-    # my $unfinished-suites = @!suites.elems;
-    # self!end-current-suite while @!suites;
+    my $unfinished-suites = @!suites.elems;
+    self.end-suite( name => $_.name ) for @!suites.reverse;
 
-    # my $top-suite = @!finished-suites[0];
+    my $top-suite = @!finished-suites[0];
 
-    # # The exit-code is going to be used as an actual process exit code so it
-    # # cannot be greater than 254.
+    # The exit-code is going to be used as an actual process exit code so it
+    # cannot be greater than 254.
+    if $top-suite.bailed {
+        return Status.new(
+            exit-code => 255,
+            error     =>
+                'Bailed out'
+                ~ ( $top-suite.bail-reason.defined ?? qq[ - {$top-suite.bail-reason}] !! q{} ),
+        );
+    }
+    elsif $top-suite.tests-failed {
+        my $failed = maybe-plural( $top-suite.tests-failed, 'test' );
+        my $error = "failed {$top-suite.tests-failed} $failed";
+        return Status.new(
+            exit-code => min( 254, $top-suite.tests-failed ),
+            error     => $error,
+        );
+    }
+    elsif $top-suite.tests-planned
+          && ( $top-suite.tests-planned != $top-suite.tests-run ) {
 
-    # if $.bailed {
-    #     return Status.new(
-    #         exit-code => 255,
-    #         error     => 'Bailed out' ~ ( $.bailed-reason ?? qq{ - $.bailed-reason} !! q{} ),
-    #     );
-    # }
-    # elsif $top-suite.real-failure-count > 0 {
-    #     my $failed = maybe-plural( $top-suite.real-failure-count, 'test' );
-    #     my $error = "failed {$top-suite.real-failure-count} $failed";
-    #     return Status.new(
-    #         exit-code => min( 254, $top-suite.real-failure-count ),
-    #         error     => $error,
-    #     );
-
-    # }
-    # elsif $top-suite.planned
-    #       && ( $top-suite.planned != $top-suite.tests-run ) {
-
-    #     my $planned = maybe-plural( $top-suite.planned, 'test' );
-    #     my $ran     = maybe-plural( $top-suite.tests-run, 'test' );
-    #     return Status.new(
-    #         exit-code => 255,
-    #         error     => "planned {$top-suite.planned} $planned but ran {$top-suite.tests-run} $ran",
-    #     );
-    # }
-    # elsif $unfinished-suites {
-    #     my $unfinished = maybe-plural( $unfinished-suites, 'suite' );
-    #     return Status.new(
-    #         exit-code => 1,
-    #         error     => "finalize was called but {@!suites.elems} $unfinished are still in process",
-    #     );
-    # }
+        my $planned = maybe-plural( $top-suite.tests-planned, 'test' );
+        my $ran     = maybe-plural( $top-suite.tests-run, 'test' );
+        return Status.new(
+            exit-code => 255,
+            error     => "planned {$top-suite.tests-planned} $planned but ran {$top-suite.tests-run} $ran",
+        );
+    }
+    elsif $unfinished-suites {
+        my $unfinished = maybe-plural( $unfinished-suites, 'suite' );
+        return Status.new(
+            exit-code => 1,
+            error     => "finalize was called but {$unfinished-suites} $unfinished are still in process",
+        );
+    }
 
     return Status.new(
         exit-code => 0,
