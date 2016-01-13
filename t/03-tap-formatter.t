@@ -11,9 +11,9 @@ use Test::Stream::Formatter::TAP12;
 use Test::Stream::Hub;
 use Test::Stream::Types;
 
-my-diag('No subtests, all tests passing');
 test-formatter(
-    event-tests => $[
+    'No subtests, all tests passing',
+    $[
         ${
             event => 'suite-start',
             args  => ${
@@ -74,9 +74,9 @@ test-formatter(
     ],
 );
 
-my-diag('Failures, todo, and skip');
 test-formatter(
-    event-tests => $[
+    'Failures, todo, and skip',
+    $[
         ${
             event => 'suite-start',
             args  => ${
@@ -122,7 +122,7 @@ test-formatter(
                 todo-output    => q{},
                 failure-output => qq:to/FAILURE/,
                 #   Failed test 'will fail'
-                #   at $*PROGRAM-NAME line 1381
+                #   at $*PROGRAM-NAME line 1383
                 FAILURE
             },
         },
@@ -147,7 +147,7 @@ test-formatter(
                 output         => "not ok 3 - needs fixing # TODO not yet done\n",
                 todo-output    => qq:to/TODO/,
                 #   Failed (TODO) test 'needs fixing'
-                #   at $*PROGRAM-NAME line 1381
+                #   at $*PROGRAM-NAME line 1383
                 TODO
                 failure-output => q{},
             },
@@ -192,9 +192,9 @@ test-formatter(
     ],
 );
 
-my-diag(Q{Escaping of # and \ in test names, diag messages, todo & skip reasons});
 test-formatter(
-    event-tests => $[
+    Q{Escaping of # and \ in test names, diag messages, todo & skip reasons},
+    $[
         ${
             event => 'suite-start',
             args  => ${
@@ -299,9 +299,9 @@ test-formatter(
     ],
 );
 
-my-diag(Q{Escaping # of and \ in SkipAll reason});
 test-formatter(
-    event-tests => $[
+    Q{Escaping # of and \ in SkipAll reason},
+    $[
         ${
             event => 'suite-start',
             args  => ${
@@ -338,9 +338,9 @@ test-formatter(
     ],
 );
 
-my-diag('Plan does not match count of tests run');
 test-formatter(
-    event-tests => $[
+    'Plan does not match count of tests run',
+    $[
         ${
             event => 'suite-start',
             args  => ${
@@ -389,9 +389,9 @@ test-formatter(
     ],
 );
 
-my-diag('Diagnostics attached to tests (including pass, failure, TODO tests, and arbtitrary %more for the diagnostic object)');
 test-formatter(
-    event-tests => $[
+    'Diagnostics attached to tests (including pass, failure, TODO tests, and arbtitrary %more for the diagnostic object)',
+    $[
         ${
             event => 'suite-start',
             args  => ${
@@ -455,7 +455,7 @@ test-formatter(
                 todo-output    => q{},
                 failure-output => qq:to/FAILURE/,
                 #   Failed test 'should include diag info'
-                #   at $*PROGRAM-NAME line 1381
+                #   at $*PROGRAM-NAME line 1383
                 # did not get the answer
                 #     expected : 42
                 #     operator : infix:<==>
@@ -492,7 +492,7 @@ test-formatter(
                 output         => qq{not ok 3 - needs fixing # TODO not yet done\n},
                 todo-output    => qq:to/TODO/,
                 #   Failed (TODO) test 'needs fixing'
-                #   at $*PROGRAM-NAME line 1381
+                #   at $*PROGRAM-NAME line 1383
                 # expected large size
                 #     expected : "large"
                 #          got : "medium"
@@ -530,7 +530,7 @@ test-formatter(
                 todo-output    => q{},
                 failure-output => qq:to/FAILURE/,
                 #   Failed test 'diag.more has arbitrary keys'
-                #   at $*PROGRAM-NAME line 1381
+                #   at $*PROGRAM-NAME line 1383
                 # did not get the answer
                 #     keys : \$[1, 2, 3]
                 #     with : "arbitrary"
@@ -551,9 +551,9 @@ test-formatter(
     ],
 );
 
-my-diag('Subtests with diagnostics, skip, todo, etc.');
 test-formatter(
-    event-tests => $[
+    'Subtests with diagnostics, skip, todo, etc.',
+    $[
         ${
             event => 'suite-start',
             args  => ${
@@ -619,7 +619,7 @@ test-formatter(
                 todo-output    => q{},
                 failure-output => qq:to/FAILURE/,
                     #   Failed test 'should include diag info'
-                    #   at $*PROGRAM-NAME line 1381
+                    #   at $*PROGRAM-NAME line 1383
                     # did not get the answer
                     #     expected : 42
                     #     operator : infix:<==>
@@ -656,7 +656,7 @@ test-formatter(
                 output         => qq{    not ok 2 - needs fixing # TODO not yet done\n},
                 todo-output    => qq:to/TODO/,
                     #   Failed (TODO) test 'needs fixing'
-                    #   at $*PROGRAM-NAME line 1381
+                    #   at $*PROGRAM-NAME line 1383
                     # expected large size
                     #     expected : "large"
                     #          got : "medium"
@@ -694,7 +694,7 @@ test-formatter(
                 todo-output    => q{},
                 failure-output => qq:to/FAILURE/,
                     #   Failed test 'diag.more has arbitrary keys'
-                    #   at $*PROGRAM-NAME line 1381
+                    #   at $*PROGRAM-NAME line 1383
                     # did not get the answer
                     #     keys : \$[1, 2, 3]
                     #     with : "arbitrary"
@@ -729,9 +729,9 @@ test-formatter(
     ],
 );
 
-my-diag('Diag from passing, failing, and todo test, in top-level test and subtests');
 test-formatter(
-    event-tests => $[
+    'Diag from passing, failing, and todo test, in top-level test and subtests',
+    $[
         ${
             event => 'suite-start',
             args  => ${
@@ -777,7 +777,7 @@ test-formatter(
                 todo-output    => q{},
                 failure-output => qq:to/FAILURE/,
                 #   Failed test 'will fail'
-                #   at $*PROGRAM-NAME line 1381
+                #   at $*PROGRAM-NAME line 1383
                 FAILURE
             },
         },
@@ -813,7 +813,7 @@ test-formatter(
                 output         => "not ok 3 - needs fixing # TODO not yet done\n",
                 todo-output    => qq:to/TODO/,
                 #   Failed (TODO) test 'needs fixing'
-                #   at $*PROGRAM-NAME line 1381
+                #   at $*PROGRAM-NAME line 1383
                 TODO
                 failure-output => q{},
             },
@@ -885,7 +885,7 @@ test-formatter(
                 todo-output    => q{},
                 failure-output => qq:to/FAILURE/,
                     #   Failed test 'will fail'
-                    #   at $*PROGRAM-NAME line 1381
+                    #   at $*PROGRAM-NAME line 1383
                 FAILURE
             },
         },
@@ -921,7 +921,7 @@ test-formatter(
                 output         => qq{    not ok 3 - needs fixing # TODO not yet done\n},
                 todo-output    => qq:to/TODO/,
                     #   Failed (TODO) test 'needs fixing'
-                    #   at $*PROGRAM-NAME line 1381
+                    #   at $*PROGRAM-NAME line 1383
                 TODO
                 failure-output => q{},
             },
@@ -976,9 +976,9 @@ test-formatter(
     ],
 );
 
-my-diag('Note always go to $.output, whether in todo or not');
 test-formatter(
-    event-tests => $[
+    'Note always go to $.output, whether in todo or not',
+    $[
         ${
             event => 'suite-start',
             args  => ${
@@ -1033,7 +1033,7 @@ test-formatter(
                 output         => "not ok 1 - needs fixing # TODO not yet done\n",
                 todo-output    => qq:to/TODO/,
                 #   Failed (TODO) test 'needs fixing'
-                #   at $*PROGRAM-NAME line 1381
+                #   at $*PROGRAM-NAME line 1383
                 TODO
                 failure-output => q{},
             },
@@ -1103,7 +1103,7 @@ test-formatter(
                 output         => qq{    not ok 1 - needs fixing # TODO not yet done\n},
                 todo-output    => qq:to/TODO/,
                     #   Failed (TODO) test 'needs fixing'
-                    #   at $*PROGRAM-NAME line 1381
+                    #   at $*PROGRAM-NAME line 1383
                 TODO
                 failure-output => q{},
             },
@@ -1144,9 +1144,9 @@ test-formatter(
     ],
 );
 
-my-diag('Bail out');
 test-formatter(
-    event-tests => $[
+    'Bail out',
+    $[
         ${
             event => 'suite-start',
             args  => ${
@@ -1172,9 +1172,9 @@ test-formatter(
     ],
 );
 
-my-diag('Bail out in a subtest');
 test-formatter(
-    event-tests => $[
+    'Bail out in a subtest',
+    $[
         ${
             event => 'suite-start',
             args  => ${
@@ -1211,9 +1211,9 @@ test-formatter(
     ],
 );
 
-my-diag('Skip all');
 test-formatter(
-    event-tests => $[
+    'Skip all',
+    $[
         ${
             event => 'suite-start',
             args  => ${
@@ -1250,9 +1250,9 @@ test-formatter(
     ],
 );
 
-my-diag('Skip all in a subtest');
 test-formatter(
-    event-tests => $[
+    'Skip all in a subtest',
+    $[
         ${
             event => 'suite-start',
             args  => ${
@@ -1337,25 +1337,27 @@ test-formatter(
 
 my-done-testing;
 
-sub test-formatter (:@event-tests) {
-    my %outputs = (
-        output         => My::IO::String.new,
-        todo-output    => My::IO::String.new,
-        failure-output => My::IO::String.new,
-    );
-
-    my $tap = Test::Stream::Formatter::TAP12.new(|%outputs);
-    my $hub = Test::Stream::Hub.new;
-    $hub.add-listener($tap);
-
-    for @event-tests -> $test {
-        test-event-output(
-            $hub,
-            $test,
-            %outputs,
+sub test-formatter ($name, @event-tests) {
+    my-subtest $name, {
+        my %outputs = (
+            output         => My::IO::String.new,
+            todo-output    => My::IO::String.new,
+            failure-output => My::IO::String.new,
         );
-        $_.clear for %outputs.values;
-    }
+
+        my $tap = Test::Stream::Formatter::TAP12.new(|%outputs);
+        my $hub = Test::Stream::Hub.new;
+        $hub.add-listener($tap);
+
+        for @event-tests -> $test {
+            test-event-output(
+                $hub,
+                $test,
+                %outputs,
+            );
+            $_.clear for %outputs.values;
+        }
+    };
 }
 
 sub test-event-output (
