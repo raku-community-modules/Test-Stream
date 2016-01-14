@@ -635,67 +635,70 @@ sub test-event-stream (My::Listener $listener, *@expect) is export {
         'got the expected number of events'
     ) or my-diag("got {@got.elems}, expected {@expect.elems}");
 
+    my $i = 0;
     for @got Z @expect -> ($g, $e) {
         my $class = $e<class>;
-        my-is(
-            $g.WHAT, $class,
-            "got a {$class.^name} event"
-        );
+        my-subtest "event[{$i++}]", {
+            my-is(
+                $g.WHAT, $class,
+                "got a {$class.^name} event"
+            );
 
-        for $e<attributes>.keys -> $k {
-            my-ok(
-                ?$g.can($k),
-                "event has a $k method"
-            ) or next;
-
-            if $e<attributes>{$k} ~~ Test::Stream::Diagnostic {
-                my $g-diag = $g."$k"();
-                my-isa-ok(
-                    $g-diag, Test::Stream::Diagnostic,
-                    "$k attribute"
+            for $e<attributes>.keys -> $k {
+                my-ok(
+                    ?$g.can($k),
+                    "event has a $k method"
                 ) or next;
 
-                my $e-diag = $e<attributes>{$k};
-                my-is(
-                    $g-diag.defined, $e-diag.defined,
-                    "$k is defined or not as expected"
-                );
+                if $e<attributes>{$k} ~~ Test::Stream::Diagnostic {
+                    my $g-diag = $g."$k"();
+                    my-isa-ok(
+                        $g-diag, Test::Stream::Diagnostic,
+                        "$k attribute"
+                    ) or next;
 
-                next unless $g-diag.defined && $e-diag.defined;
-
-                my-is(
-                    $g-diag.severity, $e-diag.severity,
-                    "$k.severity"
-                );
-                my-is(
-                    $g-diag.message, $e-diag.message,
-                    "$k.message"
-                );
-
-                # This doesn't seem to get compared properly by is-deeply so
-                # we do our own comparison and remove it from the hash so the
-                # rest can be passed to is-deeply.
-                if $e-diag.more<operator>:exists {
-                    my $g-op = $g-diag.more<operator>:delete;
-                    my $e-op = $e-diag.more<operator>:delete;
+                    my $e-diag = $e<attributes>{$k};
                     my-is(
-                        $g-op.perl, $e-op.perl,
-                        "$k.more<operator>"
+                        $g-diag.defined, $e-diag.defined,
+                        "$k is defined or not as expected"
+                    );
+
+                    next unless $g-diag.defined && $e-diag.defined;
+
+                    my-is(
+                        $g-diag.severity, $e-diag.severity,
+                        "$k.severity"
+                    );
+                    my-is(
+                        $g-diag.message, $e-diag.message,
+                        "$k.message"
+                    );
+
+                    # This doesn't seem to get compared properly by is-deeply so
+                    # we do our own comparison and remove it from the hash so the
+                    # rest can be passed to is-deeply.
+                    if $e-diag.more<operator>:exists {
+                        my $g-op = $g-diag.more<operator>:delete;
+                        my $e-op = $e-diag.more<operator>:delete;
+                        my-is(
+                            $g-op.perl, $e-op.perl,
+                            "$k.more<operator>"
+                        );
+                    }
+
+                    my-is-deeply(
+                        $g-diag.more, $e-diag.more,
+                        "$k.more"
                     );
                 }
-
-                my-is-deeply(
-                    $g-diag.more, $e-diag.more,
-                    "$k.more"
-                );
+                else {
+                    my-is-deeply(
+                        $g."$k"(), $e<attributes>{$k},
+                        "event has the expected $k attribute"
+                    );
+                }
             }
-            else {
-                my-is-deeply(
-                    $g."$k"(), $e<attributes>{$k},
-                    "event has the expected $k attribute"
-                );
-            }
-        }
+        };
     }
 
     $listener.clear;
