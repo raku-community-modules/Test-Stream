@@ -732,21 +732,6 @@ use Test::Stream::Types;
         );
     };
 
-    my-skip 'cannot pass a method object to .^can', 1;
-    # my-subtest 'can-ok( $obj, $method-obj )', {
-    #     my-is( can-ok( 'string', Str.^can('tc')[0] ), True, 'can-ok returns bool' );
-    #     test-event-stream(
-    #         $listener,
-    #         ${
-    #             class  => Test::Stream::Event::Test,
-    #             attributes => ${
-    #                 passed => True,
-    #                 name   => 'The class Str has a method tc',
-    #             },
-    #         }
-    #     );
-    # };
-
     my-subtest 'can-ok( $class, $method )', {
         my-is( can-ok( Str, 'tc' ), True, 'can-ok returns bool' );
         test-event-stream(

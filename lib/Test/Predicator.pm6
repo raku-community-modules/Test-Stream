@@ -102,20 +102,10 @@ method does-ok (Mu $got, Mu $role, $name? --> Bool:D) {
 }
 
 method can-ok (Mu $got, Mu $method, $name? --> Bool:D) {
-    my $description = description-of($got);
-
     my $passed = ?$got.^can($method);
-
-    my $meth-name =
-        $method ~~ Method && $method.name
-        ?? $method.name
-        !! $method ~~ Str
-        ?? $method
-        !! $method.gist;
-
     self!send-test(
         $passed,
-        $name // "$description has a method $meth-name",
+        $name // description-of($got) ~ " has a method $method",
     );
 
     return $passed;
