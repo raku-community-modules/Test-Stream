@@ -8,9 +8,7 @@ use Test::Stream::Diagnostic;
 use Test::Stream::Types;
 
 {
-    my $hub = Test::Stream::Hub.instance;
-    my $listener = My::Listener.new;
-    $hub.add-listener($listener);
+    my $listener = listener();
 
     my-subtest 'plan(42)', {
         plan(42);
@@ -86,6 +84,36 @@ use Test::Stream::Types;
                     diagnostic => (Test::Stream::Diagnostic)
                 },
             }
+        );
+    };
+
+    my-subtest 'pass()', {
+        my-is( pass(), True, 'pass returns bool' );
+        test-event-stream(
+            $listener,
+            ${
+                class  => Test::Stream::Event::Test,
+                attributes => ${
+                    passed     => True,
+                    name       => (Str),
+                    diagnostic => (Test::Stream::Diagnostic)
+                },
+            },
+        );
+    };
+
+    my-subtest 'flunk()', {
+        my-is( flunk(), False, 'flunk returns bool' );
+        test-event-stream(
+            $listener,
+            ${
+                class  => Test::Stream::Event::Test,
+                attributes => ${
+                    passed     => False,
+                    name       => (Str),
+                    diagnostic => (Test::Stream::Diagnostic)
+                },
+            },
         );
     };
 
@@ -478,6 +506,306 @@ use Test::Stream::Types;
         );
     };
 
+    my-subtest 'isa-ok( $obj, $type )', {
+        my-is( isa-ok( 42, Int ), True, 'isa-ok returns bool' );
+        test-event-stream(
+            $listener,
+            ${
+                class  => Test::Stream::Event::Test,
+                attributes => ${
+                    passed => True,
+                    name   => 'An object of class Int isa Int',
+                },
+            }
+        );
+    };
+
+    my-subtest 'isa-ok( $obj, !$type )', {
+        my-is( isa-ok( 42, Str ), False, 'isa-ok returns bool' );
+        test-event-stream(
+            $listener,
+            ${
+                class  => Test::Stream::Event::Test,
+                attributes => ${
+                    passed     => False,
+                    name       => 'An object of class Int isa Str',
+                    diagnostic => Test::Stream::Diagnostic.new(
+                        severity => DiagnosticSeverity::failure,
+                        message  => 'Expected an object or class which is a Str or a subclass',
+                    ),
+                },
+            },
+        );
+    };
+
+    my-subtest 'isa-ok( $obj, $type, $name )', {
+        my-is( isa-ok( 42, Int, 'my integer' ), True, 'isa-ok returns bool' );
+        test-event-stream(
+            $listener,
+            ${
+                class  => Test::Stream::Event::Test,
+                attributes => ${
+                    passed => True,
+                    name   => 'my integer',
+                },
+            }
+        );
+    };
+
+    my-subtest 'isa-ok( $obj, !$type, $name )', {
+        my-is( isa-ok( 42, Str, 'my string' ), False, 'isa-ok returns bool' );
+        test-event-stream(
+            $listener,
+            ${
+                class  => Test::Stream::Event::Test,
+                attributes => ${
+                    passed     => False,
+                    name       => 'my string',
+                    diagnostic => Test::Stream::Diagnostic.new(
+                        severity => DiagnosticSeverity::failure,
+                        message  => 'Expected an object or class which is a Str or a subclass',
+                    ),
+                },
+            },
+        );
+    };
+
+    my-subtest 'does-ok( $obj, $role )', {
+        my-is( does-ok( sub { }, Callable ), True, 'does-ok returns bool' );
+        test-event-stream(
+            $listener,
+            ${
+                class  => Test::Stream::Event::Test,
+                attributes => ${
+                    passed => True,
+                    name   => 'An object of class Sub does the role Callable',
+                },
+            }
+        );
+    };
+
+    my-subtest 'does-ok( $obj, !$role )', {
+        my-is( does-ok( 'string', Callable ), False, 'does-ok returns bool' );
+        test-event-stream(
+            $listener,
+            ${
+                class  => Test::Stream::Event::Test,
+                attributes => ${
+                    passed     => False,
+                    name       => 'An object of class Str does the role Callable',
+                    diagnostic => Test::Stream::Diagnostic.new(
+                        severity => DiagnosticSeverity::failure,
+                        message  => 'An object of class Str does not do the role Callable',
+                    ),
+                },
+            }
+        );
+    };
+
+    my-subtest 'does-ok( $obj, $role, $name )', {
+        my-is( does-ok( sub { }, Callable, 'sub does Callable' ), True, 'does-ok returns bool' );
+        test-event-stream(
+            $listener,
+            ${
+                class  => Test::Stream::Event::Test,
+                attributes => ${
+                    passed => True,
+                    name   => 'sub does Callable',
+                },
+            }
+        );
+    };
+
+    my-subtest 'does-ok( $obj, !$role, $name )', {
+        my-is( does-ok( 'string', Callable, 'string does Callable' ), False, 'does-ok returns bool' );
+        test-event-stream(
+            $listener,
+            ${
+                class  => Test::Stream::Event::Test,
+                attributes => ${
+                    passed => False,
+                    name   => 'string does Callable',
+                    diagnostic => Test::Stream::Diagnostic.new(
+                        severity => DiagnosticSeverity::failure,
+                        message  => 'An object of class Str does not do the role Callable',
+                    ),
+                },
+            }
+        );
+    };
+
+    my-subtest 'does-ok( $obj, $role, $name )', {
+        my-is( does-ok( sub { }, Callable, 'sub does Callable' ), True, 'does-ok returns bool' );
+        test-event-stream(
+            $listener,
+            ${
+                class  => Test::Stream::Event::Test,
+                attributes => ${
+                    passed => True,
+                    name   => 'sub does Callable',
+                },
+            }
+        );
+    };
+
+    my-subtest 'does-ok( $class, $role )', {
+        my-is( does-ok( Method, Callable ), True, 'does-ok returns bool' );
+        test-event-stream(
+            $listener,
+            ${
+                class  => Test::Stream::Event::Test,
+                attributes => ${
+                    passed => True,
+                    name   => 'The class Method does the role Callable',
+                },
+            }
+        );
+    };
+
+    my-subtest 'does-ok( $role, $role )', {
+        my-is( does-ok( Mixy, Baggy ), True, 'does-ok returns bool' );
+        test-event-stream(
+            $listener,
+            ${
+                class  => Test::Stream::Event::Test,
+                attributes => ${
+                    passed => True,
+                    name   => 'The role Mixy does the role Baggy',
+                },
+            }
+        );
+    };
+
+    my-subtest 'can-ok( $obj, $method )', {
+        my-is( can-ok( 42, 'chr' ), True, 'can-ok returns bool' );
+        test-event-stream(
+            $listener,
+            ${
+                class  => Test::Stream::Event::Test,
+                attributes => ${
+                    passed => True,
+                    name   => 'An object of class Int has a method chr',
+                },
+            }
+        );
+    };
+
+    my-subtest 'can-ok( $obj, !$method )', {
+        my-is( can-ok( 42, 'foobar' ), False, 'can-ok returns bool' );
+        test-event-stream(
+            $listener,
+            ${
+                class  => Test::Stream::Event::Test,
+                attributes => ${
+                    passed => False,
+                    name   => 'An object of class Int has a method foobar',
+                },
+            }
+        );
+    };
+
+    my-subtest 'can-ok( $obj, $method, $name )', {
+        my-is( can-ok( 42, 'chr', 'Int can chr' ), True, 'can-ok returns bool' );
+        test-event-stream(
+            $listener,
+            ${
+                class  => Test::Stream::Event::Test,
+                attributes => ${
+                    passed => True,
+                    name   => 'Int can chr',
+                },
+            }
+        );
+    };
+
+    my-subtest 'can-ok( $obj, !$method, $name )', {
+        my-is( can-ok( 42, 'foobar', 'Int can foobar' ), False, 'can-ok returns bool' );
+        test-event-stream(
+            $listener,
+            ${
+                class  => Test::Stream::Event::Test,
+                attributes => ${
+                    passed => False,
+                    name   => 'Int can foobar',
+                },
+            }
+        );
+    };
+
+    my-skip 'cannot pass a method object to .^can', 1;
+    # my-subtest 'can-ok( $obj, $method-obj )', {
+    #     my-is( can-ok( 'string', Str.^can('tc')[0] ), True, 'can-ok returns bool' );
+    #     test-event-stream(
+    #         $listener,
+    #         ${
+    #             class  => Test::Stream::Event::Test,
+    #             attributes => ${
+    #                 passed => True,
+    #                 name   => 'The class Str has a method tc',
+    #             },
+    #         }
+    #     );
+    # };
+
+    my-subtest 'can-ok( $class, $method )', {
+        my-is( can-ok( Str, 'tc' ), True, 'can-ok returns bool' );
+        test-event-stream(
+            $listener,
+            ${
+                class  => Test::Stream::Event::Test,
+                attributes => ${
+                    passed => True,
+                    name   => 'The class Str has a method tc',
+                },
+            }
+        );
+    };
+
+    my-skip 'cannot call Baggy.^can()', 1;
+    # my-subtest 'can-ok( $role, $method )', {
+    #     my-is( can-ok( Baggy, 'grab' ), True, 'can-ok returns bool' );
+    #     test-event-stream(
+    #         $listener,
+    #         ${
+    #             class  => Test::Stream::Event::Test,
+    #             attributes => ${
+    #                 passed => True,
+    #                 name   => 'The role Baggy has a method grab',
+    #             },
+    #         }
+    #     );
+    # };
+
+    my-subtest 'todo()', {
+        todo(
+            'unimplemented', {
+                ok(False);
+            }
+        );
+        test-event-stream(
+            $listener,
+            ${
+                class  => Test::Stream::Event::Todo::Start,
+                attributes => ${
+                    reason => 'unimplemented',
+                },
+            },
+            ${
+                class  => Test::Stream::Event::Test,
+                attributes => ${
+                    passed     => False,
+                    name       => (Str),
+                },
+            },
+            ${
+                class  => Test::Stream::Event::Todo::End,
+                attributes => ${
+                    reason => 'unimplemented',
+                },
+            },
+        );
+    };
+
     my-subtest 'skip()', {
         skip();
         test-event-stream(
@@ -855,3 +1183,13 @@ use Test::Stream::Types;
 }
 
 my-done-testing;
+
+sub listener (--> My::Listener:D) {
+    Test::Stream::Hub.clear-instance-violently-for-test-stream-tests;
+    Test::Predicates::clear-instance-violently-for-test-stream-tests;
+    my $hub = Test::Stream::Hub.instance;
+    my $listener = My::Listener.new;
+    $hub.add-listener($listener);
+
+    return $listener;
+}

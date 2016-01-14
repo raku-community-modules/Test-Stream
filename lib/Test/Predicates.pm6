@@ -9,6 +9,14 @@ sub plan (|c) is export {
     instance().plan(|c);
 }
 
+sub pass (|c --> Bool:D) is export {
+    return instance().pass(|c);
+}
+
+sub flunk (|c --> Bool:D) is export {
+    return instance().flunk(|c);
+}
+
 sub ok (|c --> Bool:D) is export {
     return instance().ok(|c);
 }
@@ -25,8 +33,26 @@ sub cmp-ok (|c --> Bool:D)  is export {
     return instance().cmp-ok(|c);
 }
 
-sub subtest (Str:D $name, &block --> Bool:D) is export {
-    return instance().subtest( $name, &block );
+sub isa-ok (|c --> Bool:D)  is export {
+    return instance().isa-ok(|c);
+}
+
+sub does-ok (|c --> Bool:D)  is export {
+    return instance().does-ok(|c);
+}
+
+sub can-ok (|c --> Bool:D)  is export {
+    return instance().can-ok(|c);
+}
+
+# We need to repeat the signature from Test::Predicator here so that the
+# compiler knows how to parse { } blocks passed to these subs.
+sub subtest (Str:D $reason, &block --> Bool:D) is export {
+    return instance().subtest( $reason, &block );
+}
+
+sub todo (Str:D $reason, &block) is export {
+    instance().todo( $reason, &block );
 }
 
 multi sub skip () is export {
@@ -40,8 +66,8 @@ multi sub skip ($reason, $count = 1) is export {
     );
 }
 
-sub skip-all ($reason?) is export {
-    instance().skip-all( $reason // (Str) );
+sub skip-all (|c) is export {
+    instance().skip-all(|c);
 }
 
 sub diag (|c) is export {
