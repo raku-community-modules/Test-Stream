@@ -166,9 +166,9 @@ method is-deeply (Mu $got, Mu $expected, $name? --> Bool:D) {
     return $passed;
 }
 
-method lives-ok (Callable:D $code, $name?) {
+method lives-ok (&block, $name? --> Bool:D) {
     try {
-        $code();
+        &block();
     }
 
     my $passed = !$!.defined;
@@ -181,10 +181,10 @@ method lives-ok (Callable:D $code, $name?) {
     return $passed;
 }
 
-method dies-ok (Callable:D $code, $name?) {
+method dies-ok (&block, $name? --> Bool:D) {
     my $passed = True;
     try {
-        $code();
+        &block();
         $passed = False;
     }
 
@@ -193,6 +193,8 @@ method dies-ok (Callable:D $code, $name?) {
         $name,
         diagnostic-message => 'The code ran without throwing an exception',
     );
+
+    return $passed;
 }
 
 # method throws-like (Callable:D $code, My:U $type?, $name?) {

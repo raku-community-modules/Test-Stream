@@ -881,6 +881,78 @@ use Test::Stream::Types;
         );
     };
 
+    my-subtest 'lives-ok( lives )', {
+        my $sub = sub { return 42 };
+        my-is( lives-ok($sub), True, 'lives-ok returns Bool' );
+        test-event-stream(
+            $listener,
+            ${
+                class  => Test::Stream::Event::Test,
+                attributes => ${
+                    passed     => True,
+                    name       => (Str),
+                    diagnostic => (Test::Stream::Diagnostic)
+                },
+            }
+        );
+    };
+
+    my-subtest 'lives-ok( dies )', {
+        my $sub = sub { die 'I died' };
+        my-is( lives-ok($sub), False, 'lives-ok returns Bool' );
+        test-event-stream(
+            $listener,
+            ${
+                class  => Test::Stream::Event::Test,
+                attributes => ${
+                    passed     => False,
+                    name       => (Str),
+                    diagnostic => Test::Stream::Diagnostic.new(
+                        severity => DiagnosticSeverity::failure,
+                        more => {
+                            exception => X::AdHoc.new( payload => 'I died' ),
+                        },
+                    ),
+                },
+            }
+        );
+    };
+
+    my-subtest 'dies-ok( dies )', {
+        my $sub = sub { die 42 };
+        my-is( dies-ok($sub), True, 'dies-ok returns Bool' );
+        test-event-stream(
+            $listener,
+            ${
+                class  => Test::Stream::Event::Test,
+                attributes => ${
+                    passed     => True,
+                    name       => (Str),
+                    diagnostic => (Test::Stream::Diagnostic)
+                },
+            }
+        );
+    };
+
+    my-subtest 'dies-ok( dies )', {
+        my $sub = sub { return 42 };
+        my-is( dies-ok($sub), False, 'dies-ok returns Bool' );
+        test-event-stream(
+            $listener,
+            ${
+                class  => Test::Stream::Event::Test,
+                attributes => ${
+                    passed     => False,
+                    name       => (Str),
+                    diagnostic => Test::Stream::Diagnostic.new(
+                        severity => DiagnosticSeverity::failure,
+                        message  => 'The code ran without throwing an exception',
+                    ),
+                },
+            }
+        );
+    };
+
     my-subtest 'todo()', {
         todo(
             'unimplemented', {

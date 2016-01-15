@@ -57,6 +57,14 @@ sub is-deeply (|c --> Bool:D)  is export {
     return instance().is-deeply(|c);
 }
 
+sub lives-ok (&block, $name? --> Bool:D) is export {
+    return instance().lives-ok( &block, $name );
+}
+
+sub dies-ok (&block, $name? --> Bool:D) is export {
+    return instance().dies-ok( &block, $name );
+}
+
 # We need to repeat the signature from Test::Predicator here so that the
 # compiler knows how to parse { } blocks passed to these subs.
 sub subtest (Str:D $reason, &block --> Bool:D) is export {
