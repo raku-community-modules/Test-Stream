@@ -65,6 +65,14 @@ sub dies-ok (&block, $name? --> Bool:D) is export {
     return instance().dies-ok( &block, $name );
 }
 
+multi sub throws-like (&block, Mu:U $type, $name? --> Bool:D) is export {
+    return instance().throws-like( &block, $type, $name );
+}
+
+multi sub throws-like (&block, Regex:D $regex, $name? --> Bool:D) is export {
+    return instance().throws-like( &block, $regex, $name );
+}
+
 # We need to repeat the signature from Test::Predicator here so that the
 # compiler knows how to parse { } blocks passed to these subs.
 sub subtest (Str:D $reason, &block --> Bool:D) is export {

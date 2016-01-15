@@ -197,9 +197,41 @@ method dies-ok (&block, $name? --> Bool:D) {
     return $passed;
 }
 
-# method throws-like (Callable:D $code, My:U $type?, $name?) {
+multi method throws-like (&block, Mu:U $type, $name? --> Bool:D) {
+    return self.subtest(
+        $name // "throws-like {$type.^name}", {
+            my $passed = True;
+            try {
+                &block();
+                $passed = False;
+            }
+            my $e = $!;
 
-# }
+            self.ok( $passed, 'code throws an exception' );
+            if $e.defined {
+                self.isa-ok( $e, $type, "exception thrown by code isa {$type.^name}" );
+            }
+        },
+    );
+}
+
+multi method throws-like (&block, Regex:D $regex, $name? --> Bool:D) {
+    return self.subtest(
+        $name // "throws-like message content", {
+            my $passed = True;
+            try {
+                &block();
+                $passed = False;
+            }
+            my $e = $!;
+
+            self.ok( $passed, 'code throws an exception' );
+            if $e.defined {
+                self.like( $e.message, $regex );
+            }
+        },
+    );
+}
 
 # XXX - set up context around block?
 method subtest (Str:D $name, &block --> Bool:D) {

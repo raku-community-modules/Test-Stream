@@ -953,6 +953,230 @@ use Test::Stream::Types;
         );
     };
 
+    my-subtest 'dies-ok( dies )', {
+        my $sub = sub { return 42 };
+        my-is( dies-ok($sub), False, 'dies-ok returns Bool' );
+        test-event-stream(
+            $listener,
+            ${
+                class  => Test::Stream::Event::Test,
+                attributes => ${
+                    passed     => False,
+                    name       => (Str),
+                    diagnostic => Test::Stream::Diagnostic.new(
+                        severity => DiagnosticSeverity::failure,
+                        message  => 'The code ran without throwing an exception',
+                    ),
+                },
+            }
+        );
+    };
+
+    my-subtest 'throws-like( $sub, X::AdHoc )', {
+        my $sub = sub { die 'whatever' };
+        my-is( throws-like( $sub, X::AdHoc ), True, 'throws-like returns Bool' );
+        test-event-stream(
+            $listener,
+            ${
+                class  => Test::Stream::Event::Suite::Start,
+                attributes => ${
+                    name => 'throws-like X::AdHoc',
+                },
+            },
+            ${
+                class  => Test::Stream::Event::Test,
+                attributes => ${
+                    passed     => True,
+                    name       => 'code throws an exception',
+                    diagnostic => (Test::Stream::Diagnostic)
+                },
+            },
+            ${
+                class  => Test::Stream::Event::Test,
+                attributes => ${
+                    passed     => True,
+                    name       => 'exception thrown by code isa X::AdHoc',
+                    diagnostic => (Test::Stream::Diagnostic)
+                },
+            },
+            ${
+                class  => Test::Stream::Event::Suite::End,
+                attributes => ${
+                    name => 'throws-like X::AdHoc',
+                },
+            },
+        );
+    };
+
+    my-subtest 'throws-like( $sub, X::AdHoc, $name )', {
+        my $sub = sub { die 'whatever' };
+        my-is( throws-like( $sub, X::AdHoc, 'sub throws ad-hoc' ), True, 'throws-like returns Bool' );
+        test-event-stream(
+            $listener,
+            ${
+                class  => Test::Stream::Event::Suite::Start,
+                attributes => ${
+                    name => 'sub throws ad-hoc',
+                },
+            },
+            ${
+                class  => Test::Stream::Event::Test,
+                attributes => ${
+                    passed     => True,
+                    name       => 'code throws an exception',
+                    diagnostic => (Test::Stream::Diagnostic)
+                },
+            },
+            ${
+                class  => Test::Stream::Event::Test,
+                attributes => ${
+                    passed     => True,
+                    name       => 'exception thrown by code isa X::AdHoc',
+                    diagnostic => (Test::Stream::Diagnostic)
+                },
+            },
+            ${
+                class  => Test::Stream::Event::Suite::End,
+                attributes => ${
+                    name => 'sub throws ad-hoc',
+                },
+            },
+        );
+    };
+
+    my-subtest 'throws-like( $sub does not die, X::AdHoc )', {
+        my $sub = sub { return 42 };
+        my-is( throws-like( $sub, X::AdHoc ), False, 'throws-like returns Bool' );
+        test-event-stream(
+            $listener,
+            ${
+                class  => Test::Stream::Event::Suite::Start,
+                attributes => ${
+                    name => 'throws-like X::AdHoc',
+                },
+            },
+            ${
+                class  => Test::Stream::Event::Test,
+                attributes => ${
+                    passed     => False,
+                    name       => 'code throws an exception',
+                    diagnostic => (Test::Stream::Diagnostic),
+                },
+            },
+            ${
+                class  => Test::Stream::Event::Suite::End,
+                attributes => ${
+                    name => 'throws-like X::AdHoc',
+                },
+            },
+        );
+    };
+
+    my-subtest 'throws-like( $sub, $regex )', {
+        my $sub = sub { die 'some message or other' };
+        my-is( throws-like( $sub, rx{ 'some message' } ), True, 'throws-like returns Bool' );
+        test-event-stream(
+            $listener,
+            ${
+                class  => Test::Stream::Event::Suite::Start,
+                attributes => ${
+                    name => 'throws-like message content',
+                },
+            },
+            ${
+                class  => Test::Stream::Event::Test,
+                attributes => ${
+                    passed     => True,
+                    name       => 'code throws an exception',
+                    diagnostic => (Test::Stream::Diagnostic),
+                },
+            },
+            ${
+                class  => Test::Stream::Event::Test,
+                attributes => ${
+                    passed     => True,
+                    name       => (Str),
+                },
+            },
+            ${
+                class  => Test::Stream::Event::Suite::End,
+                attributes => ${
+                    name => 'throws-like message content',
+                },
+            },
+        );
+    };
+
+    my-subtest 'throws-like( $sub, $regex, $name )', {
+        my $sub = sub { die 'some message or other' };
+        my-is( throws-like( $sub, rx{ 'some message' }, 'exception has our message' ), True, 'throws-like returns Bool' );
+        test-event-stream(
+            $listener,
+            ${
+                class  => Test::Stream::Event::Suite::Start,
+                attributes => ${
+                    name => 'exception has our message',
+                },
+            },
+            ${
+                class  => Test::Stream::Event::Test,
+                attributes => ${
+                    passed     => True,
+                    name       => 'code throws an exception',
+                    diagnostic => (Test::Stream::Diagnostic),
+                },
+            },
+            ${
+                class  => Test::Stream::Event::Test,
+                attributes => ${
+                    passed     => True,
+                    name       => (Str),
+                },
+            },
+            ${
+                class  => Test::Stream::Event::Suite::End,
+                attributes => ${
+                    name => 'exception has our message',
+                },
+            },
+        );
+    };
+
+    my-subtest 'throws-like( $sub, $regex )', {
+        my $sub = sub { die 'some message or other' };
+        my-is( throws-like( $sub, rx{ 'not present' } ), False, 'throws-like returns Bool' );
+        test-event-stream(
+            $listener,
+            ${
+                class  => Test::Stream::Event::Suite::Start,
+                attributes => ${
+                    name => 'throws-like message content',
+                },
+            },
+            ${
+                class  => Test::Stream::Event::Test,
+                attributes => ${
+                    passed     => True,
+                    name       => 'code throws an exception',
+                    diagnostic => (Test::Stream::Diagnostic),
+                },
+            },
+            ${
+                class  => Test::Stream::Event::Test,
+                attributes => ${
+                    passed     => False,
+                    name       => (Str),
+                },
+            },
+            ${
+                class  => Test::Stream::Event::Suite::End,
+                attributes => ${
+                    name => 'throws-like message content',
+                },
+            },
+        );
+    };
+
     my-subtest 'todo()', {
         todo(
             'unimplemented', {
