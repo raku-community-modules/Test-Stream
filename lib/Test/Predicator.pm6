@@ -149,12 +149,21 @@ method !real-cmp-ok (Mu $got, Callable:D $op, Mu $expected, $name, Bool:D $diag-
     return $passed;
 }
 
-method is-deeply (Mu $got, Mu $expected, $name) {
+method is-deeply (Mu $got, Mu $expected, $name? --> Bool:D) {
     my $passed = $got eqv $expected;
     my %more = (
         got      => $got.perl,
         expected => $expected.perl,
+        operator => &infix:<eqv>,
     ) unless $passed;
+
+    self!send-test(
+        $passed,
+        $name,
+        more => %more,
+    );
+
+    return $passed;
 }
 
 method lives-ok (Callable:D $code, $name?) {

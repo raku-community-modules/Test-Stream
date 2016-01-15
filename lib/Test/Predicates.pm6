@@ -53,6 +53,10 @@ sub unlike (|c --> Bool:D)  is export {
     return instance().unlike(|c);
 }
 
+sub is-deeply (|c --> Bool:D)  is export {
+    return instance().is-deeply(|c);
+}
+
 # We need to repeat the signature from Test::Predicator here so that the
 # compiler knows how to parse { } blocks passed to these subs.
 sub subtest (Str:D $reason, &block --> Bool:D) is export {

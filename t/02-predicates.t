@@ -835,6 +835,52 @@ use Test::Stream::Types;
         );
     };
 
+    my-subtest 'is-deeply( $str, $regex ) without name', {
+        my-is(
+            is-deeply(
+                $[ 'array', 'with', ${ hash => 'ref' } ],
+                $[ 'array', 'with', ${ hash => 'ref' } ],
+            ),
+            True,
+            'is-deeply returns Bool'
+        );
+        test-event-stream(
+            $listener,
+            ${
+                class  => Test::Stream::Event::Test,
+                attributes => ${
+                    passed     => True,
+                    name       => (Str),
+                    diagnostic => (Test::Stream::Diagnostic)
+                },
+            },
+        );
+    };
+
+    my-subtest 'is-deeply( $str, $regex ) without name', {
+        my $got    = $[ 'array', 'with', ${ hash => 'ref' } ];
+        my $expect = $[ 'array', 'with', $[ array => 'ref' ] ],;
+        my-is( is-deeply( $got, $expect ), False, 'is-deeply returns Bool' );
+        test-event-stream(
+            $listener,
+            ${
+                class  => Test::Stream::Event::Test,
+                attributes => ${
+                    passed     => False,
+                    name       => (Str),
+                    diagnostic => Test::Stream::Diagnostic.new(
+                        severity => DiagnosticSeverity::failure,
+                        more     => ${
+                            got      => $got.perl,
+                            expected => $expect.perl,
+                            operator => &infix:<eqv>,
+                        },
+                    ),
+                },
+            },
+        );
+    };
+
     my-subtest 'todo()', {
         todo(
             'unimplemented', {
