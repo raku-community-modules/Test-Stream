@@ -119,6 +119,14 @@ sub description-of (Mu $got) {
            ~ " {$got.^name}";
 }
 
+method like (Str $got, Regex:D $regex, $name? --> Bool:D) {
+    return self!real-cmp-ok( $got, &infix:<~~>, $regex, $name, True );
+}
+
+method unlike (Str $got, Regex:D $regex, $name? --> Bool:D) {
+    return self!real-cmp-ok( $got, &infix:<!~~>, $regex, $name, True );
+}
+
 method !real-cmp-ok (Mu $got, Callable:D $op, Mu $expected, $name, Bool:D $diag-operator --> Bool:D) {
     my $passed = $op( $got, $expected );
 

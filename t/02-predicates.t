@@ -28,7 +28,7 @@ use Test::Stream::Types;
     };
 
     my-subtest 'ok(True) without name', {
-        my-is( ok(True), True, 'ok returns bool' );
+        my-is( ok(True), True, 'ok returns Bool' );
         test-event-stream(
             $listener,
             ${
@@ -43,7 +43,7 @@ use Test::Stream::Types;
     };
 
     my-subtest 'ok(False) without name', {
-        my-is( ok(False), False, 'ok returns bool' );
+        my-is( ok(False), False, 'ok returns Bool' );
         test-event-stream(
             $listener,
             ${
@@ -58,7 +58,7 @@ use Test::Stream::Types;
     };
 
     my-subtest 'ok(True) with name', {
-        my-is( ok( True, 'is true' ), True, 'ok returns bool' );
+        my-is( ok( True, 'is true' ), True, 'ok returns Bool' );
         test-event-stream(
             $listener,
             ${
@@ -73,7 +73,7 @@ use Test::Stream::Types;
     };
 
     my-subtest 'ok(False) with name', {
-        my-is( ok( False, 'is false' ), False, 'ok returns bool' );
+        my-is( ok( False, 'is false' ), False, 'ok returns Bool' );
         test-event-stream(
             $listener,
             ${
@@ -88,7 +88,7 @@ use Test::Stream::Types;
     };
 
     my-subtest 'pass()', {
-        my-is( pass(), True, 'pass returns bool' );
+        my-is( pass(), True, 'pass returns Bool' );
         test-event-stream(
             $listener,
             ${
@@ -103,7 +103,7 @@ use Test::Stream::Types;
     };
 
     my-subtest 'flunk()', {
-        my-is( flunk(), False, 'flunk returns bool' );
+        my-is( flunk(), False, 'flunk returns Bool' );
         test-event-stream(
             $listener,
             ${
@@ -118,7 +118,7 @@ use Test::Stream::Types;
     };
 
     my-subtest 'is( undef, undef ) without name', {
-        my-is( is( (Str), (Str) ), True, 'is returns bool' );
+        my-is( is( (Str), (Str) ), True, 'is returns Bool' );
         test-event-stream(
             $listener,
             ${
@@ -133,7 +133,7 @@ use Test::Stream::Types;
     };
 
     my-subtest 'is( undef !=== undef ) without name', {
-        my-is( is( (Str), (Int) ), False, 'is returns bool' );
+        my-is( is( (Str), (Int) ), False, 'is returns Bool' );
         test-event-stream(
             $listener,
             ${
@@ -155,7 +155,7 @@ use Test::Stream::Types;
     };
 
     my-subtest 'is( undef !=== defined ) without name', {
-        my-is( is( (Str), 42 ), False, 'is returns bool' );
+        my-is( is( (Str), 42 ), False, 'is returns Bool' );
         test-event-stream(
             $listener,
             ${
@@ -177,7 +177,7 @@ use Test::Stream::Types;
     };
 
     my-subtest 'is( defined !=== undef ) without name', {
-        my-is( is( 42, (Str) ), False, 'is returns bool' );
+        my-is( is( 42, (Str) ), False, 'is returns Bool' );
         test-event-stream(
             $listener,
             ${
@@ -199,7 +199,7 @@ use Test::Stream::Types;
     };
 
     my-subtest 'is( defined(Int) != defined(Int) ) without name', {
-        my-is( is( 1, 2 ), False, 'is returns bool' );
+        my-is( is( 1, 2 ), False, 'is returns Bool' );
         test-event-stream(
             $listener,
             ${
@@ -221,7 +221,7 @@ use Test::Stream::Types;
     };
 
     my-subtest 'is( defined(Str) != defined(Int) ) without name', {
-        my-is( is( 'foo', 2 ), False, 'is returns bool' );
+        my-is( is( 'foo', 2 ), False, 'is returns Bool' );
         test-event-stream(
             $listener,
             ${
@@ -243,7 +243,7 @@ use Test::Stream::Types;
     };
 
     my-subtest 'is( defined(Int) == defined(Int) ) without name', {
-        my-is( is( 2, 2 ), True, 'is returns bool' );
+        my-is( is( 2, 2 ), True, 'is returns Bool' );
         test-event-stream(
             $listener,
             ${
@@ -258,7 +258,7 @@ use Test::Stream::Types;
     };
 
     my-subtest 'is( defined(Str) == defined(Str) ) without name', {
-        my-is( is( 'foo', 'foo' ), True, 'is returns bool' );
+        my-is( is( 'foo', 'foo' ), True, 'is returns Bool' );
         test-event-stream(
             $listener,
             ${
@@ -273,7 +273,7 @@ use Test::Stream::Types;
     };
 
     my-subtest 'is( defined(Str) == defined(Str) ) with name', {
-        my-is( is( 'foo', 'foo', 'two foos' ), True, 'is returns bool' );
+        my-is( is( 'foo', 'foo', 'two foos' ), True, 'is returns Bool' );
         test-event-stream(
             $listener,
             ${
@@ -288,7 +288,7 @@ use Test::Stream::Types;
     };
 
     my-subtest 'isnt( undef, undef ) without name', {
-        my-is( isnt( (Str), (Str) ), False, 'isnt returns bool' );
+        my-is( isnt( (Str), (Str) ), False, 'isnt returns Bool' );
         test-event-stream(
             $listener,
             ${
@@ -310,7 +310,7 @@ use Test::Stream::Types;
     };
 
     my-subtest 'isnt( undef !=== undef ) without name', {
-        my-is( isnt( (Str), (Int) ), True, 'isnt returns bool' );
+        my-is( isnt( (Str), (Int) ), True, 'isnt returns Bool' );
         test-event-stream(
             $listener,
             ${
@@ -325,7 +325,7 @@ use Test::Stream::Types;
     };
 
     my-subtest 'isnt( undef !=== defined ) without name', {
-        my-is( isnt( (Str), 42 ), True, 'isnt returns bool' );
+        my-is( isnt( (Str), 42 ), True, 'isnt returns Bool' );
         test-event-stream(
             $listener,
             ${
@@ -340,7 +340,7 @@ use Test::Stream::Types;
     };
 
     my-subtest 'isnt( defined !=== undef ) without name', {
-        my-is( isnt( 42, (Str) ), True, 'isnt returns bool' );
+        my-is( isnt( 42, (Str) ), True, 'isnt returns Bool' );
         test-event-stream(
             $listener,
             ${
@@ -355,7 +355,7 @@ use Test::Stream::Types;
     };
 
     my-subtest 'isnt( defined(Int) != defined(Int) ) without name', {
-        my-is( isnt( 1, 2 ), True, 'isnt returns bool' );
+        my-is( isnt( 1, 2 ), True, 'isnt returns Bool' );
         test-event-stream(
             $listener,
             ${
@@ -370,7 +370,7 @@ use Test::Stream::Types;
     };
 
     my-subtest 'isnt( defined(Str) != defined(Int) ) without name', {
-        my-is( isnt( 'foo', 2 ), True, 'isnt returns bool' );
+        my-is( isnt( 'foo', 2 ), True, 'isnt returns Bool' );
         test-event-stream(
             $listener,
             ${
@@ -385,7 +385,7 @@ use Test::Stream::Types;
     };
 
     my-subtest 'isnt( defined(Int) == defined(Int) ) without name', {
-        my-is( isnt( 2, 2 ), False, 'isnt returns bool' );
+        my-is( isnt( 2, 2 ), False, 'isnt returns Bool' );
         test-event-stream(
             $listener,
             ${
@@ -407,7 +407,7 @@ use Test::Stream::Types;
     };
 
     my-subtest 'isnt( defined(Str) == defined(Str) ) without name', {
-        my-is( isnt( 'foo', 'foo' ), False, 'isnt returns bool' );
+        my-is( isnt( 'foo', 'foo' ), False, 'isnt returns Bool' );
         test-event-stream(
             $listener,
             ${
@@ -429,7 +429,7 @@ use Test::Stream::Types;
     };
 
     my-subtest 'isnt( defined(Str) == defined(Str) ) with name', {
-        my-is( isnt( 'foo', 'foo', 'two foos' ), False, 'isnt returns bool' );
+        my-is( isnt( 'foo', 'foo', 'two foos' ), False, 'isnt returns Bool' );
         test-event-stream(
             $listener,
             ${
@@ -451,7 +451,7 @@ use Test::Stream::Types;
     };
 
     my-subtest 'cmp-ok( 2 < 3 )', {
-        my-is( cmp-ok( 2, «<», 3 ), True, 'cmp-ok returns bool' );
+        my-is( cmp-ok( 2, «<», 3 ), True, 'cmp-ok returns Bool' );
         test-event-stream(
             $listener,
             ${
@@ -466,7 +466,7 @@ use Test::Stream::Types;
     };
 
     my-subtest 'cmp-ok( 2 > 3 )', {
-        my-is( cmp-ok( 2, «>», 3 ), False, 'cmp-ok returns bool' );
+        my-is( cmp-ok( 2, «>», 3 ), False, 'cmp-ok returns Bool' );
         test-event-stream(
             $listener,
             ${
@@ -488,7 +488,7 @@ use Test::Stream::Types;
     };
 
     my-subtest 'cmp-ok( 2 not-an-op 3 )', {
-        my-is( cmp-ok( 2, 'not-an-op', 3 ), False, 'cmp-ok returns bool' );
+        my-is( cmp-ok( 2, 'not-an-op', 3 ), False, 'cmp-ok returns Bool' );
         test-event-stream(
             $listener,
             ${
@@ -507,7 +507,7 @@ use Test::Stream::Types;
     };
 
     my-subtest 'isa-ok( $obj, $type )', {
-        my-is( isa-ok( 42, Int ), True, 'isa-ok returns bool' );
+        my-is( isa-ok( 42, Int ), True, 'isa-ok returns Bool' );
         test-event-stream(
             $listener,
             ${
@@ -521,7 +521,7 @@ use Test::Stream::Types;
     };
 
     my-subtest 'isa-ok( $obj, !$type )', {
-        my-is( isa-ok( 42, Str ), False, 'isa-ok returns bool' );
+        my-is( isa-ok( 42, Str ), False, 'isa-ok returns Bool' );
         test-event-stream(
             $listener,
             ${
@@ -539,7 +539,7 @@ use Test::Stream::Types;
     };
 
     my-subtest 'isa-ok( $obj, $type, $name )', {
-        my-is( isa-ok( 42, Int, 'my integer' ), True, 'isa-ok returns bool' );
+        my-is( isa-ok( 42, Int, 'my integer' ), True, 'isa-ok returns Bool' );
         test-event-stream(
             $listener,
             ${
@@ -553,7 +553,7 @@ use Test::Stream::Types;
     };
 
     my-subtest 'isa-ok( $obj, !$type, $name )', {
-        my-is( isa-ok( 42, Str, 'my string' ), False, 'isa-ok returns bool' );
+        my-is( isa-ok( 42, Str, 'my string' ), False, 'isa-ok returns Bool' );
         test-event-stream(
             $listener,
             ${
@@ -571,7 +571,7 @@ use Test::Stream::Types;
     };
 
     my-subtest 'does-ok( $obj, $role )', {
-        my-is( does-ok( sub { }, Callable ), True, 'does-ok returns bool' );
+        my-is( does-ok( sub { }, Callable ), True, 'does-ok returns Bool' );
         test-event-stream(
             $listener,
             ${
@@ -585,7 +585,7 @@ use Test::Stream::Types;
     };
 
     my-subtest 'does-ok( $obj, !$role )', {
-        my-is( does-ok( 'string', Callable ), False, 'does-ok returns bool' );
+        my-is( does-ok( 'string', Callable ), False, 'does-ok returns Bool' );
         test-event-stream(
             $listener,
             ${
@@ -603,7 +603,7 @@ use Test::Stream::Types;
     };
 
     my-subtest 'does-ok( $obj, $role, $name )', {
-        my-is( does-ok( sub { }, Callable, 'sub does Callable' ), True, 'does-ok returns bool' );
+        my-is( does-ok( sub { }, Callable, 'sub does Callable' ), True, 'does-ok returns Bool' );
         test-event-stream(
             $listener,
             ${
@@ -617,7 +617,7 @@ use Test::Stream::Types;
     };
 
     my-subtest 'does-ok( $obj, !$role, $name )', {
-        my-is( does-ok( 'string', Callable, 'string does Callable' ), False, 'does-ok returns bool' );
+        my-is( does-ok( 'string', Callable, 'string does Callable' ), False, 'does-ok returns Bool' );
         test-event-stream(
             $listener,
             ${
@@ -635,7 +635,7 @@ use Test::Stream::Types;
     };
 
     my-subtest 'does-ok( $obj, $role, $name )', {
-        my-is( does-ok( sub { }, Callable, 'sub does Callable' ), True, 'does-ok returns bool' );
+        my-is( does-ok( sub { }, Callable, 'sub does Callable' ), True, 'does-ok returns Bool' );
         test-event-stream(
             $listener,
             ${
@@ -649,7 +649,7 @@ use Test::Stream::Types;
     };
 
     my-subtest 'does-ok( $class, $role )', {
-        my-is( does-ok( Method, Callable ), True, 'does-ok returns bool' );
+        my-is( does-ok( Method, Callable ), True, 'does-ok returns Bool' );
         test-event-stream(
             $listener,
             ${
@@ -663,7 +663,7 @@ use Test::Stream::Types;
     };
 
     my-subtest 'does-ok( $role, $role )', {
-        my-is( does-ok( Mixy, Baggy ), True, 'does-ok returns bool' );
+        my-is( does-ok( Mixy, Baggy ), True, 'does-ok returns Bool' );
         test-event-stream(
             $listener,
             ${
@@ -677,7 +677,7 @@ use Test::Stream::Types;
     };
 
     my-subtest 'can-ok( $obj, $method )', {
-        my-is( can-ok( 42, 'chr' ), True, 'can-ok returns bool' );
+        my-is( can-ok( 42, 'chr' ), True, 'can-ok returns Bool' );
         test-event-stream(
             $listener,
             ${
@@ -691,7 +691,7 @@ use Test::Stream::Types;
     };
 
     my-subtest 'can-ok( $obj, !$method )', {
-        my-is( can-ok( 42, 'foobar' ), False, 'can-ok returns bool' );
+        my-is( can-ok( 42, 'foobar' ), False, 'can-ok returns Bool' );
         test-event-stream(
             $listener,
             ${
@@ -705,7 +705,7 @@ use Test::Stream::Types;
     };
 
     my-subtest 'can-ok( $obj, $method, $name )', {
-        my-is( can-ok( 42, 'chr', 'Int can chr' ), True, 'can-ok returns bool' );
+        my-is( can-ok( 42, 'chr', 'Int can chr' ), True, 'can-ok returns Bool' );
         test-event-stream(
             $listener,
             ${
@@ -719,7 +719,7 @@ use Test::Stream::Types;
     };
 
     my-subtest 'can-ok( $obj, !$method, $name )', {
-        my-is( can-ok( 42, 'foobar', 'Int can foobar' ), False, 'can-ok returns bool' );
+        my-is( can-ok( 42, 'foobar', 'Int can foobar' ), False, 'can-ok returns Bool' );
         test-event-stream(
             $listener,
             ${
@@ -733,7 +733,7 @@ use Test::Stream::Types;
     };
 
     my-subtest 'can-ok( $class, $method )', {
-        my-is( can-ok( Str, 'tc' ), True, 'can-ok returns bool' );
+        my-is( can-ok( Str, 'tc' ), True, 'can-ok returns Bool' );
         test-event-stream(
             $listener,
             ${
@@ -748,7 +748,7 @@ use Test::Stream::Types;
 
     my-skip 'cannot call Baggy.^can()', 1;
     # my-subtest 'can-ok( $role, $method )', {
-    #     my-is( can-ok( Baggy, 'grab' ), True, 'can-ok returns bool' );
+    #     my-is( can-ok( Baggy, 'grab' ), True, 'can-ok returns Bool' );
     #     test-event-stream(
     #         $listener,
     #         ${
@@ -760,6 +760,80 @@ use Test::Stream::Types;
     #         }
     #     );
     # };
+
+    my-subtest 'like( $str, $regex ) without name', {
+        my-is( like( 'foo bar baz', rx{ 'bar' } ), True, 'like returns Bool' );
+        test-event-stream(
+            $listener,
+            ${
+                class  => Test::Stream::Event::Test,
+                attributes => ${
+                    passed     => True,
+                    name       => (Str),
+                    diagnostic => (Test::Stream::Diagnostic)
+                },
+            },
+        );
+    };
+
+    my-subtest 'like( $str, !$regex ) without name', {
+        my-is( like( 'foo bar baz', rx{ 'blorg' } ), False, 'like returns Bool' );
+        test-event-stream(
+            $listener,
+            ${
+                class  => Test::Stream::Event::Test,
+                attributes => ${
+                    passed     => False,
+                    name       => (Str),
+                    diagnostic => Test::Stream::Diagnostic.new(
+                        severity => DiagnosticSeverity::failure,
+                        more => ${
+                            got      => 'foo bar baz',
+                            expected => rx{ 'blorg' },
+                            operator => &infix:<~~>,
+                        },
+                    ),
+                },
+            },
+        );
+    };
+
+    my-subtest 'unlike( $str, $regex ) without name', {
+        my-is( unlike( 'foo bar baz', rx{ 'blorg' } ), True, 'unlike returns Bool' );
+        test-event-stream(
+            $listener,
+            ${
+                class  => Test::Stream::Event::Test,
+                attributes => ${
+                    passed     => True,
+                    name       => (Str),
+                    diagnostic => (Test::Stream::Diagnostic)
+                },
+            },
+        );
+    };
+
+    my-subtest 'unlike( $str, !$regex ) without name', {
+        my-is( unlike( 'foo bar baz', rx{ 'bar' } ), False, 'unlike returns Bool' );
+        test-event-stream(
+            $listener,
+            ${
+                class  => Test::Stream::Event::Test,
+                attributes => ${
+                    passed     => False,
+                    name       => (Str),
+                    diagnostic => Test::Stream::Diagnostic.new(
+                        severity => DiagnosticSeverity::failure,
+                        more => ${
+                            got      => 'foo bar baz',
+                            expected => rx{ 'bar' },
+                            operator => &infix:<!~~>,
+                        },
+                    ),
+                },
+            },
+        );
+    };
 
     my-subtest 'todo()', {
         todo(
@@ -855,7 +929,7 @@ use Test::Stream::Types;
                 }
             ),
             True,
-            'subtest returns bool'
+            'subtest returns Bool'
         );
         test-event-stream(
             $listener,
@@ -891,7 +965,7 @@ use Test::Stream::Types;
                 }
             ),
             False,
-            'subtest returns bool'
+            'subtest returns Bool'
         );
         test-event-stream(
             $listener,
@@ -928,7 +1002,7 @@ use Test::Stream::Types;
                 }
             ),
             False,
-            'subtest returns bool'
+            'subtest returns Bool'
         );
         test-event-stream(
             $listener,
@@ -978,7 +1052,7 @@ use Test::Stream::Types;
     my-subtest 'subtest that runs no tests returns false', {
         my-is(
             subtest( 'no tests', sub { } ), False,
-            'subtest returns bool'
+            'subtest returns Bool'
         );
         test-event-stream(
             $listener,
@@ -1007,7 +1081,7 @@ use Test::Stream::Types;
                 }
             ),
             False,
-            'subtest returns bool'
+            'subtest returns Bool'
         );
         test-event-stream(
             $listener,
@@ -1057,7 +1131,7 @@ use Test::Stream::Types;
                 }
             ),
             False,
-            'subtest returns bool'
+            'subtest returns Bool'
         );
         test-event-stream(
             $listener,

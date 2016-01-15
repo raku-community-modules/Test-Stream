@@ -45,6 +45,14 @@ sub can-ok (|c --> Bool:D)  is export {
     return instance().can-ok(|c);
 }
 
+sub like (|c --> Bool:D)  is export {
+    return instance().like(|c);
+}
+
+sub unlike (|c --> Bool:D)  is export {
+    return instance().unlike(|c);
+}
+
 # We need to repeat the signature from Test::Predicator here so that the
 # compiler knows how to parse { } blocks passed to these subs.
 sub subtest (Str:D $reason, &block --> Bool:D) is export {
