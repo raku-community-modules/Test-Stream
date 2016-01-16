@@ -117,6 +117,9 @@ method finalize (--> Status:D) {
     if $top-suite.bailed {
         return Status.new(
             exit-code => 255,
+            error     =>
+                'Bailed out'
+                ~ ( $top-suite.bail-reason.defined ?? qq[ - {$top-suite.bail-reason}] !! q{} ),
         );
     }
     elsif $top-suite.tests-failed {
