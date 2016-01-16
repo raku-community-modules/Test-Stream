@@ -27,11 +27,11 @@ my %scripts = (
         1..2
         # failed 1 test
         END
-        err => Q:to/END/,
-        #   Failed test
-        #   at /home/autarch/projects/perl6/Test-Stream/lib/Test/Predicator.pm6 line 331
-        # Looks like you failed 1 test out of 2.
-        END
+        err => rx{
+        "#   Failed test\n"
+        '#   at ' .+ "/lib/Test/Predicator.pm6 line 331\n"
+        "# Looks like you failed 1 test out of 2.\n"
+        },
         exit-code => 1,
     },
     'bail.pl6' => ${
@@ -49,7 +49,12 @@ for %scripts.kv -> $script, $expect {
     # a segfault - https://rt.perl.org/Ticket/Display.html?id=125756
     my $proc = run( $*EXECUTABLE, $path, :out, :err );
     my-is( $proc.out.slurp-rest, $expect<out>, "got expected stdout from $script" );
-    my-is( $proc.err.slurp-rest, $expect<err> // q{}, "got expected stderr from $script" );
+    if $expect<err>.defined {
+        my-like( $proc.err.slurp-rest, $expect<err>, "got expected stderr from $script" );
+    }
+    else {
+        my-is( $proc.err.slurp-rest, q{}, "no stderr from $script" );
+    }
     # We need to close the handles in order to get the exitcode - the try
     # block is for https://rt.perl.org/Ticket/Display.html?id=125757
     try {
