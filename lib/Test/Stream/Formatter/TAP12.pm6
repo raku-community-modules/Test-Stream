@@ -229,7 +229,7 @@ method !say-comment (IO::Handle $output, Str:D $comment) {
     );
 }
 
-sub escape (Str:D $text) {
+our sub escape (Str:D $text) {
     return $text.subst( :g, rx{ (<[ # \\ ]>) }, { Q{\} ~ $/[0] } ),
 }
 

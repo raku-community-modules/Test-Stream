@@ -38,6 +38,10 @@ method remove-listener (Test::Stream::Listener:D $listener) {
     @.listeners = @.listeners.grep( { $_ !=== $listener } );
 }
 
+method has-listeners (--> Bool:D) {
+    return ?@.listeners;
+}
+
 method start-suite (Str:D :$name) {
     self.send-event(
         Test::Stream::Event::Suite::Start.new(
@@ -93,6 +97,10 @@ method send-event (Test::Stream::Event:D $event) {
     .accept-event($event) for @.listeners;
 }
 
+method main-suite (--> Test::Stream::Suite:D) {
+    return @!suites[0];
+}
+
 class Status {
     has Int:D $.exit-code = 0;
     has Str:D $.error     = q{};
@@ -109,9 +117,6 @@ method finalize (--> Status:D) {
     if $top-suite.bailed {
         return Status.new(
             exit-code => 255,
-            error     =>
-                'Bailed out'
-                ~ ( $top-suite.bail-reason.defined ?? qq[ - {$top-suite.bail-reason}] !! q{} ),
         );
     }
     elsif $top-suite.tests-failed {

@@ -2,6 +2,7 @@ use v6;
 
 unit module Test::Predicates;
 
+use Test::Stream::Formatter::TAP12;
 use Test::Stream::Hub;
 use Test::Predicator;
 
@@ -102,11 +103,28 @@ sub diag (|c) is export {
     instance().diag(|c);
 }
 
+sub bail (|c) is export {
+    instance().bail(|c);
+    exit(255);
+}
+
+sub done-testing is export {
+    my $status = instance().done-testing;
+    if $status.error {
+        say '# ' ~ Test::Stream::Formatter::TAP12::escape( $status.error );
+    }
+    exit( $status.exit-code );
+}
+
 my Test::Predicator $instance;
 sub instance {
-    return $instance //= Test::Predicator.new(
-        hub => Test::Stream::Hub.instance,
-    );
+    unless $instance {
+        my $hub = Test::Stream::Hub.instance;
+        $hub.add-listener( Test::Stream::Formatter::TAP12.new )
+            unless $hub.has-listeners;
+        $instance = Test::Predicator.new( hub => $hub );
+    }
+    return $instance;
 }
 
 # In case it's not obvious this method is only for testing of Test::Stream. If

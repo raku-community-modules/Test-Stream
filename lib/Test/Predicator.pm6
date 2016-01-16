@@ -280,6 +280,24 @@ method diag (Str:D(Mu:D) $message) {
     )
 }
 
+method bail ($reason?) {
+    self!send-event(
+        Test::Stream::Event::Bail.new(
+            reason => $reason,
+        )
+    );
+}
+
+method done-testing {
+    unless $!hub.main-suite.tests-planned {
+        self.plan( $!hub.main-suite.tests-run );
+    }
+
+    $!hub.end-suite( name => $!top-suite-name );
+
+    return $!hub.finalize;
+}
+
 method !send-test (Bool:D $passed, $name, :$diagnostic-message?, :%more?) {
     my %e = ( passed => $passed );
     %e<name> = $name if $name.defined;
