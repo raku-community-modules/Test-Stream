@@ -51,7 +51,6 @@ our sub infix:<!===> ($a, $b --> Bool:D) {
 }
 
 method isnt (Mu $got, Mu $expected, $name? --> Bool:D) {
-    use MONKEY-SEE-NO-EVAL;
     my $op =
         !$got.defined || !$expected.defined
         ?? &infix:<!===>
@@ -67,6 +66,8 @@ method cmp-ok (Mu $got, $op, Mu $expected, $name? --> Bool:D) {
         # passed as ops.
         my @delims = $op ~~ rx{ <[ < > ]> } ?? ( '«', '»' ) !! ( '<', '>' );
         use MONKEY-SEE-NO-EVAL;
+        # The "\&" bit is needed because of
+        # https://rt.perl.org/Ticket/Display.html?id=127284
         $matcher = EVAL qq{\&infix:@delims[0]$op@delims[1]};
         CATCH {
             self!send-test(
