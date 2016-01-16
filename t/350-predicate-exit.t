@@ -29,7 +29,7 @@ my %scripts = (
         END
         err => Q:to/END/,
         #   Failed test
-        #   at /home/autarch/projects/perl6/Test-Stream/lib/Test/Predicator.pm6 line 326
+        #   at /home/autarch/projects/perl6/Test-Stream/lib/Test/Predicator.pm6 line 331
         # Looks like you failed 1 test out of 2.
         END
         exit-code => 1,
