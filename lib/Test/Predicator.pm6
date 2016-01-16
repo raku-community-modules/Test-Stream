@@ -67,7 +67,7 @@ method cmp-ok (Mu $got, $op, Mu $expected, $name? --> Bool:D) {
         # passed as ops.
         my @delims = $op ~~ rx{ <[ < > ]> } ?? ( '«', '»' ) !! ( '<', '>' );
         use MONKEY-SEE-NO-EVAL;
-        $matcher = EVAL qq{&infix:@delims[0]$op@delims[1]};
+        $matcher = EVAL qq{\&infix:@delims[0]$op@delims[1]};
         CATCH {
             self!send-test(
                 False,
