@@ -16,7 +16,7 @@ use Test::Stream::Types;
             $listener,
             ${
                 class      => Test::Stream::Event::Suite::Start,
-                attributes => ${ name => '02-predicates.t' },
+                attributes => ${ name => '300-predicates.t' },
             },
             ${
                 class  => Test::Stream::Event::Plan,
@@ -1546,7 +1546,7 @@ use Test::Stream::Types;
             $listener,
             ${
                 class      => Test::Stream::Event::Suite::Start,
-                attributes => ${ name => '02-predicates.t' },
+                attributes => ${ name => '300-predicates.t' },
             },
             ${
                 class  => Test::Stream::Event::SkipAll,
@@ -1571,7 +1571,7 @@ use Test::Stream::Types;
             $listener,
             ${
                 class      => Test::Stream::Event::Suite::Start,
-                attributes => ${ name => '02-predicates.t' },
+                attributes => ${ name => '300-predicates.t' },
             },
             ${
                 class  => Test::Stream::Event::SkipAll,
