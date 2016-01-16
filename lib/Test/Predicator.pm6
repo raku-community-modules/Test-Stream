@@ -61,19 +61,24 @@ method isnt (Mu $got, Mu $expected, $name? --> Bool:D) {
 }
 
 method cmp-ok (Mu $got, $op, Mu $expected, $name? --> Bool:D) {
-    use MONKEY-SEE-NO-EVAL;
-    # Note that we have to use «» in order to make sure that < and > work.
-    if $op ~~ Callable ?? $op !! try EVAL qq{&infix:«$op»} -> $matcher {
-        return self!real-cmp-ok( $got, $matcher, $expected, $name, True );
+    my $matcher = $op;
+    unless $matcher ~~ Callable {
+        # We may have to use «» in order to make sure that '<' and '>' can be
+        # passed as ops.
+        my @delims = $op ~~ rx{ <[ < > ]> } ?? ( '«', '»' ) !! ( '<', '>' );
+        use MONKEY-SEE-NO-EVAL;
+        $matcher = EVAL qq{&infix:@delims[0]$op@delims[1]};
+        CATCH {
+            self!send-test(
+                False,
+                $name,
+                diagnostic-message => qq{Could not use '$op' as a comparator},
+            );
+            return False;
+        }
     }
 
-    self!send-test(
-        False,
-        $name,
-        diagnostic-message => qq{Could not use '$op' as a comparator},
-    );
-
-    return False;
+    return self!real-cmp-ok( $got, $matcher, $expected, $name, True );
 }
 
 method isa-ok (Mu $got, Mu $type, $name? --> Bool:D) {
