@@ -12,6 +12,7 @@ has Test::Stream::Suite:D @!suites;
 # As we pop suites off @!suites we unshift them onto this so we always have
 # access to them.
 has Test::Stream::Suite:D @!finished-suites;
+has CallFrame:D @!context;
 
 # My current thinking is that there should really just be one Hub per process
 # in most scenarios. Different event producers and listeners can all attach to
@@ -80,6 +81,10 @@ method end-suite (Str:D :$name) {
     return $current;
 }
 
+method main-suite (--> Test::Stream::Suite:D) {
+    return @!suites[0];
+}
+
 method send-event (Test::Stream::Event:D $event) {
     unless @.listeners.elems {
         die "Attempted to send a {$event.^name} event before any listeners were added";
@@ -93,12 +98,20 @@ method send-event (Test::Stream::Event:D $event) {
         die "Attempted to send a {$event.^name} event after sending a Bail";
     }
 
-    $event.set-source( Test::Stream::EventSource.new );
+    $event.set-source( self.make-source );
     .accept-event($event) for @.listeners;
 }
 
-method main-suite (--> Test::Stream::Suite:D) {
-    return @!suites[0];
+method set-context {
+    @!context.append( callframe(2) );
+}
+
+method release-context {
+    @!context.pop;
+}
+
+method make-source {
+    return Test::Stream::EventSource.new( :frame( @!context[0] ) );
 }
 
 class Status {

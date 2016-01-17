@@ -122,7 +122,7 @@ test-formatter(
                 todo-output    => q{},
                 failure-output => qq:to/FAILURE/,
                 #   Failed test 'will fail'
-                #   at $*PROGRAM-NAME line 1383
+                #   at $*PROGRAM-NAME line 77
                 FAILURE
             },
         },
@@ -147,7 +147,7 @@ test-formatter(
                 output         => "not ok 3 - needs fixing # TODO not yet done\n",
                 todo-output    => qq:to/TODO/,
                 #   Failed (TODO) test 'needs fixing'
-                #   at $*PROGRAM-NAME line 1383
+                #   at $*PROGRAM-NAME line 77
                 TODO
                 failure-output => q{},
             },
@@ -455,7 +455,7 @@ test-formatter(
                 todo-output    => q{},
                 failure-output => qq:to/FAILURE/,
                 #   Failed test 'should include diag info'
-                #   at $*PROGRAM-NAME line 1383
+                #   at $*PROGRAM-NAME line 392
                 # did not get the answer
                 #     expected : 42
                 #     operator : infix:<==>
@@ -492,7 +492,7 @@ test-formatter(
                 output         => qq{not ok 3 - needs fixing # TODO not yet done\n},
                 todo-output    => qq:to/TODO/,
                 #   Failed (TODO) test 'needs fixing'
-                #   at $*PROGRAM-NAME line 1383
+                #   at $*PROGRAM-NAME line 392
                 # expected large size
                 #     expected : "large"
                 #          got : "medium"
@@ -530,7 +530,7 @@ test-formatter(
                 todo-output    => q{},
                 failure-output => qq:to/FAILURE/,
                 #   Failed test 'diag.more has arbitrary keys'
-                #   at $*PROGRAM-NAME line 1383
+                #   at $*PROGRAM-NAME line 392
                 # did not get the answer
                 #     keys : \$[1, 2, 3]
                 #     with : "arbitrary"
@@ -619,7 +619,7 @@ test-formatter(
                 todo-output    => q{},
                 failure-output => qq:to/FAILURE/,
                     #   Failed test 'should include diag info'
-                    #   at $*PROGRAM-NAME line 1383
+                    #   at $*PROGRAM-NAME line 554
                     # did not get the answer
                     #     expected : 42
                     #     operator : infix:<==>
@@ -656,7 +656,7 @@ test-formatter(
                 output         => qq{    not ok 2 - needs fixing # TODO not yet done\n},
                 todo-output    => qq:to/TODO/,
                     #   Failed (TODO) test 'needs fixing'
-                    #   at $*PROGRAM-NAME line 1383
+                    #   at $*PROGRAM-NAME line 554
                     # expected large size
                     #     expected : "large"
                     #          got : "medium"
@@ -694,7 +694,7 @@ test-formatter(
                 todo-output    => q{},
                 failure-output => qq:to/FAILURE/,
                     #   Failed test 'diag.more has arbitrary keys'
-                    #   at $*PROGRAM-NAME line 1383
+                    #   at $*PROGRAM-NAME line 554
                     # did not get the answer
                     #     keys : \$[1, 2, 3]
                     #     with : "arbitrary"
@@ -777,7 +777,7 @@ test-formatter(
                 todo-output    => q{},
                 failure-output => qq:to/FAILURE/,
                 #   Failed test 'will fail'
-                #   at $*PROGRAM-NAME line 1383
+                #   at $*PROGRAM-NAME line 732
                 FAILURE
             },
         },
@@ -813,7 +813,7 @@ test-formatter(
                 output         => "not ok 3 - needs fixing # TODO not yet done\n",
                 todo-output    => qq:to/TODO/,
                 #   Failed (TODO) test 'needs fixing'
-                #   at $*PROGRAM-NAME line 1383
+                #   at $*PROGRAM-NAME line 732
                 TODO
                 failure-output => q{},
             },
@@ -885,7 +885,7 @@ test-formatter(
                 todo-output    => q{},
                 failure-output => qq:to/FAILURE/,
                     #   Failed test 'will fail'
-                    #   at $*PROGRAM-NAME line 1383
+                    #   at $*PROGRAM-NAME line 732
                 FAILURE
             },
         },
@@ -921,7 +921,7 @@ test-formatter(
                 output         => qq{    not ok 3 - needs fixing # TODO not yet done\n},
                 todo-output    => qq:to/TODO/,
                     #   Failed (TODO) test 'needs fixing'
-                    #   at $*PROGRAM-NAME line 1383
+                    #   at $*PROGRAM-NAME line 732
                 TODO
                 failure-output => q{},
             },
@@ -1033,7 +1033,7 @@ test-formatter(
                 output         => "not ok 1 - needs fixing # TODO not yet done\n",
                 todo-output    => qq:to/TODO/,
                 #   Failed (TODO) test 'needs fixing'
-                #   at $*PROGRAM-NAME line 1383
+                #   at $*PROGRAM-NAME line 979
                 TODO
                 failure-output => q{},
             },
@@ -1103,7 +1103,7 @@ test-formatter(
                 output         => qq{    not ok 1 - needs fixing # TODO not yet done\n},
                 todo-output    => qq:to/TODO/,
                     #   Failed (TODO) test 'needs fixing'
-                    #   at $*PROGRAM-NAME line 1383
+                    #   at $*PROGRAM-NAME line 979
                 TODO
                 failure-output => q{},
             },
@@ -1338,17 +1338,17 @@ test-formatter(
 my-done-testing;
 
 sub test-formatter ($name, @event-tests) {
+    my %outputs = (
+        output         => My::IO::String.new,
+        todo-output    => My::IO::String.new,
+        failure-output => My::IO::String.new,
+    );
+    my $tap = Test::Stream::Formatter::TAP12.new(|%outputs);
+    my $hub = Test::Stream::Hub.new;
+    $hub.add-listener($tap);
+    $hub.set-context;
+
     my-subtest $name, {
-        my %outputs = (
-            output         => My::IO::String.new,
-            todo-output    => My::IO::String.new,
-            failure-output => My::IO::String.new,
-        );
-
-        my $tap = Test::Stream::Formatter::TAP12.new(|%outputs);
-        my $hub = Test::Stream::Hub.new;
-        $hub.add-listener($tap);
-
         for @event-tests -> $test {
             test-event-output(
                 $hub,

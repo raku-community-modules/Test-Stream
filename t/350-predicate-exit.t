@@ -29,7 +29,7 @@ my %scripts = (
         END
         err => rx{
         "#   Failed test\n"
-        '#   at ' .+ "/lib/Test/Predicator.pm6 line 331\n"
+        "#   at t/helpers/test-failures.pl6 line 7\n"
         "# Looks like you failed 1 test out of 2.\n"
         },
         exit-code => 1,
