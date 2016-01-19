@@ -1346,7 +1346,9 @@ sub test-formatter ($name, @event-tests) {
     my $tap = Test::Stream::Formatter::TAP12.new(|%outputs);
     my $hub = Test::Stream::Hub.new;
     $hub.add-listener($tap);
+
     $hub.set-context;
+    LEAVE { $hub.release-context; }
 
     my-subtest $name, {
         for @event-tests -> $test {

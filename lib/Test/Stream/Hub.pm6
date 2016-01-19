@@ -86,6 +86,10 @@ method main-suite (--> Test::Stream::Suite:D) {
 }
 
 method send-event (Test::Stream::Event:D $event) {
+    unless @!context.elems {
+        die "Attempted to send a {$event.^name} event before any context was set";
+    }
+
     unless @.listeners.elems {
         die "Attempted to send a {$event.^name} event before any listeners were added";
     }

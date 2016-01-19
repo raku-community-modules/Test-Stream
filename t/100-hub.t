@@ -14,6 +14,15 @@ my-subtest 'multiple listeners and events', {
     $hub.add-listener($l1);
     $hub.add-listener($l2);
 
+    my-throws-like(
+        { $hub.start-suite( name => 'suite' ) },
+        rx{ 'Attempted to send a Test::Stream::Event::Suite::Start event before any context was set' },
+        'cannot start a suite without a context'
+    );
+
+    $hub.set-context;
+    LEAVE { $hub.release-context; }
+
     $hub.start-suite( name => 'suite' );
 
     my-is(
@@ -63,6 +72,7 @@ my-subtest 'multiple listeners and events', {
         $hub.listeners[0], $l1,
         'the remaining listener is the one that was not removed'
     );
+
 };
 
 my-subtest 'errors from bad event sequences', {
@@ -70,6 +80,9 @@ my-subtest 'errors from bad event sequences', {
     my $l = My::Listener.new;
 
     $hub.add-listener($l);
+
+    $hub.set-context;
+    LEAVE { $hub.release-context; }
 
     my-throws-like(
         {
@@ -173,6 +186,9 @@ my-subtest 'events after Bail', {
     my $hub = Test::Stream::Hub.new;
     $hub.add-listener(My::Listener.new);
 
+    $hub.set-context;
+    LEAVE { $hub.release-context; }
+
     $hub.start-suite( name => 'suite' );
     $hub.send-event(
         Test::Stream::Event::Test.new(
@@ -202,6 +218,9 @@ my-subtest 'events after Bail', {
 my-subtest 'finalize when Bail is seen', {
     my $hub = Test::Stream::Hub.new;
     $hub.add-listener(My::Listener.new);
+
+    $hub.set-context;
+    LEAVE { $hub.release-context; }
 
     $hub.start-suite( name => 'suite' );
     $hub.send-event(
@@ -238,6 +257,9 @@ my-subtest 'finalize when 3 tests fail', {
     my $hub = Test::Stream::Hub.new;
     $hub.add-listener(My::Listener.new);
 
+    $hub.set-context;
+    LEAVE { $hub.release-context; }
+
     $hub.start-suite( name => 'suite' );
     $hub.send-event(
         Test::Stream::Event::Test.new(
@@ -250,6 +272,9 @@ my-subtest 'finalize when 3 tests fail', {
         )
     ) for 1..3;
     $hub.end-suite( name => 'suite' );
+
+    $hub.set-context;
+    LEAVE { $hub.release-context; }
 
     my $status = $hub.finalize;
     my-is(
@@ -267,6 +292,9 @@ my-subtest 'finalize when 3 tests fail', {
 my-subtest 'finalize when plan does not match tests run', {
     my $hub = Test::Stream::Hub.new;
     $hub.add-listener(My::Listener.new);
+
+    $hub.set-context;
+    LEAVE { $hub.release-context; }
 
     $hub.start-suite( name => 'suite' );
     $hub.send-event(
@@ -298,6 +326,9 @@ my-subtest 'finalize when 2 child suites are unfinished', {
     my $hub = Test::Stream::Hub.new;
     $hub.add-listener(My::Listener.new);
 
+    $hub.set-context;
+    LEAVE { $hub.release-context; }
+
     $hub.start-suite( name => 'suite' );
     $hub.start-suite( name => 'inner1' );
     $hub.start-suite( name => 'inner2' );
@@ -324,6 +355,9 @@ my-subtest 'finalize when all tests pass', {
     my $hub = Test::Stream::Hub.new;
     $hub.add-listener(My::Listener.new);
 
+    $hub.set-context;
+    LEAVE { $hub.release-context; }
+
     $hub.start-suite( name => 'suite' );
     $hub.send-event(
         Test::Stream::Event::Test.new(
@@ -347,6 +381,10 @@ my-subtest 'finalize when all tests pass', {
 
 my-subtest 'starting a suite without any listeners', {
     my $hub = Test::Stream::Hub.new;
+
+    $hub.set-context;
+    LEAVE { $hub.release-context; }
+
     my-throws-like(
         { $hub.start-suite( name => 'whatever' ) },
         rx{ 'Attempted to send a Test::Stream::Event::Suite::Start event before any listeners were added' },
