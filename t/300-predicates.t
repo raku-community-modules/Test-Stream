@@ -1583,6 +1583,8 @@ use Test::Stream::Types;
     };
 }
 
+Test::Predicates::clear-instance-violently-for-test-stream-tests;
+
 my-done-testing;
 
 sub listener (--> My::Listener:D) {

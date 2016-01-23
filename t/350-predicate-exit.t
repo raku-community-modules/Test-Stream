@@ -12,6 +12,14 @@ my %scripts = (
         END
         exit-code => 0,
     },
+    'plan-no-done-testing.pl6' => ${
+        out => Q:to/END/,
+        1..2
+        ok 1 - test 1
+        ok 2
+        END
+        exit-code => 0,
+    },
     'no-plan-exit-ok.pl6' => ${
         out => Q:to/END/,
         ok 1 - test 1

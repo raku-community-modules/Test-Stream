@@ -81,6 +81,10 @@ method end-suite (Str:D :$name) {
     return $current;
 }
 
+method is-finished (--> Bool:D) {
+    return ?( !@!suites || @!suites[0].bailed );
+}
+
 method main-suite (--> Test::Stream::Suite:D) {
     return @!suites[0];
 }

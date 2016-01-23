@@ -181,6 +181,9 @@ sub bail (|c) is export {
 }
 
 sub done-testing is export {
+    my $hub = Test::Stream::Hub.instance;
+    $hub.set-context;
+    LEAVE { $hub.release-context }
     my $status = instance().done-testing;
     if $status.error {
         say '# ' ~ Test::Stream::Formatter::TAP12::escape( $status.error );
@@ -197,6 +200,12 @@ sub instance {
         $instance = Test::Predicator.new( hub => $hub );
     }
     return $instance;
+}
+
+END {
+    if $instance {
+        done-testing() unless $instance.hub.is-finished;
+    }
 }
 
 # In case it's not obvious this method is only for testing of Test::Stream. If
