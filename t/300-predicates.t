@@ -1534,11 +1534,7 @@ use Test::Stream::Types;
 }
 
 {
-    Test::Stream::Hub.clear-instance-violently-for-test-stream-tests;
-    Test::Predicates::clear-instance-violently-for-test-stream-tests;
-    my $hub = Test::Stream::Hub.instance;
-    my $listener = My::Listener.new;
-    $hub.add-listener($listener);
+    my $listener = listener();
 
     my-subtest 'skip-all()', {
         skip-all();
@@ -1559,11 +1555,7 @@ use Test::Stream::Types;
 }
 
 {
-    Test::Stream::Hub.clear-instance-violently-for-test-stream-tests;
-    Test::Predicates::clear-instance-violently-for-test-stream-tests;
-    my $hub = Test::Stream::Hub.instance;
-    my $listener = My::Listener.new;
-    $hub.add-listener($listener);
+    my $listener = listener();
 
     my-subtest 'skip-all()', {
         skip-all('why not');
