@@ -353,7 +353,8 @@ my-subtest 'finalize when 2 child suites are unfinished', {
 
 my-subtest 'finalize when all tests pass', {
     my $hub = Test::Stream::Hub.new;
-    $hub.add-listener(Test::Stream::Recorder.new);
+    my $l = Test::Stream::Recorder.new;
+    $hub.add-listener($l);
 
     $hub.set-context;
     LEAVE { $hub.release-context; }
@@ -390,6 +391,33 @@ my-subtest 'starting a suite without any listeners', {
         rx{ 'Attempted to send a Test::Stream::Event::Suite::Start event before any listeners were added' },
         'got exception trying to start a suite without any listeners added'
     );
+};
+
+my-subtest 'finalize sends event', {
+    my $hub = Test::Stream::Hub.new;
+    my $l = Test::Stream::Recorder.new;
+    $hub.add-listener($l);
+
+    $hub.set-context;
+    LEAVE { $hub.release-context; }
+
+    $hub.start-suite( name => 'suite' );
+    $hub.send-event(
+        Test::Stream::Event::Test.new(
+            passed => True,
+        )
+    );
+    $hub.end-suite( name => 'suite' );
+
+    my $status = $hub.finalize;
+
+    my $last-event = $l.events[*-1];
+    my-isa-ok(
+        $last-event,
+        'Test::Stream::Event::Finalize',
+        'last event sent to listener'
+    );
+
 };
 
 my-subtest 'instance returns the same object', {

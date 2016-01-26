@@ -122,6 +122,8 @@ multi method accept-event (Test::Stream::Event::Todo::End:D $event) {
     $!todo-reason = (Str);
 }
 
+multi method accept-event (Test::Stream::Event::Finalize:D $event) { }
+
 method !say-plan (Int:D $planned, Str $skip-reason?) {
     my $plan-line = '1..' ~ $planned;
     if $skip-reason.defined {

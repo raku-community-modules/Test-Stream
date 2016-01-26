@@ -14,6 +14,7 @@ role Test::Stream::Listener {
     multi method accept-event (Test::Stream::Event::Todo::End:D $event) { ... }
     multi method accept-event (Test::Stream::Event::Suite::Start:D $event) { ... }
     multi method accept-event (Test::Stream::Event::Suite::End:D $event) { ... }
+    multi method accept-event (Test::Stream::Event::Finalize:D $event) { ... }
 }
 
 role Test::Stream::Listener::MostlyIgnores does Test::Stream::Listener {
@@ -28,4 +29,5 @@ role Test::Stream::Listener::MostlyIgnores does Test::Stream::Listener {
     multi method accept-event (Test::Stream::Event::Test:D $event) { }
     multi method accept-event (Test::Stream::Event::Todo::Start:D $event) { }
     multi method accept-event (Test::Stream::Event::Todo::End:D $event) { }
+    multi method accept-event (Test::Stream::Event::Finalize:D $event) { }
 }

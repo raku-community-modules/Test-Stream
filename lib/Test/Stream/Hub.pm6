@@ -2,6 +2,7 @@ use v6;
 
 unit class Test::Stream::Hub;
 
+use Test::Stream::FinalStatus;
 use Test::Stream::Listener;
 use Test::Stream::Suite;
 use Test::Stream::Util;
@@ -98,11 +99,17 @@ method send-event (Test::Stream::Event:D $event) {
         die "Attempted to send a {$event.^name} event before any listeners were added";
     }
 
-    unless @!suites.elems || $event.isa(Test::Stream::Event::Suite::Start) {
+    # It would probably be better to have some sort of property or role for
+    # events that says they don't require suites.
+    unless @!suites.elems
+        || $event.isa(Test::Stream::Event::Suite::Start)
+        || $event.isa(Test::Stream::Event::Finalize) {
         die "Attempted to send a {$event.^name} event before any suites were started";
     }
 
-    if @!suites.elems && @!suites[0].bailed && !$event.isa(Test::Stream::Event::Suite::End) {
+    # Same for here, except a property that says "can be sent after bail".
+    if @!suites.elems && @!suites[0].bailed
+        && !( $event.isa(Test::Stream::Event::Suite::End) || $event.isa(Test::Stream::Event::Finalize) ) {
         die "Attempted to send a {$event.^name} event after sending a Bail";
     }
 
@@ -122,21 +129,29 @@ method make-source {
     return Test::Stream::EventSource.new( :frame( @!context[0] ) );
 }
 
-class Status {
-    has Int:D $.exit-code = 0;
-    has Str:D $.error     = q{};
-}
-
-method finalize (--> Status:D) {
+method finalize (--> Test::Stream::FinalStatus:D) {
     my $unfinished-suites = @!suites.elems;
     self.end-suite( name => $_.name ) for @!suites.reverse;
 
+    my $status = self!final-status($unfinished-suites);
+
+    self.send-event(
+        Test::Stream::Event::Finalize.new(
+            status => $status,
+            source => self.make-source,
+        ),
+    );
+
+    return $status;
+}
+
+method !final-status (Int:D $unfinished-suites --> Test::Stream::FinalStatus:D) {
     my $top-suite = @!finished-suites[0];
 
     # The exit-code is going to be used as an actual process exit code so it
     # cannot be greater than 254.
     if $top-suite.bailed {
-        return Status.new(
+        return Test::Stream::FinalStatus.new(
             exit-code => 255,
             error     =>
                 'Bailed out'
@@ -146,30 +161,30 @@ method finalize (--> Status:D) {
     elsif $top-suite.tests-failed {
         my $failed = maybe-plural( $top-suite.tests-failed, 'test' );
         my $error = "failed {$top-suite.tests-failed} $failed";
-        return Status.new(
+        return Test::Stream::FinalStatus.new(
             exit-code => min( 254, $top-suite.tests-failed ),
             error     => $error,
         );
     }
     elsif $top-suite.tests-planned
-          && ( $top-suite.tests-planned != $top-suite.tests-run ) {
+       && ( $top-suite.tests-planned != $top-suite.tests-run ) {
 
         my $planned = maybe-plural( $top-suite.tests-planned, 'test' );
         my $ran     = maybe-plural( $top-suite.tests-run, 'test' );
-        return Status.new(
+        return Test::Stream::FinalStatus.new(
             exit-code => 255,
             error     => "planned {$top-suite.tests-planned} $planned but ran {$top-suite.tests-run} $ran",
         );
     }
     elsif $unfinished-suites {
         my $unfinished = maybe-plural( $unfinished-suites, 'suite' );
-        return Status.new(
+        return Test::Stream::FinalStatus.new(
             exit-code => 1,
             error     => "finalize was called but {$unfinished-suites} $unfinished are still in process",
         );
     }
 
-    return Status.new(
+    return Test::Stream::FinalStatus.new(
         exit-code => 0,
         error     => q{},
     );

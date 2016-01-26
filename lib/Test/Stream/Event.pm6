@@ -4,6 +4,7 @@ unit module Test::Stream;
 
 use Test::Stream::Diagnostic;
 use Test::Stream::EventSource;
+use Test::Stream::FinalStatus;
 use Test::Stream::Types;
 
 role Event {
@@ -98,5 +99,10 @@ class Event::Todo::Start does Event {
 
 class Event::Todo::End does Event {
     has Str $.reason;
-    submethod BUILD (Str :$!reason, Test::Stream::EventSource :$!source) { }
+    submethod BUILD (Str :$!reason) { }
+}
+
+class Event::Finalize does Event {
+    has Test::Stream::FinalStatus $.status;
+    submethod BUILD (Test::Stream::FinalStatus:D :$!status) { }
 }
