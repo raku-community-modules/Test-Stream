@@ -46,9 +46,7 @@ my-subtest 'source marker stack', {
             my-is( $source.file, $*PROGRAM-NAME, 'source points to this file' );
             my-is( $source.line, 23, 'source points to the line in a sub that does not set a context' );
         }
-    };
-
-    
+    };    
 };
 
 my-done-testing;
