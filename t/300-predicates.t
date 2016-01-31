@@ -87,6 +87,36 @@ use Test::Stream::Types;
         );
     };
 
+    my-subtest 'ok(1) without name', {
+        my-is( ok(1), True, 'ok returns Bool' );
+        test-event-stream(
+            $listener,
+            ${
+                class  => Test::Stream::Event::Test,
+                attributes => ${
+                    passed     => True,
+                    name       => (Str),
+                    diagnostic => (Test::Stream::Diagnostic)
+                },
+            },
+        );
+    };
+
+    my-subtest 'ok(0) without name', {
+        my-is( ok(0), False, 'ok returns Bool' );
+        test-event-stream(
+            $listener,
+            ${
+                class  => Test::Stream::Event::Test,
+                attributes => ${
+                    passed     => False,
+                    name       => (Str),
+                    diagnostic => (Test::Stream::Diagnostic)
+                },
+            },
+        );
+    };
+
     my-subtest 'pass()', {
         my-is( pass(), True, 'pass returns Bool' );
         test-event-stream(

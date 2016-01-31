@@ -35,7 +35,7 @@ method flunk ($name? --> Bool:D) {
     return False;
 }
 
-method ok (Bool:D(Any) $passed, $name? --> Bool:D) {
+method ok (Bool(Any) $passed, $name? --> Bool:D) {
     self!send-test( $passed, $name );
     return $passed;
 }
