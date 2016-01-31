@@ -627,9 +627,9 @@ END {
 }
 
 # New code added for the purpose of testing Test::Stream
-use My::Listener;
-sub test-event-stream (My::Listener $listener, *@expect) is export {
-    my @got = $listener.events;
+use Test::Stream::Recorder;
+sub test-event-stream (Test::Stream::Recorder:D $recorder, *@expect) is export {
+    my @got = $recorder.events;
     my-is(
         @got.elems, @expect.elems,
         'got the expected number of events'
@@ -701,7 +701,7 @@ sub test-event-stream (My::Listener $listener, *@expect) is export {
         };
     }
 
-    $listener.clear;
+    $recorder.clear;
 }
 
 

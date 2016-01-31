@@ -1,16 +1,16 @@
 use v6;
 use lib 'lib', 't/lib';
 
-use My::Listener;
 use My::Test;
 use Test::Stream::Event;
 use Test::Stream::Hub;
+use Test::Stream::Recorder;
 
 my-subtest 'multiple listeners and events', {
     my $hub = Test::Stream::Hub.new;
 
-    my $l1 = My::Listener.new;
-    my $l2 = My::Listener.new;
+    my $l1 = Test::Stream::Recorder.new;
+    my $l2 = Test::Stream::Recorder.new;
     $hub.add-listener($l1);
     $hub.add-listener($l2);
 
@@ -77,7 +77,7 @@ my-subtest 'multiple listeners and events', {
 
 my-subtest 'errors from bad event sequences', {
     my $hub = Test::Stream::Hub.new;
-    my $l = My::Listener.new;
+    my $l = Test::Stream::Recorder.new;
 
     $hub.add-listener($l);
 
@@ -184,7 +184,7 @@ my-subtest 'errors from bad event sequences', {
 
 my-subtest 'events after Bail', {
     my $hub = Test::Stream::Hub.new;
-    $hub.add-listener(My::Listener.new);
+    $hub.add-listener(Test::Stream::Recorder.new);
 
     $hub.set-context;
     LEAVE { $hub.release-context; }
@@ -217,7 +217,7 @@ my-subtest 'events after Bail', {
 
 my-subtest 'finalize when Bail is seen', {
     my $hub = Test::Stream::Hub.new;
-    $hub.add-listener(My::Listener.new);
+    $hub.add-listener(Test::Stream::Recorder.new);
 
     $hub.set-context;
     LEAVE { $hub.release-context; }
@@ -255,7 +255,7 @@ my-subtest 'finalize when Bail is seen', {
 
 my-subtest 'finalize when 3 tests fail', {
     my $hub = Test::Stream::Hub.new;
-    $hub.add-listener(My::Listener.new);
+    $hub.add-listener(Test::Stream::Recorder.new);
 
     $hub.set-context;
     LEAVE { $hub.release-context; }
@@ -291,7 +291,7 @@ my-subtest 'finalize when 3 tests fail', {
 
 my-subtest 'finalize when plan does not match tests run', {
     my $hub = Test::Stream::Hub.new;
-    $hub.add-listener(My::Listener.new);
+    $hub.add-listener(Test::Stream::Recorder.new);
 
     $hub.set-context;
     LEAVE { $hub.release-context; }
@@ -324,7 +324,7 @@ my-subtest 'finalize when plan does not match tests run', {
 
 my-subtest 'finalize when 2 child suites are unfinished', {
     my $hub = Test::Stream::Hub.new;
-    $hub.add-listener(My::Listener.new);
+    $hub.add-listener(Test::Stream::Recorder.new);
 
     $hub.set-context;
     LEAVE { $hub.release-context; }
@@ -353,7 +353,7 @@ my-subtest 'finalize when 2 child suites are unfinished', {
 
 my-subtest 'finalize when all tests pass', {
     my $hub = Test::Stream::Hub.new;
-    $hub.add-listener(My::Listener.new);
+    $hub.add-listener(Test::Stream::Recorder.new);
 
     $hub.set-context;
     LEAVE { $hub.release-context; }

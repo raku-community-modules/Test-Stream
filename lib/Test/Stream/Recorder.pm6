@@ -2,7 +2,7 @@ use v6;
 
 use Test::Stream::Listener;
 
-unit class My::Listener does Test::Stream::Listener;
+unit class Test::Stream::Recorder does Test::Stream::Listener;
 
 use Test::Stream::Event;
 

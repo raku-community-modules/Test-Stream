@@ -1,10 +1,10 @@
 use v6;
 use lib 'lib', 't/lib';
 
-use My::Listener;
 use My::Test;
 use Test::Predicates;
 use Test::Stream::Diagnostic;
+use Test::Stream::Recorder;
 use Test::Stream::Types;
 
 {
@@ -1579,11 +1579,11 @@ Test::Predicates::clear-instance-violently-for-test-stream-tests;
 
 my-done-testing;
 
-sub listener (--> My::Listener:D) {
+sub listener (--> Test::Stream::Recorder:D) {
     Test::Stream::Hub.clear-instance-violently-for-test-stream-tests;
     Test::Predicates::clear-instance-violently-for-test-stream-tests;
     my $hub = Test::Stream::Hub.instance;
-    my $listener = My::Listener.new;
+    my $listener = Test::Stream::Recorder.new;
     $hub.add-listener($listener);
 
     return $listener;
