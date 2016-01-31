@@ -12,6 +12,11 @@ has Bool:D $!manage-top-suite  = True;
 has Bool:D $!started-top-suite = False;
 has Str:D  $!top-suite-name    = IO::Path.new($*PROGRAM-NAME).basename;
 
+submethod BUILD (
+    Test::Stream::Hub:D :$!hub,
+    Bool:D :$!manage-top-suite = True,
+) { }
+
 method plan (PositiveInt:D $planned) {
     self!send-event(
         Test::Stream::Event::Plan.new(
