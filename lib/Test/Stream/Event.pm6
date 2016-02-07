@@ -32,7 +32,7 @@ role Event::PassFail {
 }
 
 class Event::Suite::Start does Event does Event::Named {
-    submethod BUILD (Str:D :$!name) { }
+    submethod BUILD (Str:D :$!name, Test::Stream::EventSource :$!source) { }
 }
 
 class Event::Suite::End does Event does Event::Named {
@@ -46,6 +46,7 @@ class Event::Suite::End does Event does Event::Named {
         Int:D  :$!tests-run,
         Int:D  :$!tests-failed,
         Bool:D :$!passed,
+        Test::Stream::EventSource :$!source,
     ) { }
 }
 
@@ -55,32 +56,33 @@ class Event::Test does Event does Event::Named does Event::PassFail {
         Str :$!name,
         Test::Stream::Diagnostic :$!diagnostic,
         Bool:D :$!passed,
+        Test::Stream::EventSource :$!source,
     ) { }
 }
 
 class Event::Bail does Event {
     has Str $.reason;
-    submethod BUILD (Str :$!reason) { }
+    submethod BUILD (Str :$!reason, Test::Stream::EventSource :$!source) { }
 }
 
 class Event::Diag does Event {
     has Str $.message;
-    submethod BUILD (Str :$!message) { }
+    submethod BUILD (Str :$!message, Test::Stream::EventSource :$!source) { }
 }
 
 class Event::Note does Event {
     has Str $.message;
-    submethod BUILD (Str :$!message) { }
+    submethod BUILD (Str :$!message, Test::Stream::EventSource :$!source) { }
 }
 
 class Event::Plan does Event {
     has PositiveInt $.planned;
-    submethod BUILD (PositiveInt:D :$!planned) { }
+    submethod BUILD (PositiveInt:D :$!planned, Test::Stream::EventSource :$!source) { }
 }
 
 class Event::SkipAll does Event {
     has Str $.reason;
-    submethod BUILD (Str :$!reason) { }
+    submethod BUILD (Str :$!reason, Test::Stream::EventSource :$!source) { }
 }
 
 class Event::Skip does Event {
@@ -89,12 +91,13 @@ class Event::Skip does Event {
     submethod BUILD (
         PositiveInt:D :$!count,
         Str :$!reason,
+        Test::Stream::EventSource :$!source,
     ) { }
 }
 
 class Event::Todo::Start does Event {
     has Str $.reason;
-    submethod BUILD (Str :$!reason) { }
+    submethod BUILD (Str :$!reason, Test::Stream::EventSource :$!source) { }
 }
 
 class Event::Todo::End does Event {
