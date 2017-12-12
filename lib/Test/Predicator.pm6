@@ -15,6 +15,7 @@ has Str:D  $!top-suite-name    = IO::Path.new($*PROGRAM-NAME).basename;
 submethod BUILD (
     Test::Stream::Hub:D :$!hub,
     Bool:D :$!manage-top-suite = True,
+    Str:D :$!top-suite-name    = IO::Path.new($*PROGRAM-NAME).basename,
 ) { }
 
 method plan (PositiveInt:D $planned) {

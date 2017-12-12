@@ -26,26 +26,20 @@ my-subtest 'source marker stack', {
 
     my-subtest 'sub returns source directly', {
         my $source = foo();
-        if my-ok( $source.frame, 'source returned has a frame' ) {
-            my-is( $source.file, $*PROGRAM-NAME, 'source points to this file' );
-            my-is( $source.line, 28, 'source points to where a sub that sets a context is called' );
-        }
+        my-is( $source.file, $*PROGRAM-NAME, 'source points to this file' );
+        my-is( $source.line, 28, 'source points to where a sub that sets a context is called' );
     };
 
     my-subtest 'sub sets source marker and then calls another sub to make the source', {
         my $source = bar();
-        if my-ok( $source.frame, 'source returned has a frame' ) {
-            my-is( $source.file, $*PROGRAM-NAME, 'source points to this file' );
-            my-is( $source.line, 36, 'source points to where a sub that sets a context is called' );
-        }
+        my-is( $source.file, $*PROGRAM-NAME, 'source points to this file' );
+        my-is( $source.line, 35, 'source points to where a sub that sets a context is called' );
     };
 
     my-subtest 'sub does not set source marker and then calls sub that does', {
         my $source = baz();
-        if my-ok( $source.frame, 'source returned has a frame' ) {
-            my-is( $source.file, $*PROGRAM-NAME, 'source points to this file' );
-            my-is( $source.line, 23, 'source points to the line in a sub that does not set a context' );
-        }
+        my-is( $source.file, $*PROGRAM-NAME, 'source points to this file' );
+        my-is( $source.line, 23, 'source points to the line in a sub that does not set a context' );
     };    
 };
 

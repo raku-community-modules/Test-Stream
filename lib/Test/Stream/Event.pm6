@@ -10,6 +10,7 @@ use Test::Stream::Types;
 role Event {
     has Test::Stream::EventSource $.source;
     has Instant:D $.time = now;
+    has $.event-tag;
 
     method type {
         return self.^name.subst( rx{ ^ 'Test::Stream::Event::' }, q{} );
@@ -17,6 +18,10 @@ role Event {
 
     method set-source (Test::Stream::EventSource:D $source) {
         $!source = $source;
+    }
+
+    method set-event-tag ($tag) {
+        $!event-tag = $tag;
     }
 }
 
@@ -32,7 +37,11 @@ role Event::PassFail {
 }
 
 class Event::Suite::Start does Event does Event::Named {
-    submethod BUILD (Str:D :$!name, Test::Stream::EventSource :$!source) { }
+    submethod BUILD (
+        Str:D :$!name,
+        Test::Stream::EventSource :$!source,
+        :$!event-tag,
+    ) { }
 }
 
 class Event::Suite::End does Event does Event::Named {
@@ -47,6 +56,7 @@ class Event::Suite::End does Event does Event::Named {
         Int:D  :$!tests-failed,
         Bool:D :$!passed,
         Test::Stream::EventSource :$!source,
+        :$!event-tag,
     ) { }
 }
 
@@ -57,32 +67,53 @@ class Event::Test does Event does Event::Named does Event::PassFail {
         Test::Stream::Diagnostic :$!diagnostic,
         Bool:D :$!passed,
         Test::Stream::EventSource :$!source,
+        :$!event-tag,
     ) { }
 }
 
 class Event::Bail does Event {
     has Str $.reason;
-    submethod BUILD (Str :$!reason, Test::Stream::EventSource :$!source) { }
+    submethod BUILD (
+        Str :$!reason,
+        Test::Stream::EventSource :$!source,
+        :$!event-tag,
+    ) { }
 }
 
 class Event::Diag does Event {
     has Str $.message;
-    submethod BUILD (Str :$!message, Test::Stream::EventSource :$!source) { }
+    submethod BUILD (
+        Str :$!message,
+        Test::Stream::EventSource :$!source,
+        :$!event-tag,
+    ) { }
 }
 
 class Event::Note does Event {
     has Str $.message;
-    submethod BUILD (Str :$!message, Test::Stream::EventSource :$!source) { }
+    submethod BUILD (
+        Str :$!message,
+        Test::Stream::EventSource :$!source,
+        :$!event-tag,
+    ) { }
 }
 
 class Event::Plan does Event {
     has PositiveInt $.planned;
-    submethod BUILD (PositiveInt:D :$!planned, Test::Stream::EventSource :$!source) { }
+    submethod BUILD (
+        PositiveInt:D :$!planned,
+        Test::Stream::EventSource :$!source,
+        :$!event-tag,
+    ) { }
 }
 
 class Event::SkipAll does Event {
     has Str $.reason;
-    submethod BUILD (Str :$!reason, Test::Stream::EventSource :$!source) { }
+    submethod BUILD (
+        Str :$!reason,
+        Test::Stream::EventSource :$!source,
+        :$!event-tag,
+    ) { }
 }
 
 class Event::Skip does Event {
@@ -92,20 +123,33 @@ class Event::Skip does Event {
         PositiveInt:D :$!count,
         Str :$!reason,
         Test::Stream::EventSource :$!source,
+        :$!event-tag,
     ) { }
 }
 
 class Event::Todo::Start does Event {
     has Str $.reason;
-    submethod BUILD (Str :$!reason, Test::Stream::EventSource :$!source) { }
+    submethod BUILD (
+        Str :$!reason,
+        Test::Stream::EventSource :$!source,
+        :$!event-tag,
+    ) { }
 }
 
 class Event::Todo::End does Event {
     has Str $.reason;
-    submethod BUILD (Str :$!reason) { }
+    submethod BUILD (
+        Str :$!reason,
+        Test::Stream::EventSource :$!source,
+        :$!event-tag,
+    ) { }
 }
 
 class Event::Finalize does Event {
     has Test::Stream::FinalStatus $.status;
-    submethod BUILD (Test::Stream::FinalStatus:D :$!status) { }
+    submethod BUILD (
+        Test::Stream::FinalStatus:D :$!status,
+        Test::Stream::EventSource :$!source,
+        :$!event-tag,
+    ) { }
 }

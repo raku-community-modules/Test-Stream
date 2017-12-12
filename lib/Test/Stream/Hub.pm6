@@ -7,6 +7,7 @@ use Test::Stream::Listener;
 use Test::Stream::Suite;
 use Test::Stream::Util;
 
+has $.event-tag;
 has Test::Stream::Listener:D @.listeners;
 # This is the current suite stack. We push and pop onto this as we go.
 has Test::Stream::Suite:D @!suites;
@@ -14,6 +15,7 @@ has Test::Stream::Suite:D @!suites;
 # access to them.
 has Test::Stream::Suite:D @!finished-suites;
 has CallFrame:D @!context;
+has Bool:D $.is-finalized = False;
 
 # My current thinking is that there should really just be one Hub per process
 # in most scenarios. Different event producers and listeners can all attach to
@@ -91,7 +93,7 @@ method main-suite (--> Test::Stream::Suite:D) {
 }
 
 method send-event (Test::Stream::Event:D $event) {
-    unless @!context.elems {
+    unless @!context.elems || $event.source.defined {
         die "Attempted to send a {$event.^name} event before any context was set";
     }
 
@@ -99,6 +101,7 @@ method send-event (Test::Stream::Event:D $event) {
         die "Attempted to send a {$event.^name} event before any listeners were added";
     }
 
+    dd $event if $event.source.defined;
     # It would probably be better to have some sort of property or role for
     # events that says they don't require suites.
     unless @!suites.elems
@@ -113,7 +116,9 @@ method send-event (Test::Stream::Event:D $event) {
         die "Attempted to send a {$event.^name} event after sending a Bail";
     }
 
-    $event.set-source( self.make-source );
+    $event.set-source( self.make-source ) unless $event.source.defined;
+    $event.set-event-tag($!event-tag) if $!event-tag.defined;
+
     .accept-event($event) for @.listeners;
 }
 
@@ -126,7 +131,7 @@ method release-context {
 }
 
 method make-source {
-    return Test::Stream::EventSource.new( :frame( @!context[0] ) );
+    return Test::Stream::EventSource.from-frame( @!context[0] );
 }
 
 method finalize (--> Test::Stream::FinalStatus:D) {
@@ -141,6 +146,8 @@ method finalize (--> Test::Stream::FinalStatus:D) {
             source => self.make-source,
         ),
     );
+
+    $!is-finalized = True;
 
     return $status;
 }

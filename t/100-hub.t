@@ -24,7 +24,7 @@ my-subtest 'multiple listeners and events', {
     LEAVE { $hub.release-context; }
 
     $hub.start-suite( name => 'suite' );
-
+    dd $l1.events[0].source;
     my-is(
         $l1.events.elems, 1,
         'first listener got 1 event',
