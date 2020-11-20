@@ -1,6 +1,6 @@
 This is a prototype of an event-based test framework. The goal is to produce
 an underlying set of modules that can be shared by all Test modules in the
-Perl 6 ecosystem. Building this on top of an abstract test event system makes
+Raku ecosystem. Building this on top of an abstract test event system makes
 integrating different modules much easier. It also makes testing your test
 modules *much* easier, and allows for output formats besides TAP.
 
