@@ -8,5 +8,5 @@
     "provides"    : {
         "Test::Stream" : "lib/Test/Stream.pm6"
     },
-    "source-url"  : "git://github.com/autarch/perl6-Test-Stream.git"
+    "source-url"  : "git://github.com/raku-community-modules/Test-Stream.git"
 }
