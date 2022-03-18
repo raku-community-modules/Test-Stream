@@ -152,12 +152,12 @@ method !real-cmp-ok (Mu $got, Callable:D $op, Mu $expected, $name, Bool:D $diag-
     }
 
     self!send-test(
-        $passed,
+        so $passed,
         $name,
         more => %more,
     );
 
-    return $passed;
+    return so $passed;
 }
 
 method is-deeply (Mu $got, Mu $expected, $name? --> Bool:D) {
@@ -310,7 +310,7 @@ method done-testing {
 }
 
 method !send-test (Bool:D $passed, $name, :$diagnostic-message?, :%more?) {
-    my %e = ( passed => $passed );
+    my %e = (:$passed);
     %e<name> = $name if $name.defined;
 
     unless %e<passed> {
