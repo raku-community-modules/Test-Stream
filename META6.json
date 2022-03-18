@@ -11,7 +11,7 @@
     "Test::Stream::Diagnostic": "lib/Test/Stream/Diagnostic.pm6",
     "Test::Stream::Event": "lib/Test/Stream/Event.pm6",
     "Test::Stream::EventSource": "lib/Test/Stream/EventSource.pm6",
-    "Test::Stream::Formatter/TAP12": "lib/Test/Stream/Formatter/TAP12.pm6",
+    "Test::Stream::Formatter::TAP12": "lib/Test/Stream/Formatter/TAP12.pm6",
     "Test::Stream::Hub": "lib/Test/Stream/Hub.pm6",
     "Test::Stream::Listener": "lib/Test/Stream/Listener.pm6",
     "Test::Stream::Recorder": "lib/Test/Stream/Recorder.pm6",
