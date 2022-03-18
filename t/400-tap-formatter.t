@@ -1,7 +1,6 @@
 # Warning - the emacs uncomment-region command will seriously screw up many
 # parts of this test!
 
-use v6;
 use lib 'lib', 't/lib';
 
 use My::IO::String;
