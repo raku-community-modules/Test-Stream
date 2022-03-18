@@ -1,8 +1,9 @@
 {
   "name": "Test::Stream",
   "description": "Stream test events",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "perl": "6.*",
+  "auth": "zef:raku-community-modules",
   "depends": [],
   "provides": {
     "Test::Predicates": "lib/Test/Predicates.pm6",
