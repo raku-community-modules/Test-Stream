@@ -11,4 +11,4 @@ do not rely on this code yet.
 
 # LICENSE
 
-T
+This module is licensed under the [Artistic License](LICENSE)
