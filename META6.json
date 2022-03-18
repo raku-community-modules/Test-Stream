@@ -5,7 +5,18 @@
   "perl": "6.*",
   "depends": [],
   "provides": {
-    "Test::Stream": "lib/Test/Stream.pm6"
+    "Test::Predicates": "lib/Test/Predicates.pm6",
+    "Test::Predicator": "lib/Test/Predicator.pm6",
+    "Test::Stream::Diagnostic": "lib/Test/Stream/Diagnostic.pm6",
+    "Test::Stream::Event": "lib/Test/Stream/Event.pm6",
+    "Test::Stream::EventSource": "lib/Test/Stream/EventSource.pm6",
+    "Test::Stream::Formatter/TAP12": "lib/Test/Stream/Formatter/TAP12.pm6",
+    "Test::Stream::Hub": "lib/Test/Stream/Hub.pm6",
+    "Test::Stream::Listener": "lib/Test/Stream/Listener.pm6",
+    "Test::Stream::Recorder": "lib/Test/Stream/Recorder.pm6",
+    "Test::Stream::Suite": "lib/Test/Stream/Suite.pm6",
+    "Test::Stream::Types": "lib/Test/Stream/Types.pm6",
+    "Test::Stream::Util": "lib/Test/Stream/Util.pm6"
   },
   "license": "Artistic-2.0",
   "source-url": "https://github.com/raku-community-modules/Test-Stream.git",
