@@ -1,12 +1,13 @@
 {
-    "perl"        : "6.*",
-    "name"        : "Test::Stream",
-    "version"     : "0.0.1",
-    "author"      : "Dave Rolsky <autarch@urth.org>",
-    "description" : "Stream test events",
-    "depends"     : [],
-    "provides"    : {
-        "Test::Stream" : "lib/Test/Stream.pm6"
-    },
-    "source-url"  : "git://github.com/raku-community-modules/Test-Stream.git"
+  "name": "Test::Stream",
+  "description": "Stream test events",
+  "version": "0.0.1",
+  "perl": "6.*",
+  "depends": [],
+  "provides": {
+    "Test::Stream": "lib/Test/Stream.pm6"
+  },
+  "license": "Artistic-2.0",
+  "source-url": "https://github.com/raku-community-modules/Test-Stream.git",
+  "author": "Dave Rolsky <autarch@urth.org>"
 }
