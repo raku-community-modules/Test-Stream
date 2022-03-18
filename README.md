@@ -1,4 +1,4 @@
-# Test::Stream
+# Test::Stream [![Tests on source](https://github.com/raku-community-modules/Test-Stream/actions/workflows/test.yaml/badge.svg)](https://github.com/raku-community-modules/Test-Stream/actions/workflows/test.yaml)
 
 This is a prototype of an event-based test framework. The goal is to produce
 an underlying set of modules that can be shared by all Test modules in the
