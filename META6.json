@@ -1,7 +1,7 @@
 {
   "name": "Test::Stream",
   "description": "Stream test events",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "perl": "6.*",
   "auth": "zef:raku-community-modules",
   "depends": [],
