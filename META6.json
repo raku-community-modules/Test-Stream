@@ -7,11 +7,12 @@
   ],
   "description": "Stream test events",
   "license": "Artistic-2.0",
-  "name": "Test::Predicates",
+  "name": "Test::Stream",
   "perl": "6.*",
   "provides": {
     "Test::Predicates": "lib/Test/Predicates.rakumod",
     "Test::Predicator": "lib/Test/Predicator.rakumod",
+    "Test::Stream": "lib/Test/Stream.rakumod",
     "Test::Stream::Diagnostic": "lib/Test/Stream/Diagnostic.rakumod",
     "Test::Stream::Event": "lib/Test/Stream/Event.rakumod",
     "Test::Stream::EventSource": "lib/Test/Stream/EventSource.rakumod",

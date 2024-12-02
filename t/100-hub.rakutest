@@ -3,7 +3,7 @@ use My::Test;
 use Test::Stream::Event;
 use Test::Stream::Hub;
 use Test::Stream::Recorder;
-
+if %*ENV<NO_TESTING> { say "1..0"; exit }
 my-subtest 'multiple listeners and events', {
     my $hub = Test::Stream::Hub.new;
 

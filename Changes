@@ -1,7 +1,8 @@
 Revision history for Test::Stream
 
 {{$NEXT}}
-0.1  2024-12-02T17:58:55+01:00
+
+0.1  2024-12-02T18:29:36+01:00
     - Modernized file extensions
     - Added CI badge for each OS
     - Some code modernization
