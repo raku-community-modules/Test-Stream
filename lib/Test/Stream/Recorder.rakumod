@@ -1,5 +1,3 @@
-use v6;
-
 use Test::Stream::Listener;
 
 unit class Test::Stream::Recorder does Test::Stream::Listener;
@@ -21,3 +19,5 @@ multi method accept-event (Test::Stream::Event::Todo::Start:D $event) { @.events
 multi method accept-event (Test::Stream::Event::Todo::End:D $event) { @.events.append($event) }
 
 method clear { @.events = () }
+
+# vim: expandtab shiftwidth=4

@@ -1,10 +1,8 @@
-use v6;
-use lib 'lib', 't/lib';
-
+use lib $*PROGRAM.sibling("lib");
 use My::Test;
 
 my %scripts = (
-    'plan-exit-ok.pl6' => ${
+    'plan-exit-ok.raku' => ${
         out => Q:to/END/,
         1..2
         ok 1 - test 1
@@ -12,7 +10,7 @@ my %scripts = (
         END
         exit-code => 0,
     },
-    'plan-no-done-testing.pl6' => ${
+    'plan-no-done-testing.raku' => ${
         out => Q:to/END/,
         1..2
         ok 1 - test 1
@@ -20,7 +18,7 @@ my %scripts = (
         END
         exit-code => 0,
     },
-    'no-plan-exit-ok.pl6' => ${
+    'no-plan-exit-ok.raku' => ${
         out => Q:to/END/,
         ok 1 - test 1
         ok 2
@@ -28,7 +26,7 @@ my %scripts = (
         END
         exit-code => 0,
     },
-    'test-failures.pl6' => ${
+    'test-failures.raku' => ${
         out => Q:to/END/,
         ok 1 - test 1
         not ok 2
@@ -37,12 +35,12 @@ my %scripts = (
         END
         err => rx{
         "#   Failed test\n"
-        "#   at t/helpers/test-failures.pl6 line 7\n"
+        "#   at t/helpers/test-failures.raku line 7\n"
         "# Looks like you failed 1 test out of 2.\n"
         },
         exit-code => 1,
     },
-    'bail.pl6' => ${
+    'bail.raku' => ${
         out => Q:to/END/,
         ok 1 - test 1
         Bail out!  things are going wrong
@@ -73,3 +71,5 @@ for %scripts.kv -> $script, $expect {
 }
 
 my-done-testing();
+
+# vim: expandtab shiftwidth=4

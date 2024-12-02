@@ -1,5 +1,3 @@
-use v6;
-
 use Test::Stream::Event;
 
 role Test::Stream::Listener {
@@ -29,3 +27,5 @@ role Test::Stream::Listener::MostlyIgnores does Test::Stream::Listener {
     multi method accept-event (Test::Stream::Event::Todo::Start:D $event) { }
     multi method accept-event (Test::Stream::Event::Todo::End:D $event) { }
 }
+
+# vim: expandtab shiftwidth=4

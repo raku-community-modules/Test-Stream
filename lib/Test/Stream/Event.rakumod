@@ -1,5 +1,3 @@
-use v6;
-
 unit module Test::Stream;
 
 use Test::Stream::Diagnostic;
@@ -100,3 +98,5 @@ class Event::Todo::End does Event {
     has Str $.reason;
     submethod BUILD (Str :$!reason, Test::Stream::EventSource :$!source) { }
 }
+
+# vim: expandtab shiftwidth=4

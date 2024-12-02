@@ -1,9 +1,8 @@
-use v6;
-use lib 'lib', 't/lib';
-
-use My::Test;
 use Test::Stream::EventSource;
 use Test::Stream::Hub;
+
+use lib $*PROGRAM.sibling("lib");
+use My::Test;
 
 my $hub = Test::Stream::Hub.instance;
 
@@ -28,7 +27,7 @@ my-subtest 'source marker stack', {
         my $source = foo();
         if my-ok( $source.frame, 'source returned has a frame' ) {
             my-is( $source.file, $*PROGRAM-NAME, 'source points to this file' );
-            my-is( $source.line, 28, 'source points to where a sub that sets a context is called' );
+            my-is( $source.line, 27, 'source points to where a sub that sets a context is called' );
         }
     };
 
@@ -36,7 +35,7 @@ my-subtest 'source marker stack', {
         my $source = bar();
         if my-ok( $source.frame, 'source returned has a frame' ) {
             my-is( $source.file, $*PROGRAM-NAME, 'source points to this file' );
-            my-is( $source.line, 36, 'source points to where a sub that sets a context is called' );
+            my-is( $source.line, 35, 'source points to where a sub that sets a context is called' );
         }
     };
 
@@ -44,10 +43,12 @@ my-subtest 'source marker stack', {
         my $source = baz();
         if my-ok( $source.frame, 'source returned has a frame' ) {
             my-is( $source.file, $*PROGRAM-NAME, 'source points to this file' );
-            my-is( $source.line, 24,
+            my-is( $source.line, 23,
                     'source points to the line in a sub that does not set a context' );
         }
     };    
 };
 
 my-done-testing;
+
+# vim: expandtab shiftwidth=4

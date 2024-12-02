@@ -1,15 +1,14 @@
 # Warning - the emacs uncomment-region command will seriously screw up many
 # parts of this test!
 
-
-use lib 'lib', 't/lib';
-
-use My::IO::String;
-use My::Test;
 use Test::Stream::Event;
 use Test::Stream::Formatter::TAP12;
 use Test::Stream::Hub;
 use Test::Stream::Types;
+
+use lib $*PROGRAM.sibling("lib");
+use My::IO::String;
+use My::Test;
 
 test-formatter(
     'No subtests, all tests passing',
@@ -122,7 +121,7 @@ test-formatter(
                 todo-output    => q{},
                 failure-output => qq:to/FAILURE/,
                 #   Failed test 'will fail'
-                #   at $*PROGRAM-NAME line 187
+                #   at $*PROGRAM-NAME line 186
                 FAILURE
             },
         },
@@ -147,7 +146,7 @@ test-formatter(
                 output         => "not ok 3 - needs fixing # TODO not yet done\n",
                 todo-output    => qq:to/TODO/,
                 #   Failed (TODO) test 'needs fixing'
-                #   at $*PROGRAM-NAME line 187
+                #   at $*PROGRAM-NAME line 186
                 TODO
                 failure-output => q{},
             },
@@ -1034,7 +1033,7 @@ test-formatter(
                 output         => "not ok 1 - needs fixing # TODO not yet done\n",
                 todo-output    => qq:to/TODO/,
                 #   Failed (TODO) test 'needs fixing'
-                #   at $*PROGRAM-NAME line 1140
+                #   at $*PROGRAM-NAME line 1139
                 TODO
                 failure-output => q{},
             },
@@ -1104,7 +1103,7 @@ test-formatter(
                 output         => qq{    not ok 1 - needs fixing # TODO not yet done\n},
                 todo-output    => qq:to/TODO/,
                     #   Failed (TODO) test 'needs fixing'
-                    #   at $*PROGRAM-NAME line 1140
+                    #   at $*PROGRAM-NAME line 1139
                 TODO
                 failure-output => q{},
             },
@@ -1408,3 +1407,5 @@ sub compare-outputs (Str:D $key, %outputs, %expect) {
         );
     }
 }
+
+# vim: expandtab shiftwidth=4

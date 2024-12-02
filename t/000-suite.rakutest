@@ -1,9 +1,8 @@
-use v6;
-use lib 'lib', 't/lib';
-
-use My::Test;
 use Test::Stream::Event;
 use Test::Stream::Suite;
+
+use lib $*PROGRAM.sibling("lib");
+use My::Test;
 
 {
     my $suite = Test::Stream::Suite.new( name => 'suite' );
@@ -300,3 +299,5 @@ use Test::Stream::Suite;
 }
 
 my-done-testing;
+
+# vim: expandtab shiftwidth=4

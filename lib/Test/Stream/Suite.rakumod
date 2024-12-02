@@ -1,5 +1,3 @@
-use v6;
-
 use Test::Stream::Listener;
 
 # This class is injected into the hub while we run a suite. We track some of
@@ -102,5 +100,7 @@ method passed (--> Bool:D) {
     return True if $!tests-run && !$!tests-planned.defined;
     # We want to allow a plan of 0 for SkipAll events
     return True if $!tests-planned.defined && $!tests-run == $!tests-planned;
-    return False;
+    False
 }
+
+# vim: expandtab shiftwidth=4

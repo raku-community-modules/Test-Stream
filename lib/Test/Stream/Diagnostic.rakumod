@@ -1,5 +1,3 @@
-use v6;
-
 unit class Test::Stream::Diagnostic;
 
 use Test::Stream::Types;
@@ -14,3 +12,4 @@ submethod BUILD (
     :%!more?
 ) { }
 
+# vim: expandtab shiftwidth=4

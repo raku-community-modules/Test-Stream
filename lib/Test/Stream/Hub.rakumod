@@ -1,5 +1,3 @@
-use v6;
-
 unit class Test::Stream::Hub;
 
 use Test::Stream::Listener;
@@ -169,8 +167,10 @@ method finalize (--> Status:D) {
         );
     }
 
-    return Status.new(
+    Status.new(
         exit-code => 0,
         error     => q{},
     );
 }
+
+# vim: expandtab shiftwidth=4

@@ -1,5 +1,3 @@
-use v6;
-
 use Test::Stream::Listener;
 
 unit class Test::Stream::Formatter::TAP12 does Test::Stream::Listener;
@@ -230,7 +228,7 @@ method !say-comment (IO::Handle $output, Str:D $comment) {
 }
 
 our sub escape (Str:D $text) {
-    return $text.subst( :g, rx{ (<[ # \\ ]>) }, { Q{\} ~ $/[0] } ),
+    $text.subst( :g, rx{ (<[ # \\ ]>) }, { Q{\} ~ $/[0] } )
 }
 
 # Output needs to be escaped _before_ calling this method, since some hash
@@ -248,5 +246,7 @@ method !say-indented (IO::Handle:D $handle, Str :$prefix, *@text) {
 }
 
 method !indent-level {
-    return ( $!suite-level - 1 ) * 4;
+    ( $!suite-level - 1 ) * 4;
 }
+
+# vim: expandtab shiftwidth=4

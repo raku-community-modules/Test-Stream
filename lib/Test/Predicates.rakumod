@@ -1,5 +1,3 @@
-use v6;
-
 unit module Test::Predicates;
 
 use Test::Stream::Formatter::TAP12;
@@ -15,97 +13,97 @@ sub plan (|c) is export {
 sub pass (|c --> Bool:D) is export {
     instance().hub.set-context;
     LEAVE { instance().hub.release-context }
-    return instance().pass(|c);
+    instance().pass(|c);
 }
 
 sub flunk (|c --> Bool:D) is export {
     instance().hub.set-context;
     LEAVE { instance().hub.release-context }
-    return instance().flunk(|c);
+    instance().flunk(|c);
 }
 
 sub ok (|c --> Bool:D) is export {
     instance().hub.set-context;
     LEAVE { instance().hub.release-context }
-    return instance().ok(|c);
+    instance().ok(|c);
 }
 
 sub is (|c --> Bool:D)  is export {
     instance().hub.set-context;
     LEAVE { instance().hub.release-context }
-    return instance().is(|c);
+    instance().is(|c);
 }
 
 sub isnt (|c --> Bool:D)  is export {
     instance().hub.set-context;
     LEAVE { instance().hub.release-context }
-    return instance().isnt(|c);
+    instance().isnt(|c);
 }
 
 sub cmp-ok (|c --> Bool:D)  is export {
     instance().hub.set-context;
     LEAVE { instance().hub.release-context }
-    return instance().cmp-ok(|c);
+    instance().cmp-ok(|c);
 }
 
 sub isa-ok (|c --> Bool:D)  is export {
     instance().hub.set-context;
     LEAVE { instance().hub.release-context }
-    return instance().isa-ok(|c);
+    instance().isa-ok(|c);
 }
 
 sub does-ok (|c --> Bool:D)  is export {
     instance().hub.set-context;
     LEAVE { instance().hub.release-context }
-    return instance().does-ok(|c);
+    instance().does-ok(|c);
 }
 
 sub can-ok (|c --> Bool:D)  is export {
     instance().hub.set-context;
     LEAVE { instance().hub.release-context }
-    return instance().can-ok(|c);
+    instance().can-ok(|c);
 }
 
 sub like (|c --> Bool:D)  is export {
     instance().hub.set-context;
     LEAVE { instance().hub.release-context }
-    return instance().like(|c);
+    instance().like(|c);
 }
 
 sub unlike (|c --> Bool:D)  is export {
     instance().hub.set-context;
     LEAVE { instance().hub.release-context }
-    return instance().unlike(|c);
+    instance().unlike(|c);
 }
 
 sub is-deeply (|c --> Bool:D)  is export {
     instance().hub.set-context;
     LEAVE { instance().hub.release-context }
-    return instance().is-deeply(|c);
+    instance().is-deeply(|c);
 }
 
 sub lives-ok (&block, $name? --> Bool:D) is export {
     instance().hub.set-context;
     LEAVE { instance().hub.release-context }
-    return instance().lives-ok( &block, $name );
+    instance().lives-ok( &block, $name );
 }
 
 sub dies-ok (&block, $name? --> Bool:D) is export {
     instance().hub.set-context;
     LEAVE { instance().hub.release-context }
-    return instance().dies-ok( &block, $name );
+    instance().dies-ok( &block, $name );
 }
 
 multi sub throws-like (&block, Mu:U $type, $name? --> Bool:D) is export {
     instance().hub.set-context;
     LEAVE { instance().hub.release-context }
-    return instance().throws-like( &block, $type, $name );
+    instance().throws-like( &block, $type, $name );
 }
 
 multi sub throws-like (&block, Regex:D $regex, $name? --> Bool:D) is export {
     instance().hub.set-context;
     LEAVE { instance().hub.release-context }
-    return instance().throws-like( &block, $regex, $name );
+    instance().throws-like( &block, $regex, $name );
 }
 
 # We need to repeat the signature from Test::Predicator here so that the
@@ -113,7 +111,7 @@ multi sub throws-like (&block, Regex:D $regex, $name? --> Bool:D) is export {
 sub subtest (Str:D $reason, &block --> Bool:D) is export {
     instance().hub.set-context;
     LEAVE { instance().hub.release-context }
-    return instance().subtest( $reason, &block );
+    instance().subtest( $reason, &block );
 }
 
 sub todo (Str:D $reason, &block) is export {
@@ -174,7 +172,7 @@ sub instance {
             unless $hub.has-listeners;
         $instance = Test::Predicator.new( hub => $hub );
     }
-    return $instance;
+    $instance
 }
 
 END {
@@ -189,3 +187,5 @@ END {
 our sub clear-instance-violently-for-test-stream-tests {
     $instance = (Test::Predicator);
 }
+
+# vim: expandtab shiftwidth=4

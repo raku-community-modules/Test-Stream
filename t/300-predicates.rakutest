@@ -1,7 +1,6 @@
-use v6;
-use lib 'lib', 't/lib';
-
+use lib $*PROGRAM.sibling("lib");
 use My::Test;
+
 use Test::Predicates;
 use Test::Stream::Diagnostic;
 use Test::Stream::Recorder;
@@ -16,7 +15,7 @@ use Test::Stream::Types;
             $listener,
             ${
                 class      => Test::Stream::Event::Suite::Start,
-                attributes => ${ name => '300-predicates.t' },
+                attributes => ${ name => '300-predicates.rakutest' },
             },
             ${
                 class  => Test::Stream::Event::Plan,
@@ -1573,7 +1572,7 @@ use Test::Stream::Types;
             $listener,
             ${
                 class      => Test::Stream::Event::Suite::Start,
-                attributes => ${ name => '300-predicates.t' },
+                attributes => ${ name => '300-predicates.rakutest' },
             },
             ${
                 class  => Test::Stream::Event::SkipAll,
@@ -1594,7 +1593,7 @@ use Test::Stream::Types;
             $listener,
             ${
                 class      => Test::Stream::Event::Suite::Start,
-                attributes => ${ name => '300-predicates.t' },
+                attributes => ${ name => '300-predicates.rakutest' },
             },
             ${
                 class  => Test::Stream::Event::SkipAll,
@@ -1619,3 +1618,5 @@ sub listener (--> Test::Stream::Recorder:D) {
 
     return $listener;
 }
+
+# vim: expandtab shiftwidth=4

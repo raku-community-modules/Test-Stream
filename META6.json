@@ -1,25 +1,34 @@
 {
-  "name": "Test::Stream",
-  "description": "Stream test events",
-  "version": "0.0.3",
-  "perl": "6.*",
   "auth": "zef:raku-community-modules",
-  "depends": [],
-  "provides": {
-    "Test::Predicates": "lib/Test/Predicates.pm6",
-    "Test::Predicator": "lib/Test/Predicator.pm6",
-    "Test::Stream::Diagnostic": "lib/Test/Stream/Diagnostic.pm6",
-    "Test::Stream::Event": "lib/Test/Stream/Event.pm6",
-    "Test::Stream::EventSource": "lib/Test/Stream/EventSource.pm6",
-    "Test::Stream::Formatter::TAP12": "lib/Test/Stream/Formatter/TAP12.pm6",
-    "Test::Stream::Hub": "lib/Test/Stream/Hub.pm6",
-    "Test::Stream::Listener": "lib/Test/Stream/Listener.pm6",
-    "Test::Stream::Recorder": "lib/Test/Stream/Recorder.pm6",
-    "Test::Stream::Suite": "lib/Test/Stream/Suite.pm6",
-    "Test::Stream::Types": "lib/Test/Stream/Types.pm6",
-    "Test::Stream::Util": "lib/Test/Stream/Util.pm6"
-  },
+  "author": "Dave Rolsky",
+  "build-depends": [
+  ],
+  "depends": [
+  ],
+  "description": "Stream test events",
   "license": "Artistic-2.0",
+  "name": "Test::Predicates",
+  "perl": "6.*",
+  "provides": {
+    "Test::Predicates": "lib/Test/Predicates.rakumod",
+    "Test::Predicator": "lib/Test/Predicator.rakumod",
+    "Test::Stream::Diagnostic": "lib/Test/Stream/Diagnostic.rakumod",
+    "Test::Stream::Event": "lib/Test/Stream/Event.rakumod",
+    "Test::Stream::EventSource": "lib/Test/Stream/EventSource.rakumod",
+    "Test::Stream::Formatter::TAP12": "lib/Test/Stream/Formatter/TAP12.rakumod",
+    "Test::Stream::Hub": "lib/Test/Stream/Hub.rakumod",
+    "Test::Stream::Listener": "lib/Test/Stream/Listener.rakumod",
+    "Test::Stream::Recorder": "lib/Test/Stream/Recorder.rakumod",
+    "Test::Stream::Suite": "lib/Test/Stream/Suite.rakumod",
+    "Test::Stream::Types": "lib/Test/Stream/Types.rakumod",
+    "Test::Stream::Util": "lib/Test/Stream/Util.rakumod"
+  },
+  "resources": [
+  ],
   "source-url": "https://github.com/raku-community-modules/Test-Stream.git",
-  "author": "Dave Rolsky <autarch@urth.org>"
+  "tags": [
+  ],
+  "test-depends": [
+  ],
+  "version": "0.0.3"
 }

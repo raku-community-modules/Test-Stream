@@ -1,5 +1,3 @@
-use v6;
-
 unit class Test::Stream::EventSource;
 
 has CallFrame $.frame handles < code file line >;
@@ -11,3 +9,5 @@ method package {
         ?? $.frame.code.package
         !! '<none>';
 }
+
+# vim: expandtab shiftwidth=4

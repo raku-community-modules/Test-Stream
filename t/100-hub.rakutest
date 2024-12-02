@@ -1,6 +1,4 @@
-use v6;
-use lib 'lib', 't/lib';
-
+use lib $*PROGRAM.sibling("lib");
 use My::Test;
 use Test::Stream::Event;
 use Test::Stream::Hub;
@@ -402,3 +400,5 @@ my-subtest 'instance returns the same object', {
 };
 
 my-done-testing;
+
+# vim: expandtab shiftwidth=4
