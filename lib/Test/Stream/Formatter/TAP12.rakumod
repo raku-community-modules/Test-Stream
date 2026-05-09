@@ -66,7 +66,7 @@ multi method accept-event (Test::Stream::Event::Suite::End:D $event) {
     }
 
     # It might be nice to add some timing output here as well, but for now
-    # we'll stick with emulating Perl 5 as closely as possible.
+    # we'll stick with emulating Perl as closely as possible.
 }
 
 multi method accept-event (Test::Stream::Event::Plan:D $event) {
@@ -192,7 +192,7 @@ method !maybe-say-diagnostic (Test::Stream::Diagnostic $diagnostic)  {
 
     if $diagnostic.more.defined {
         if $diagnostic.more<got>.defined && $diagnostic.more<expected>.defined {
-            self!say-comment( $output, q{    expected : } ~ $diagnostic.more<expected>.perl );
+            self!say-comment( $output, q{    expected : } ~ $diagnostic.more<expected>.raku );
             if $diagnostic.more<operator>.defined {
                 my $op-str = do given $diagnostic.more<operator> {
                     when Str  {
@@ -209,11 +209,11 @@ method !maybe-say-diagnostic (Test::Stream::Diagnostic $diagnostic)  {
                 };
                 self!say-comment( $output, q{    operator : } ~ $op-str );
             }
-            self!say-comment( $output, q{         got : } ~ $diagnostic.more<got>.perl )
+            self!say-comment( $output, q{         got : } ~ $diagnostic.more<got>.raku )
         }
         else {
             for $diagnostic.more.keys.sort -> $k {
-                self!say-comment( $output, qq[    $k : {$diagnostic.more{$k}.perl}] );
+                self!say-comment( $output, qq[    $k : {$diagnostic.more{$k}.raku}] );
             }
         }
     }

@@ -101,8 +101,8 @@ method does-ok (Mu $got, Mu $role, $name? --> Bool:D) {
     my $passed = ?$got.does($role);
     self!send-test(
         $passed,
-        $name // "$description does the role {$role.perl}",
-        diagnostic-message => "$description does not do the role {$role.perl}",
+        $name // "$description does the role {$role.raku}",
+        diagnostic-message => "$description does not do the role {$role.raku}",
     );
 
     $passed
@@ -159,8 +159,8 @@ method !real-cmp-ok (Mu $got, Callable:D $op, Mu $expected, $name, Bool:D $diag-
 method is-deeply (Mu $got, Mu $expected, $name? --> Bool:D) {
     my $passed = $got eqv $expected;
     my %more = (
-        got      => $got.perl,
-        expected => $expected.perl,
+        got      => $got.raku,
+        expected => $expected.raku,
         operator => &infix:<eqv>,
     ) unless $passed;
 
