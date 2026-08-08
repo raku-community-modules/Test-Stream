@@ -119,10 +119,7 @@ test-formatter(
             expect => ${
                 output         => "not ok 2 - will fail\n",
                 todo-output    => q{},
-                failure-output => qq:to/FAILURE/,
-                #   Failed test 'will fail'
-                #   at $*PROGRAM-NAME line 186
-                FAILURE
+                failure-output => rx/^ "#   Failed test 'will fail'\n" "#   at $*PROGRAM-NAME line " \d+ \n $/,
             },
         },
         ${
@@ -144,10 +141,7 @@ test-formatter(
             },
             expect => ${
                 output         => "not ok 3 - needs fixing # TODO not yet done\n",
-                todo-output    => qq:to/TODO/,
-                #   Failed (TODO) test 'needs fixing'
-                #   at $*PROGRAM-NAME line 186
-                TODO
+                todo-output    => rx/^ "#   Failed (TODO) test 'needs fixing'\n" "#   at $*PROGRAM-NAME line " \d+ \n $/,
                 failure-output => q{},
             },
         },
@@ -1031,10 +1025,7 @@ test-formatter(
             },
             expect => ${
                 output         => "not ok 1 - needs fixing # TODO not yet done\n",
-                todo-output    => qq:to/TODO/,
-                #   Failed (TODO) test 'needs fixing'
-                #   at $*PROGRAM-NAME line 1139
-                TODO
+                todo-output    => rx/^ "#   Failed (TODO) test 'needs fixing'\n" "#   at $*PROGRAM-NAME line " \d+ \n $/,
                 failure-output => q{},
             },
         },
@@ -1101,10 +1092,7 @@ test-formatter(
             },
             expect => ${
                 output         => qq{    not ok 1 - needs fixing # TODO not yet done\n},
-                todo-output    => qq:to/TODO/,
-                    #   Failed (TODO) test 'needs fixing'
-                    #   at $*PROGRAM-NAME line 1139
-                TODO
+                todo-output    => rx/^ "    #   Failed (TODO) test 'needs fixing'\n" "    #   at $*PROGRAM-NAME line " \d+ \n $/,
                 failure-output => q{},
             },
         },
@@ -1396,7 +1384,7 @@ sub test-event-output (
 sub compare-outputs (Str:D $key, %outputs, %expect) {
     if %expect{$key} ~~ Regex {
         my-like(
-            %outputs{$key}, %expect{$key},
+            %outputs{$key}.Str, %expect{$key},
             "got expected $key"
         );
     }
