@@ -1,6 +1,8 @@
 {
   "auth": "zef:raku-community-modules",
-  "author": "Dave Rolsky",
+  "authors": [
+    "Dave Rolsky"
+  ],
   "build-depends": [
   ],
   "depends": [
@@ -8,7 +10,6 @@
   "description": "Stream test events",
   "license": "Artistic-2.0",
   "name": "Test::Stream",
-  "perl": "6.*",
   "provides": {
     "Test::Predicates": "lib/Test/Predicates.rakumod",
     "Test::Predicator": "lib/Test/Predicator.rakumod",
@@ -24,10 +25,18 @@
     "Test::Stream::Types": "lib/Test/Stream/Types.rakumod",
     "Test::Stream::Util": "lib/Test/Stream/Util.rakumod"
   },
+  "raku": "6.*",
   "resources": [
   ],
   "source-url": "https://github.com/raku-community-modules/Test-Stream.git",
+  "support": {
+    "bugtracker": "https://github.com/raku-community-modules/Test-Stream/issues",
+    "email": "community@raku.org",
+    "source": "https://github.com/raku-community-modules/Test-Stream.git"
+  },
   "tags": [
+    "TEST",
+    "STREAM"
   ],
   "test-depends": [
   ],
