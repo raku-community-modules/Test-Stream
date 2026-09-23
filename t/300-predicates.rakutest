@@ -900,8 +900,8 @@ use Test::Stream::Types;
                     diagnostic => Test::Stream::Diagnostic.new(
                         severity => DiagnosticSeverity::failure,
                         more     => ${
-                            got      => $got.perl,
-                            expected => $expect.perl,
+                            got      => $got.raku,
+                            expected => $expect.raku,
                             operator => &infix:<eqv>,
                         },
                     ),

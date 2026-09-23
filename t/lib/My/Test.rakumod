@@ -147,8 +147,8 @@ multi sub my-is(Mu $got, Mu:D $expected, $desc = '') is export {
         if !$test {
             if try [eq] ($got, $expected)>>.Str>>.subst(/\s/, '', :g) {
                 # only white space differs, so better show it to the user
-                my-diag "expected: {$expected.perl}";
-                my-diag "     got: {$got.perl}";
+                my-diag "expected: {$expected.raku}";
+                my-diag "     got: {$got.raku}";
             }
             else {
                 my-diag "expected: '$expected'";
@@ -332,7 +332,7 @@ multi sub my-flunk($reason) is export {
     $ok;
 }
 
-multi sub my-isa-ok(Mu $var, Mu $type, $msg = ("The object is-a '" ~ $type.perl ~ "'")) is export {
+multi sub my-isa-ok(Mu $var, Mu $type, $msg = ("The object is-a '" ~ $type.raku ~ "'")) is export {
     $time_after = nqp::p6box_n(nqp::time_n);
     my $ok = proclaim($var.isa($type), $msg)
         or my-diag('Actual type: ' ~ $var.^name);
@@ -340,15 +340,15 @@ multi sub my-isa-ok(Mu $var, Mu $type, $msg = ("The object is-a '" ~ $type.perl 
     $ok;
 }
 
-multi sub my-does-ok(Mu $var, Mu $type, $msg = ("The object does role '" ~ $type.perl ~ "'")) is export {
+multi sub my-does-ok(Mu $var, Mu $type, $msg = ("The object does role '" ~ $type.raku ~ "'")) is export {
     $time_after = nqp::p6box_n(nqp::time_n);
     my $ok = proclaim($var.does($type), $msg)
-        or my-diag([~] 'Type: ',  $var.^name, " doesn't do role ", $type.perl);
+        or my-diag([~] 'Type: ',  $var.^name, " doesn't do role ", $type.raku);
     $time_before = nqp::time_n;
     $ok;
 }
 
-multi sub my-can-ok(Mu $var, Str $meth, $msg = ( ($var.defined ?? "An object of type '" !! "The type '" ) ~ $var.WHAT.perl ~ "' can do the method '$meth'") ) is export {
+multi sub my-can-ok(Mu $var, Str $meth, $msg = ( ($var.defined ?? "An object of type '" !! "The type '" ) ~ $var.WHAT.raku ~ "' can do the method '$meth'") ) is export {
     $time_after = nqp::p6box_n(nqp::time_n);
     my $ok = proclaim($var.^can($meth), $msg);
     $time_before = nqp::time_n;
@@ -361,7 +361,7 @@ multi sub my-like(Str $got, Regex $expected, $desc = '') is export {
     my $test = $got ~~ $expected;
     my $ok = proclaim(?$test, $desc);
     if !$test {
-        my-diag sprintf "     expected: '%s'", $expected.perl;
+        my-diag sprintf "     expected: '%s'", $expected.raku;
         my-diag "     got: '$got'";
     }
     $time_before = nqp::time_n;
@@ -374,7 +374,7 @@ multi sub my-unlike(Str $got, Regex $expected, $desc = '') is export {
     my $test = !($got ~~ $expected);
     my $ok = proclaim(?$test, $desc);
     if !$test {
-        my-diag sprintf "     expected: '%s'", $expected.perl;
+        my-diag sprintf "     expected: '%s'", $expected.raku;
         my-diag "     got: '$got'";
     }
     $time_before = nqp::time_n;
@@ -435,8 +435,8 @@ multi sub my-is-deeply(Mu $got, Mu $expected, $reason = '') is export {
     my $test = _is_deeply( $got, $expected );
     my $ok = proclaim($test, $reason);
     if !$test {
-        my $got_perl      = try { $got.perl };
-        my $expected_perl = try { $expected.perl };
+        my $got_perl      = try { $got.raku };
+        my $expected_perl = try { $expected.raku };
         if $got_perl.defined && $expected_perl.defined {
             my-diag "expected: $expected_perl";
             my-diag "     got: $got_perl";
@@ -470,7 +470,7 @@ sub my-throws-like($code, $ex_type, $reason?, *%matcher) is export {
                         my $ok = $got ~~ $v,;
                         my-ok $ok, ".$k matches $v.gist()";
                         unless $ok {
-                            my-diag "Expected: " ~ ($v ~~ Str ?? $v !! $v.perl);
+                            my-diag "Expected: " ~ ($v ~~ Str ?? $v !! $v.raku);
                             my-diag "Got:      $got";
                         }
                     }
@@ -681,7 +681,7 @@ sub test-event-stream (Test::Stream::Recorder:D $recorder, *@expect) is export {
                         my $g-op = $g-diag.more<operator>:delete;
                         my $e-op = $e-diag.more<operator>:delete;
                         my-is(
-                            $g-op.perl, $e-op.perl,
+                            $g-op.raku, $e-op.raku,
                             "$k.more<operator>"
                         );
                     }
